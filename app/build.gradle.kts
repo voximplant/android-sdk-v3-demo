@@ -47,6 +47,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:catalog"))
+    implementation(project(":feature:login"))
+    implementation(project(":feature:audiocall"))
+
     implementation(project(":core:designsystem"))
 
     implementation(libs.core.ktx)

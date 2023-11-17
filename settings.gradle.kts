@@ -17,3 +17,7 @@ rootProject.name = "Voximplant SDK v3 Demo"
 include(":app")
 
 include(":core:designsystem")
+
+include(":feature:catalog")
+include(":feature:login")
+include(":feature:audiocall")
