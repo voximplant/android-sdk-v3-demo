@@ -2,6 +2,9 @@ package com.voximplant.sdk3demo.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
+val Gray10 = Color(0xFF1F1C28)
+val Gray70 = Color(0xFFABACC0)
+
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)

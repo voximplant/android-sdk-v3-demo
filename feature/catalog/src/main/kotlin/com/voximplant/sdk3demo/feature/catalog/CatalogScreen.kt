@@ -12,13 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.feature.catalog.R
 import com.voximplant.sdk3demo.feature.catalog.component.CatalogItem
@@ -56,12 +53,8 @@ fun CatalogScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Version", color = Color(0xFF555770), style = TextStyle(
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Default,
-                        letterSpacing = 0.5.sp,
-                        lineHeight = 16.sp,
-                    )
+                    text = "Version",
+                    style = Typography.bodySmall,
                 )
             }
         }
