@@ -20,7 +20,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.feature.catalog"
+    namespace = "com.voximplant.sdk3demo.feature.login"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
