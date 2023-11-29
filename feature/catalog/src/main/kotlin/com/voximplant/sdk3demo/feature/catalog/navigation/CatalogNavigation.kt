@@ -13,9 +13,13 @@ fun NavController.navigateToCatalog(navOptions: NavOptions? = null) {
 }
 
 fun NavGraphBuilder.catalogScreen(
+    onLoginClick: () -> Unit,
     onModuleClick: (String) -> Unit,
 ) {
     composable(route = catalogRoute) {
-        CatalogRoute(onModuleClick)
+        CatalogRoute(
+            onLoginClick = onLoginClick,
+            onModuleClick = onModuleClick,
+        )
     }
 }

@@ -1,7 +1,8 @@
 plugins {
-//    id("com.android.library")
-//    id("org.jetbrains.kotlin.android")
-//    id("com.google.devtools.ksp")
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -19,18 +20,14 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
-    }
 }
 
 dependencies {
-//    implementation(libs.hilt.android)
-//    implementation(libs.kotlinx.coroutines.android)
-//    ksp(libs.hilt.compiler)
+    implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
+    api(project(":core:model"))
+
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }
