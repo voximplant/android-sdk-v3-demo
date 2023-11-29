@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voximplant.sdk3demo.core.designsystem.theme.Gray10
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.feature.catalog.R
@@ -47,11 +48,13 @@ fun CatalogItem(
             ) {
                 Text(
                     text = title,
+                    color = Gray10,
                     style = Typography.titleMedium,
                 )
                 if (description != null) {
                     Text(
                         text = description,
+                        color = Gray10,
                         style = Typography.bodyMedium,
                     )
                 }

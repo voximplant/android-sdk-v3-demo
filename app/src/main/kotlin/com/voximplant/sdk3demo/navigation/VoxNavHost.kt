@@ -9,6 +9,7 @@ import com.voximplant.sdk3demo.feature.audiocall.navigation.navigateToAudioCall
 import com.voximplant.sdk3demo.feature.catalog.navigation.catalogRoute
 import com.voximplant.sdk3demo.feature.catalog.navigation.catalogScreen
 import com.voximplant.sdk3demo.feature.login.navigation.loginScreen
+import com.voximplant.sdk3demo.feature.login.navigation.navigateToLogin
 import com.voximplant.sdk3demo.ui.VoxAppState
 
 @Composable
@@ -24,13 +25,20 @@ fun VoxNavHost(
         modifier = modifier,
     ) {
         catalogScreen(
+            onLoginClick = {
+                navController.navigateToLogin()
+            },
             onModuleClick = { route ->
                 if (route == audioCallRoute) {
                     navController.navigateToAudioCall()
                 }
             },
         )
-        loginScreen()
+        loginScreen(
+            onLoginSuccess = {
+                navController.popBackStack()
+            }
+        )
         audioCallScreen()
     }
 }
