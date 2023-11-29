@@ -3,7 +3,6 @@ package com.voximplant.sdk3demo.feature.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.sdk3demo.core.domain.LogInUseCase
-import com.voximplant.sdk3demo.core.domain.SilentLogInUseCase
 import com.voximplant.sdk3demo.core.model.data.AuthError
 import com.voximplant.sdk3demo.core.model.data.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,17 +15,10 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LogInUseCase,
-    private val silentLogInUseCase: SilentLogInUseCase,
 ) : ViewModel() {
 
     private val _loginUiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState.Init)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            silentLogInUseCase()
-        }
-    }
 
     fun logIn(username: String, password: String) {
         _loginUiState.value = LoginUiState.Loading
