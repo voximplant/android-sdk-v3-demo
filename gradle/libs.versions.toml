@@ -13,6 +13,7 @@ hilt = "2.48.1"
 androidxHilt = "1.1.0"
 ksp = "1.9.20-1.0.14"
 androidxNavigation = "2.7.5"
+accompanist = "0.32.0"
 kotlinxCoroutines = "1.7.3"
 voximplantSdk = "3.0.0-alpha-38.0"
 androidxDataStore = "1.0.0"
@@ -38,6 +39,7 @@ androidx-compose-material-iconsExtended = { group = "androidx.compose.material",
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxNavigation" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
