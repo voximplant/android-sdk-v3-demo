@@ -50,25 +50,54 @@ fun LoginRoute(
     val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    if (loginUiState is LoginUiState.Success) {
-        onLoginSuccess()
-    } else if (loginUiState is LoginUiState.Failure) {
-        when ((loginUiState as LoginUiState.Failure).error) {
-            AuthError.AccountFrozen -> stringResource(R.string.account_frozen_error)
-            AuthError.InternalError -> stringResource(R.string.internal_error_error)
-            AuthError.Interrupted -> stringResource(R.string.interrupted_by_user_error)
-            AuthError.InvalidState -> stringResource(R.string.invalid_state_error)
-            AuthError.MauAccessDenied -> stringResource(R.string.mau_access_denied_error)
-            AuthError.NetworkIssue -> stringResource(R.string.network_issue_error)
-            AuthError.TimeOut -> stringResource(R.string.timeout_error)
-            AuthError.TokenExpired -> stringResource(R.string.token_expired_error)
-            else -> null
-        }?.let { errorMessage ->
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = errorMessage,
-                    duration = SnackbarDuration.Long,
-                )
+    var authError: AuthError? by rememberSaveable(loginUiState) {
+        when (loginUiState) {
+            is LoginUiState.Success -> {
+                onLoginSuccess()
+                mutableStateOf(null)
+            }
+
+            is LoginUiState.Failure -> {
+                when (val error = (loginUiState as LoginUiState.Failure).error) {
+                    AuthError.AccountFrozen,
+                    AuthError.InternalError,
+                    AuthError.Interrupted,
+                    AuthError.InvalidState,
+                    AuthError.MauAccessDenied,
+                    AuthError.NetworkIssue,
+                    AuthError.TimeOut,
+                    AuthError.TokenExpired,
+                    -> error
+
+                    else -> null
+                }.let { authError ->
+                    mutableStateOf(authError)
+                }
+            }
+
+            else -> {
+                mutableStateOf(null)
+            }
+        }
+    }
+
+    when (authError) {
+        AuthError.AccountFrozen -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.account_frozen_login_error)
+        AuthError.InternalError -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.internal_login_error)
+        AuthError.Interrupted -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.interrupted_by_user_error)
+        AuthError.InvalidState -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.invalid_state_error)
+        AuthError.MauAccessDenied -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.mau_access_denied_error)
+        AuthError.NetworkIssue -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.network_issue_error)
+        AuthError.TimeOut -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.timeout_error)
+        AuthError.TokenExpired -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.token_expired_error)
+        else -> null
+    }?.let { errorMessage ->
+        scope.launch {
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                duration = SnackbarDuration.Short,
+            ).let {
+                authError = null
             }
         }
     }
@@ -166,7 +195,7 @@ fun LoginScreen(
                     .padding(horizontal = 12.dp),
                 enabled = interactionAvailable,
             ) {
-                Text(text = stringResource(R.string.log_in))
+                Text(text = stringResource(com.voximplant.sdk3demo.core.resource.R.string.log_in))
             }
         }
     }

@@ -68,7 +68,7 @@ fun UserBanner(
                 }
             } else {
                 Button(onClick = onLoginClick) {
-                    Text(text = stringResource(R.string.log_in))
+                    Text(text = stringResource(com.voximplant.sdk3demo.core.resource.R.string.log_in))
                 }
             }
         }
