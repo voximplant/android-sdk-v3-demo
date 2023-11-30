@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_in">Log in</string>
+    <string name="account_frozen_login_error">Account frozen</string>
+    <string name="internal_login_error">Internal error</string>
+    <string name="interrupted_by_user_error">Interrupted by user</string>
+    <string name="invalid_state_error">Invalid state</string>
+    <string name="mau_access_denied_error">MAU access denied</string>
+    <string name="network_issue_error">Network issue</string>
+    <string name="timeout_error">Timeout</string>
+    <string name="token_expired_error">Token expired</string>
+    <string name="login_problem">Login problem</string>
+</resources>

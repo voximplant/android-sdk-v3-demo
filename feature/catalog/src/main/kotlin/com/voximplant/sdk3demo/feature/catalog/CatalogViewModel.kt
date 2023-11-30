@@ -5,8 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.voximplant.sdk3demo.core.domain.GetUserUseCase
 import com.voximplant.sdk3demo.core.domain.LogOutUseCase
 import com.voximplant.sdk3demo.core.domain.SilentLogInUseCase
+import com.voximplant.sdk3demo.core.model.data.AuthError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,9 +27,18 @@ class CatalogViewModel @Inject constructor(
         initialValue = null,
     )
 
+    private val _loginUiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState.Init)
+    val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
+
     init {
         viewModelScope.launch {
             silentLogInUseCase()
+                .onSuccess {
+                    _loginUiState.value = LoginUiState.Success
+                }
+                .onFailure { throwable ->
+                    _loginUiState.value = LoginUiState.Failure(throwable as AuthError)
+                }
         }
     }
 
@@ -34,4 +47,10 @@ class CatalogViewModel @Inject constructor(
             logOutUseCase()
         }
     }
+}
+
+sealed interface LoginUiState {
+    data object Init : LoginUiState
+    data object Success : LoginUiState
+    data class Failure(val error: AuthError) : LoginUiState
 }
