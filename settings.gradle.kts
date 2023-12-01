@@ -28,6 +28,7 @@ include(":core:domain")
 include(":core:model")
 include(":core:network")
 include(":core:resource")
+include(":core:ui")
 
 include(":feature:catalog")
 include(":feature:login")

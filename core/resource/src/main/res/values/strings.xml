@@ -10,4 +10,5 @@
     <string name="timeout_error">Timeout</string>
     <string name="token_expired_error">Token expired</string>
     <string name="login_problem">Login problem</string>
+    <string name="confirm">Confirm</string>
 </resources>
