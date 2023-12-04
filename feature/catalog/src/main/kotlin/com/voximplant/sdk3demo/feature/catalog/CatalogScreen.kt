@@ -46,6 +46,7 @@ import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.AuthError
 import com.voximplant.sdk3demo.core.model.data.User
 import com.voximplant.sdk3demo.core.ui.PermissionDialog
+import com.voximplant.sdk3demo.feature.catalog.BuildConfig
 import com.voximplant.sdk3demo.feature.catalog.CatalogViewModel
 import com.voximplant.sdk3demo.feature.catalog.LoginUiState
 import com.voximplant.sdk3demo.feature.catalog.R
@@ -223,7 +224,7 @@ fun CatalogScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Version",
+                    text = stringResource(R.string.voximplant_sdk_version, BuildConfig.VOXIMPLANT_SDK_VERSION),
                     color = Gray70,
                     style = Typography.bodySmall,
                 )
