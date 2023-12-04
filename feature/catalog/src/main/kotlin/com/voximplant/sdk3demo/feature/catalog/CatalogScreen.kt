@@ -213,7 +213,10 @@ fun CatalogScreen(
             ) {
                 item {
                     CatalogItem(
-                        title = "Audio call", description = "Make and receive an audio call", onClick = { onModuleClick("audio_call_route") }, image = painterResource(id = R.drawable.ic_phone_call_circle)
+                        title = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.audio_call),
+                        description = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.audio_call_description),
+                        onClick = { onModuleClick("audio_call_route") },
+                        image = painterResource(id = R.drawable.ic_phone_call_circle),
                     )
                 }
             }
