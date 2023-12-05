@@ -27,6 +27,7 @@ include(":core:designsystem")
 include(":core:domain")
 include(":core:model")
 include(":core:network")
+include(":core:permissions")
 include(":core:resource")
 include(":core:ui")
 

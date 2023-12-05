@@ -11,6 +11,7 @@
     <string name="token_expired_error">Token expired</string>
     <string name="login_problem">Login problem</string>
     <string name="confirm">Confirm</string>
+    <string name="go_to_settings">Go to settings</string>
     <string name="audio_call">Audio call</string>
     <string name="audio_call_description">Make and receive an audio call</string>
     <string name="call_to_user">Username</string>
