@@ -1,3 +1,5 @@
+package com.voximplant.sdk3demo.feature.catalog
+
 import android.Manifest
 import android.content.Intent
 import android.os.Build
@@ -20,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,11 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -46,10 +52,6 @@ import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.AuthError
 import com.voximplant.sdk3demo.core.model.data.User
 import com.voximplant.sdk3demo.core.ui.PermissionDialog
-import com.voximplant.sdk3demo.feature.catalog.BuildConfig
-import com.voximplant.sdk3demo.feature.catalog.CatalogViewModel
-import com.voximplant.sdk3demo.feature.catalog.LoginUiState
-import com.voximplant.sdk3demo.feature.catalog.R
 import com.voximplant.sdk3demo.feature.catalog.component.CatalogItem
 import com.voximplant.sdk3demo.feature.catalog.component.NotificationBanner
 import com.voximplant.sdk3demo.feature.catalog.component.UserBanner
@@ -164,6 +166,7 @@ fun CatalogRoute(
         },
         onModuleClick = onModuleClick,
     )
+
     NotificationPermissionEffect(
         showRationale = showNotificationRationale,
         onPermissionGranted = { value ->
@@ -240,6 +243,7 @@ private fun NotificationPermissionEffect(
     onPermissionGranted: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     var showRequest by rememberSaveable { mutableStateOf(false) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
@@ -254,17 +258,34 @@ private fun NotificationPermissionEffect(
         },
     )
 
-    LaunchedEffect(notificationsPermissionState, showRationale) {
+    LaunchedEffect(notificationsPermissionState, showRationale, lifecycleOwner) {
         val status = notificationsPermissionState.status
-        if (status is PermissionStatus.Denied && !status.shouldShowRationale) {
-            showRequest = true
-        } else {
-            showSettings = true
+
+        if (status is PermissionStatus.Denied) {
+            if (!status.shouldShowRationale) {
+                showRequest = true
+            } else if (showRationale) {
+                showSettings = true
+            }
         }
     }
 
-    LaunchedEffect(notificationsPermissionState, showRequest) {
+    LaunchedEffect(notificationsPermissionState, showRequest, showSettings) {
         onPermissionGranted(notificationsPermissionState.status.isGranted)
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                onPermissionGranted(notificationsPermissionState.status.isGranted)
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     if (showRequest) {

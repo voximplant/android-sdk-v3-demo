@@ -1,10 +1,10 @@
 package com.voximplant.sdk3demo.feature.catalog.navigation
 
-import CatalogRoute
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.voximplant.sdk3demo.feature.catalog.CatalogRoute
 
 const val catalogRoute = "catalog_route"
 
