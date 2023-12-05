@@ -12,8 +12,14 @@ fun NavController.navigateToAudioCall(navOptions: NavOptions? = null) {
     this.navigate(audioCallRoute, navOptions)
 }
 
-fun NavGraphBuilder.audioCallScreen() {
+fun NavGraphBuilder.audioCallScreen(
+    onBackClick: () -> Unit,
+    onCallClick: (String) -> Unit,
+) {
     composable(route = audioCallRoute) {
-        AudioCallRoute()
+        AudioCallRoute(
+            onBackClick = onBackClick,
+            onCallClick = onCallClick,
+        )
     }
 }
