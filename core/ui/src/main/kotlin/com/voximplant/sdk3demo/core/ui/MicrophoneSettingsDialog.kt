@@ -23,15 +23,15 @@ fun MicrophoneSettingsDialog(
         onConfirm = onConfirm,
         icon = {
             Icon(
-                painterResource(id = Icons.Notification),
+                painterResource(id = Icons.Microphone),
                 contentDescription = null,
             )
         },
         title = {
-            Text(text = stringResource(id = R.string.permission_post_notification))
+            Text(text = stringResource(id = R.string.permission_record_audio))
         },
         description = {
-            Text(text = stringResource(id = R.string.permission_post_notification_description))
+            Text(text = stringResource(id = R.string.permission_record_audio_description))
         },
     )
 }
