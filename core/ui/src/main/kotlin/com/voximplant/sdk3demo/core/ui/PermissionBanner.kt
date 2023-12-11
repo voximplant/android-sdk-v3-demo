@@ -1,34 +1,37 @@
-package com.voximplant.sdk3demo.feature.catalog.component
+package com.voximplant.sdk3demo.core.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.Gray10
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
-import com.voximplant.sdk3demo.feature.catalog.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationBanner(
-    modifier: Modifier = Modifier,
+fun PermissionBanner(
+    icon: @Composable () -> Unit,
+    text: @Composable () -> Unit,
     onRequestClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Card(
         onClick = onRequestClick,
@@ -45,15 +48,17 @@ fun NotificationBanner(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    painter = painterResource(id = Icons.Notification),
-                    contentDescription = null,
-                )
-                Text(
-                    text = stringResource(R.string.receive_notifications),
-                    color = Gray10,
-                    style = Typography.titleMedium,
-                )
+                icon()
+                Box(
+                    Modifier
+                        .padding(
+                            start = ButtonDefaults.IconSpacing,
+                        ),
+                ) {
+                    ProvideTextStyle(value = Typography.titleMedium.copy(color = Gray10)) {
+                        text()
+                    }
+                }
             }
         }
     }
@@ -61,9 +66,15 @@ fun NotificationBanner(
 
 @Preview
 @Composable
-fun NotificationBannerPreview() {
+private fun PermissionBannerPreview() {
     VoximplantTheme {
-        NotificationBanner(
+        PermissionBanner(
+            icon = {
+                Icon(painter = painterResource(id = Icons.Notification), contentDescription = null)
+            },
+            text = {
+                Text("Allow permission")
+            },
             onRequestClick = {}
         )
     }

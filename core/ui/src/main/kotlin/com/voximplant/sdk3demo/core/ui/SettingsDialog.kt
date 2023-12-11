@@ -17,7 +17,7 @@ import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 
 @Composable
-fun PermissionDialog(
+fun SettingsDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     icon: @Composable (() -> Unit)? = null,
@@ -30,7 +30,7 @@ fun PermissionDialog(
             Button(
                 onClick = onConfirm::invoke,
             ) {
-                Text(text = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.confirm))
+                Text(text = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.go_to_settings))
             }
         },
         dismissButton = {
@@ -48,9 +48,9 @@ fun PermissionDialog(
 
 @Preview
 @Composable
-private fun PermissionDialogPreview() {
+private fun SettingsDialogPreview() {
     VoximplantTheme {
-        PermissionDialog(
+        SettingsDialog(
             onDismiss = {},
             onConfirm = {},
             icon = {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_post_notification">Notification permission required</string>
+    <string name="permission_post_notification_description">To receive notifications about incoming calls, allow the Notification permission.</string>
+    <string name="permission_record_audio">Microphone permission required</string>
+    <string name="permission_record_audio_description">To make a call, allow the Microphone permission.</string>
+    <string name="allow_notifications">Allow notifications</string>
+    <string name="allow_microphone">Allow microphone</string>
+</resources>

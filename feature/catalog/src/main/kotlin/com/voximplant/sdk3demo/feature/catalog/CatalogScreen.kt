@@ -1,9 +1,5 @@
 package com.voximplant.sdk3demo.feature.catalog
 
-import android.Manifest
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
@@ -17,43 +13,30 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.Gray70
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.AuthError
 import com.voximplant.sdk3demo.core.model.data.User
-import com.voximplant.sdk3demo.core.ui.PermissionDialog
+import com.voximplant.sdk3demo.core.permissions.NotificationsPermissionEffect
+import com.voximplant.sdk3demo.core.ui.NotificationsBanner
 import com.voximplant.sdk3demo.feature.catalog.component.CatalogItem
-import com.voximplant.sdk3demo.feature.catalog.component.NotificationBanner
 import com.voximplant.sdk3demo.feature.catalog.component.UserBanner
 
 @Composable
@@ -65,8 +48,8 @@ fun CatalogRoute(
     val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
     val user by viewModel.user.collectAsStateWithLifecycle()
 
-    var showNotificationBanner by rememberSaveable { mutableStateOf(false) }
-    var showNotificationRationale by rememberSaveable { mutableStateOf(false) }
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
 
     var authError: AuthError? by rememberSaveable(loginUiState) {
         if (loginUiState is LoginUiState.Failure) {
@@ -160,18 +143,18 @@ fun CatalogRoute(
         user = user,
         onLoginClick = onLoginClick,
         onLogoutClick = viewModel::logout,
-        showNotificationBanner = showNotificationBanner,
-        onNotificationRequestClick = {
-            showNotificationRationale = true
+        showNotificationsBanner = !notificationsPermissionGranted,
+        onNotificationsRequestClick = {
+            showNotificationsRationale = true
         },
         onModuleClick = onModuleClick,
     )
 
-    NotificationPermissionEffect(
-        showRationale = showNotificationRationale,
+    NotificationsPermissionEffect(
+        showRationale = showNotificationsRationale,
         onPermissionGranted = { value ->
-            showNotificationBanner = !value
-            showNotificationRationale = false
+            notificationsPermissionGranted = value
+            showNotificationsRationale = false
         },
     )
 }
@@ -181,8 +164,8 @@ fun CatalogScreen(
     user: User?,
     onLoginClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    showNotificationBanner: Boolean,
-    onNotificationRequestClick: () -> Unit,
+    showNotificationsBanner: Boolean,
+    onNotificationsRequestClick: () -> Unit,
     onModuleClick: (String) -> Unit,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -198,12 +181,12 @@ fun CatalogScreen(
                 onLogoutClick = onLogoutClick,
             )
 
-            AnimatedVisibility(visible = showNotificationBanner) {
-                NotificationBanner(
+            AnimatedVisibility(visible = showNotificationsBanner) {
+                NotificationsBanner(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 12.dp, top = 16.dp, end = 12.dp),
-                    onRequestClick = onNotificationRequestClick,
+                    onRequestClick = onNotificationsRequestClick,
                 )
             }
 
@@ -239,108 +222,6 @@ fun CatalogScreen(
     }
 }
 
-@Composable
-@OptIn(ExperimentalPermissionsApi::class)
-private fun NotificationPermissionEffect(
-    showRationale: Boolean,
-    onPermissionGranted: (Boolean) -> Unit,
-) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    var showRequest by rememberSaveable { mutableStateOf(false) }
-    var showSettings by rememberSaveable { mutableStateOf(false) }
-
-    if (LocalInspectionMode.current) return
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-
-    val notificationsPermissionState = rememberPermissionState(
-        Manifest.permission.POST_NOTIFICATIONS,
-        onPermissionResult = { value ->
-            onPermissionGranted(value)
-        },
-    )
-
-    LaunchedEffect(notificationsPermissionState, showRationale, lifecycleOwner) {
-        val status = notificationsPermissionState.status
-
-        if (status is PermissionStatus.Denied) {
-            if (!status.shouldShowRationale) {
-                showRequest = true
-            } else if (showRationale) {
-                showSettings = true
-            }
-        }
-    }
-
-    LaunchedEffect(notificationsPermissionState, showRequest, showSettings) {
-        onPermissionGranted(notificationsPermissionState.status.isGranted)
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                onPermissionGranted(notificationsPermissionState.status.isGranted)
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    if (showRequest) {
-        PermissionDialog(
-            title = { Text(text = stringResource(id = R.string.permission_post_notification)) },
-            description = { Text(text = stringResource(id = R.string.permission_post_notification_description)) },
-            onDismiss = { showRequest = false },
-            onConfirm = {
-                showRequest = false
-                notificationsPermissionState.launchPermissionRequest()
-            },
-        )
-    }
-
-    if (showSettings) {
-        AlertDialog(
-            onDismissRequest = { showSettings = false },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showSettings = false
-                        context.startActivity(
-                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                            }
-                        )
-                    },
-                ) {
-                    Text(text = stringResource(R.string.go_to_settings))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showSettings = false
-                    },
-                ) {
-                    Text(text = stringResource(id = android.R.string.cancel))
-                }
-            },
-            icon = {
-                Icon(
-                    painterResource(id = Icons.Notification),
-                    contentDescription = null,
-                )
-            },
-            title = { Text(text = stringResource(id = R.string.permission_post_notification)) },
-            text = { Text(text = stringResource(id = R.string.permission_post_notification_description)) },
-        )
-    }
-}
-
 @Preview
 @Composable
 fun PreviewCatalogScreen() {
@@ -349,8 +230,8 @@ fun PreviewCatalogScreen() {
             user = null,
             onLoginClick = {},
             onLogoutClick = {},
-            showNotificationBanner = true,
-            onNotificationRequestClick = {},
+            showNotificationsBanner = true,
+            onNotificationsRequestClick = {},
             onModuleClick = {},
         )
     }

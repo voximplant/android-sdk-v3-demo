@@ -1,5 +1,6 @@
 package com.voximplant.sdk3demo.feature.audiocall
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
+import com.voximplant.sdk3demo.core.permissions.MicrophonePermissionEffect
+import com.voximplant.sdk3demo.core.permissions.NotificationsPermissionEffect
+import com.voximplant.sdk3demo.core.ui.MicrophoneBanner
+import com.voximplant.sdk3demo.core.ui.NotificationsBanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +42,11 @@ fun AudioCallRoute(
     onBackClick: () -> Unit,
     onCallClick: (String) -> Unit,
 ) {
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
+    var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,14 +61,48 @@ fun AudioCallRoute(
     ) { paddingValues ->
         AudioCallScreen(
             modifier = Modifier.padding(paddingValues),
-            onCallClick = onCallClick,
+            showNotificationsBanner = !notificationsPermissionGranted,
+            showMicrophoneBanner = !microphonePermissionGranted,
+            onNotificationsRequestClick = {
+                showNotificationsRationale = true
+            },
+            onMicrophoneRequestClick = {
+                showMicrophoneRationale = true
+            },
+            onCallClick = { username ->
+                if (microphonePermissionGranted) {
+                    onCallClick(username)
+                } else {
+                    showMicrophoneRationale = true
+                }
+            },
         )
     }
+
+    NotificationsPermissionEffect(
+        showRationale = showNotificationsRationale,
+        onPermissionGranted = { value ->
+            notificationsPermissionGranted = value
+            showNotificationsRationale = false
+        },
+    )
+
+    MicrophonePermissionEffect(
+        showRationale = showMicrophoneRationale,
+        onPermissionGranted = { value ->
+            microphonePermissionGranted = value
+            showMicrophoneRationale = false
+        },
+    )
 }
 
 @Composable
 fun AudioCallScreen(
     modifier: Modifier = Modifier,
+    showNotificationsBanner: Boolean,
+    showMicrophoneBanner: Boolean,
+    onNotificationsRequestClick: () -> Unit,
+    onMicrophoneRequestClick: () -> Unit,
     onCallClick: (String) -> Unit,
 ) {
     var username by rememberSaveable { mutableStateOf("") }
@@ -74,6 +118,24 @@ fun AudioCallScreen(
             modifier = Modifier.padding(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            AnimatedVisibility(visible = showNotificationsBanner) {
+                NotificationsBanner(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, top = 16.dp, end = 12.dp),
+                    onRequestClick = onNotificationsRequestClick,
+                )
+            }
+
+            AnimatedVisibility(visible = showMicrophoneBanner) {
+                MicrophoneBanner(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, top = 16.dp, end = 12.dp),
+                    onRequestClick = onMicrophoneRequestClick,
+                )
+            }
+
             OutlinedTextField(
                 value = username,
                 onValueChange = {
@@ -124,6 +186,10 @@ fun AudioCallScreen(
 fun PreviewAudioCallScreen() {
     VoximplantTheme {
         AudioCallScreen(
+            showNotificationsBanner = true,
+            showMicrophoneBanner = true,
+            onNotificationsRequestClick = {},
+            onMicrophoneRequestClick = {},
             onCallClick = {},
         )
     }
