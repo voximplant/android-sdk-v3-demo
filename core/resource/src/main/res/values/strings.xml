@@ -15,6 +15,6 @@
     <string name="audio_call">Audio call</string>
     <string name="audio_call_description">Make and receive an audio call</string>
     <string name="call_to_user">Username</string>
-    <string name="empty_username_error">The username of the interlocutor must be filled in</string>
+    <string name="empty_username_error">The username must be filled in</string>
     <string name="make_call">Call</string>
 </resources>
