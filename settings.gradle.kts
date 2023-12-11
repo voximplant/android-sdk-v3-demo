@@ -21,12 +21,14 @@ dependencyResolutionManagement {
 rootProject.name = "Voximplant SDK v3 Demo"
 include(":app")
 
+include(":core:calls")
+include(":core:common")
 include(":core:data")
 include(":core:datastore")
 include(":core:designsystem")
 include(":core:domain")
+include(":core:foundation")
 include(":core:model")
-include(":core:network")
 include(":core:permissions")
 include(":core:resource")
 include(":core:ui")

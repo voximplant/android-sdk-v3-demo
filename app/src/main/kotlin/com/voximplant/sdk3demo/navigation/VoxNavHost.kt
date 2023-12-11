@@ -45,10 +45,17 @@ fun VoxNavHost(
             onBackClick = {
                 navController.popBackStack()
             },
-            onCallClick = { username ->
-                navController.navigateToAudioCallOngoing(username)
+            onLoginClick = {
+                navController.navigateToLogin()
+            },
+            onCallClick = { callId, username ->
+                navController.navigateToAudioCallOngoing(callId, username)
             },
         )
-        audioCallOngoingScreen()
+        audioCallOngoingScreen(
+            onCallEnded = {
+                navController.popBackStack()
+            },
+        )
     }
 }
