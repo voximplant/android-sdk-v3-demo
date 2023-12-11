@@ -1,5 +1,6 @@
 package com.voximplant.sdk3demo.core.data
 
+import com.voximplant.sdk3demo.core.model.data.UserCredentials
 import com.voximplant.sdk3demo.core.model.data.UserData
 import com.voximplant.sdk3demo.core.network.UserDataSource
 import com.voximplant.sdk3demo.core.network.model.NetworkUserData
@@ -34,6 +35,8 @@ class UserDataRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun refreshToken(username: String, refreshToken: String): Result<UserCredentials> = datasource.refreshToken(username, refreshToken)
 
     fun logOut() {
         datasource.disconnect()

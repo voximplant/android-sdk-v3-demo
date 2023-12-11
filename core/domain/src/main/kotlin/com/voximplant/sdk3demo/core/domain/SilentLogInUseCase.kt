@@ -4,6 +4,8 @@ import com.voximplant.sdk3demo.core.data.UserDataRepository
 import com.voximplant.sdk3demo.core.datastore.UserPreferencesDataSource
 import com.voximplant.sdk3demo.core.model.data.AuthError
 import com.voximplant.sdk3demo.core.model.data.User
+import com.voximplant.sdk3demo.core.model.data.UserCredentials
+import com.voximplant.sdk3demo.core.model.data.UserData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
@@ -21,7 +23,7 @@ class SilentLogInUseCase @Inject constructor(
         userPreferencesDataSource.userData.firstOrNull().let { userData ->
             if (userData == null) {
                 attempt = 0
-                return Result.failure(AuthError.InternalError)
+                return Result.failure(AuthError.NoInfo)
             }
             userDataRepository.logInWithToken(userData.user.username, userData.accessToken).let { userDataResult ->
                 userDataResult.fold(
@@ -33,6 +35,13 @@ class SilentLogInUseCase @Inject constructor(
                     onFailure = { throwable ->
                         if (throwable in listOf(AuthError.TimeOut, AuthError.NetworkIssue) && attempt < maxAttempts) {
                             return invoke()
+                        } else if (throwable is AuthError.TokenExpired) {
+                            refreshToken(userData).let { refreshResult ->
+                                refreshResult.fold(
+                                    onSuccess = { return invoke() },
+                                    onFailure = { return Result.failure(throwable) },
+                                )
+                            }
                         } else {
                             attempt = 0
                             return Result.failure(throwable)
@@ -40,6 +49,25 @@ class SilentLogInUseCase @Inject constructor(
                     },
                 )
             }
+        }
+    }
+
+    private suspend fun refreshToken(userData: UserData): Result<UserCredentials> {
+        userDataRepository.refreshToken(userData.user.username, userData.refreshToken).let { authParamsResult ->
+            authParamsResult.fold(
+                onSuccess = { authParams ->
+                    userPreferencesDataSource.updateTokens(authParams.accessToken, authParams.refreshToken)
+                    return Result.success(authParams)
+                },
+                onFailure = { throwable ->
+                    if (throwable in listOf(AuthError.TimeOut, AuthError.NetworkIssue) && attempt < maxAttempts) {
+                        return refreshToken(userData)
+                    } else {
+                        attempt = 0
+                        return Result.failure(throwable)
+                    }
+                },
+            )
         }
     }
 

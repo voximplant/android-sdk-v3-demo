@@ -10,7 +10,9 @@ import com.voximplant.core.ConnectionCallback
 import com.voximplant.core.ConnectionError
 import com.voximplant.core.LoginCallback
 import com.voximplant.core.LoginError
+import com.voximplant.core.RefreshTokenCallback
 import com.voximplant.sdk3demo.core.model.data.AuthError
+import com.voximplant.sdk3demo.core.model.data.UserCredentials
 import com.voximplant.sdk3demo.core.network.model.NetworkUser
 import com.voximplant.sdk3demo.core.network.model.NetworkUserData
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -179,6 +181,45 @@ class UserDataSource(@ApplicationContext context: Context) {
         }
     }
 
+    suspend fun refreshToken(username: String, refreshToken: String): Result<UserCredentials> {
+        val refreshResult: RefreshResult = suspendCoroutine { continuation ->
+            client.refreshToken(
+                username,
+                refreshToken,
+                object : RefreshTokenCallback {
+                    override fun onFailure(error: LoginError) {
+                        continuation.resume(RefreshResult.Failure(error))
+                    }
+
+                    override fun onSuccess(authParams: AuthParams) {
+                        continuation.resume(RefreshResult.Success(authParams))
+                    }
+                },
+            )
+        }
+        return when (refreshResult) {
+            is RefreshResult.Success -> {
+                Result.success(UserCredentials(refreshResult.authParams.accessToken, refreshResult.authParams.refreshToken))
+            }
+
+            is RefreshResult.Failure -> {
+                val authError = when (refreshResult.error) {
+                    LoginError.INVALID_PASSWORD -> AuthError.InvalidPassword
+                    LoginError.INVALID_USERNAME -> AuthError.InvalidUsername
+                    LoginError.ACCOUNT_FROZEN -> AuthError.AccountFrozen
+                    LoginError.INTERNAL_ERROR -> AuthError.InternalError
+                    LoginError.INVALID_STATE -> AuthError.InvalidState
+                    LoginError.INTERRUPTED -> AuthError.Interrupted
+                    LoginError.MAU_ACCESS_DENIED -> AuthError.MauAccessDenied
+                    LoginError.NETWORK_ISSUES -> AuthError.NetworkIssue
+                    LoginError.TOKEN_EXPIRED -> AuthError.TokenExpired
+                    LoginError.TIMEOUT -> AuthError.TimeOut
+                }
+                return Result.failure(authError)
+            }
+        }
+    }
+
     private suspend fun connect() = suspendCoroutine { continuation ->
         client.connect(object : ConnectionCallback {
             override fun onFailure(error: ConnectionError) {
@@ -202,4 +243,9 @@ private sealed interface ConnectionResult {
 private sealed interface LoginResult {
     data class Success(val networkUserData: NetworkUserData) : LoginResult
     data class Failure(val error: LoginError) : LoginResult
+}
+
+private sealed interface RefreshResult {
+    data class Success(val authParams: AuthParams) : RefreshResult
+    data class Failure(val error: LoginError) : RefreshResult
 }

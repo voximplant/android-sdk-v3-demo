@@ -36,6 +36,15 @@ class UserPreferencesDataSource @Inject constructor(
         }
     }
 
+    suspend fun updateTokens(accessToken: String, refreshToken: String) {
+        userPreferencesDataStore.updateData { userPreferences ->
+            userPreferences.copy {
+                this.accessToken = accessToken
+                this.refreshToken = refreshToken
+            }
+        }
+    }
+
     suspend fun clearUser() {
         userPreferencesDataStore.updateData { userPreferences ->
             userPreferences.copy {
