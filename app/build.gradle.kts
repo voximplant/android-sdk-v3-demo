@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":feature:catalog"))
     implementation(project(":feature:login"))
     implementation(project(":feature:audiocall"))
+    implementation(project(":feature:audiocall-incoming"))
     implementation(project(":feature:audiocall-ongoing"))
 
     implementation(project(":core:designsystem"))

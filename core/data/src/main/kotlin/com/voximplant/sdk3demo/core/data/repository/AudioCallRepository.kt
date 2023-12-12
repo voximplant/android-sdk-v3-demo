@@ -23,6 +23,14 @@ class AudioCallRepository @Inject constructor(
     val isOnHold: Flow<Boolean>
         get() = callDataSource.isOnHold
 
+    fun startListeningIncomingCalls() {
+        callDataSource.startListeningIncomingCalls()
+    }
+
+    fun stopListeningIncomingCalls() {
+        callDataSource.stopListeningIncomingCalls()
+    }
+
     fun createCall(username: String): Result<Call> {
         callDataSource.createCall(username).let { callDataResult ->
             callDataResult.fold(
@@ -59,5 +67,9 @@ class AudioCallRepository @Inject constructor(
 
     fun hangUp() {
         callDataSource.hangUp()
+    }
+
+    fun reject() {
+        callDataSource.reject()
     }
 }

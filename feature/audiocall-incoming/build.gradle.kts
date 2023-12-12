@@ -22,7 +22,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.feature.audiocall"
+    namespace = "com.voximplant.sdk3demo.feature.audiocall.incoming"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -49,7 +49,6 @@ android {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
-    implementation(project(":core:permissions"))
     implementation(project(":core:resource"))
     implementation(project(":core:ui"))
 

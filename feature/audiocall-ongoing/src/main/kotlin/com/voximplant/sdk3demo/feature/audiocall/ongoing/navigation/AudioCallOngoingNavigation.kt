@@ -21,7 +21,7 @@ internal class OngoingCallArgs(val id: String, val username: String) {
             )
 }
 
-fun NavController.navigateToAudioCallOngoing(id: String, username: String) {
+fun NavController.navigateToAudioCallOngoing(id: String, username: String?) {
     this.navigate("$audioCallOngoingRoute/$id?username=$username") {
         launchSingleTop = true
     }

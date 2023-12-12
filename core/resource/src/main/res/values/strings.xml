@@ -24,4 +24,7 @@
     <string name="call_state_disconnecting">Disconnecting</string>
     <string name="call_state_failed">Failed</string>
     <string name="call_state_reconnecting">Reconnecting</string>
+    <string name="reject">Reject</string>
+    <string name="answer">Answer</string>
+    <string name="unknown_user">Unknown user</string>
 </resources>
