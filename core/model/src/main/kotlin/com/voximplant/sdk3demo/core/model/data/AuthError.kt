@@ -11,4 +11,5 @@ sealed class AuthError : Throwable() {
     data object Interrupted : AuthError()
     data object MauAccessDenied : AuthError()
     data object TokenExpired : AuthError()
+    data object NoInfo : AuthError()
 }

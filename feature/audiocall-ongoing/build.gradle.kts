@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
     implementation(project(":core:resource"))
+    implementation(project(":core:ui"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.hilt.navigation.compose)

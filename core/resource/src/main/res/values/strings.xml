@@ -17,4 +17,11 @@
     <string name="call_to_user">Username</string>
     <string name="empty_username_error">The username must be filled in</string>
     <string name="make_call">Call</string>
+    <string name="audio_devices">Audio devices</string>
+    <string name="call_state_connected">Connected</string>
+    <string name="call_state_connecting">Connecting</string>
+    <string name="call_state_disconnected">Disconnected</string>
+    <string name="call_state_disconnecting">Disconnecting</string>
+    <string name="call_state_failed">Failed</string>
+    <string name="call_state_reconnecting">Reconnecting</string>
 </resources>
