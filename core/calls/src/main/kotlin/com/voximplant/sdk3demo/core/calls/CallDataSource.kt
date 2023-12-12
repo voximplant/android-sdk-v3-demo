@@ -91,8 +91,8 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    fun makeCall(id: String): Result<CallApiData> {
-        Log.d("DemoV3", "makeCall: $call")
+    fun startCall(id: String): Result<CallApiData> {
+        Log.d("DemoV3", "startCall: $call")
         if (call?.id != id) return Result.failure(Throwable("Call not found"))
 
         if (call?.callDirection == CallDirection.OUTGOING) {
@@ -101,7 +101,7 @@ class CallDataSource @Inject constructor(
                     it.setCallListener(callListener)
                     it.start()
                     Result.success(it.asCallData())
-                } ?: return Result.failure(Throwable("Failed to make call"))
+                } ?: return Result.failure(Throwable("Failed to start call"))
             } catch (exception: CallException) {
                 Result.failure(exception)
             }

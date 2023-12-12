@@ -11,9 +11,9 @@ import com.voximplant.sdk3demo.core.domain.GetHoldStateUseCase
 import com.voximplant.sdk3demo.core.domain.GetMuteStateUseCase
 import com.voximplant.sdk3demo.core.domain.HangUpCallUseCase
 import com.voximplant.sdk3demo.core.domain.HoldCallUseCase
-import com.voximplant.sdk3demo.core.domain.MakeCallUseCase
 import com.voximplant.sdk3demo.core.domain.MuteCallUseCase
 import com.voximplant.sdk3demo.core.domain.SelectAudioDeviceUseCase
+import com.voximplant.sdk3demo.core.domain.StartCallUseCase
 import com.voximplant.sdk3demo.core.model.data.AudioDevice
 import com.voximplant.sdk3demo.core.model.data.Call
 import com.voximplant.sdk3demo.core.model.data.CallApiState
@@ -37,7 +37,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     getAudioDevices: GetAudioDevicesUseCase,
     getAudioDevice: GetAudioDeviceUseCase,
     private val selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
-    makeCall: MakeCallUseCase,
+    startCall: StartCallUseCase,
     private val muteCall: MuteCallUseCase,
     private val holdCall: HoldCallUseCase,
     private val hangUpCall: HangUpCallUseCase,
@@ -68,7 +68,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     )
 
     init {
-        makeCall(ongoingCallArgs.id)
+        startCall(ongoingCallArgs.id)
     }
 
     fun toggleMute() {

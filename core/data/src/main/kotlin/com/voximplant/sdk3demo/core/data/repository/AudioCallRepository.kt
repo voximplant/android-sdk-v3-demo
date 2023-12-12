@@ -36,8 +36,8 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
-    fun makeCall(id: String): Result<Call> {
-        callDataSource.makeCall(id).let { callDataResult ->
+    fun startCall(id: String): Result<Call> {
+        callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
                     return Result.success(callData.asCall())
