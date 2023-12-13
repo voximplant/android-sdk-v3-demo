@@ -19,6 +19,9 @@ package com.voximplant.sdk3demo.core.foundation.di
 import android.content.Context
 import com.voximplant.core.Client
 import com.voximplant.core.audio.AudioDeviceManager
+import com.voximplant.sdk3demo.core.common.Dispatcher
+import com.voximplant.sdk3demo.core.common.VoxDispatchers
+import com.voximplant.sdk3demo.core.common.di.ApplicationScope
 import com.voximplant.sdk3demo.core.foundation.AudioDeviceDataSource
 import com.voximplant.sdk3demo.core.foundation.AuthDataSource
 import dagger.Module
@@ -26,6 +29,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Module
@@ -36,7 +41,9 @@ object FoundationModule {
     @Singleton
     fun providesUserDataSource(
         @ApplicationContext context: Context,
-    ): AuthDataSource = AuthDataSource(client = Client.getInstance(context))
+        @Dispatcher(VoxDispatchers.Default) defaultDispatcher: CoroutineDispatcher,
+        @ApplicationScope coroutineScope: CoroutineScope,
+    ): AuthDataSource = AuthDataSource(client = Client.getInstance(context), defaultDispatcher, coroutineScope)
 
     @Provides
     @Singleton

@@ -11,10 +11,10 @@ import javax.inject.Inject
 class AudioCallRepository @Inject constructor(
     private val callDataSource: CallDataSource,
 ) {
-    val call: Flow<Call>
-        get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData.asCall() }
+    val call: Flow<Call?>
+        get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData?.asCall() }
 
-    val state: Flow<CallApiState>
+    val state: Flow<CallApiState?>
         get() = callDataSource.callStateFlow
 
     val isMuted: Flow<Boolean>

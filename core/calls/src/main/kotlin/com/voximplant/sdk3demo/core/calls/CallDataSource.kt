@@ -18,9 +18,7 @@ import com.voximplant.sdk3demo.core.model.data.CallApiState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -85,12 +83,12 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    private val _callApiDataFlow: MutableSharedFlow<CallApiData> = MutableSharedFlow()
-    val callApiDataFlow: Flow<CallApiData> = _callApiDataFlow.asSharedFlow()
+    private val _callApiDataFlow: MutableStateFlow<CallApiData?> = MutableStateFlow(null)
+    val callApiDataFlow: Flow<CallApiData?> = _callApiDataFlow.asStateFlow()
 
-    private val _callState: MutableSharedFlow<CallState> = MutableSharedFlow()
-    val callStateFlow: Flow<CallApiState> = _callState.asSharedFlow().map { callState ->
-        callState.asExternalModel
+    private val _callState: MutableStateFlow<CallState?> = MutableStateFlow(null)
+    val callStateFlow: Flow<CallApiState?> = _callState.asStateFlow().map { callState ->
+        callState?.asExternalModel
     }.flowOn(defaultDispatcher)
 
     private val _isMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -105,6 +103,9 @@ class CallDataSource @Inject constructor(
         }
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
+                coroutineScope.launch {
+                    _callApiDataFlow.emit(call.asCallData())
+                }
                 activeCall = call
                 return Result.success(call.asCallData())
             } else {

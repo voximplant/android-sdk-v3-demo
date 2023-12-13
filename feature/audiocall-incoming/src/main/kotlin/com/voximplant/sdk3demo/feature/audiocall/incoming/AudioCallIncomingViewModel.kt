@@ -56,7 +56,7 @@ class AudioCallIncomingViewModel @Inject constructor(
 
 private fun audioCallIncomingUiState(
     displayName: String?,
-    stateFlow: Flow<CallApiState>,
+    stateFlow: Flow<CallApiState?>,
 ): Flow<AudioCallIncomingUiState> = combine(stateFlow) {
     AudioCallIncomingUiState(
         displayName = displayName,
@@ -67,7 +67,7 @@ private fun audioCallIncomingUiState(
             RECONNECTING -> CallState.Reconnecting
             DISCONNECTING -> CallState.Disconnecting
             DISCONNECTED -> CallState.Disconnected
-            FAILED -> CallState.Failed("audioCallIncomingUiState error")
+            FAILED, null -> CallState.Failed("audioCallIncomingUiState error")
         },
     )
 }
