@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,8 +37,10 @@ import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.Gray10
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
+import com.voximplant.sdk3demo.core.permissions.MicrophonePermissionEffect
 import com.voximplant.sdk3demo.core.ui.CallActionButton
 import com.voximplant.sdk3demo.core.ui.CallFailedDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun AudioCallIncomingRoute(
@@ -45,7 +48,12 @@ fun AudioCallIncomingRoute(
     onCallEnded: () -> Unit,
     onCallAnswered: (String) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+
     val audioCallIncomingUiState by viewModel.callIncomingUiState.collectAsStateWithLifecycle()
+
+    var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
 
     var showCallFailedDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -76,10 +84,24 @@ fun AudioCallIncomingRoute(
                 viewModel.reject()
             },
             onAnswerClick = {
-                onCallAnswered(viewModel.id)
+                if (microphonePermissionGranted) {
+                    scope.launch {
+                        onCallAnswered(viewModel.id)
+                    }
+                } else {
+                    showMicrophoneRationale = true
+                }
             },
         )
     }
+
+    MicrophonePermissionEffect(
+        showRationale = showMicrophoneRationale,
+        onPermissionGranted = { value ->
+            microphonePermissionGranted = value
+            showMicrophoneRationale = false
+        },
+    )
 }
 
 @Composable
