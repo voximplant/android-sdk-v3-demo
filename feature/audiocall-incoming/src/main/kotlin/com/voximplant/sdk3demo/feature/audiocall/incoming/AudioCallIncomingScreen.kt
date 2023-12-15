@@ -170,7 +170,9 @@ fun AudioCallIncomingScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally)
+                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .padding(bottom = 48.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     CallActionButton(
                         icon = {
