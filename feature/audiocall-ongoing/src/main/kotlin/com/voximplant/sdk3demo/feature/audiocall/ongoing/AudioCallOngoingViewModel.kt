@@ -88,18 +88,18 @@ class AudioCallOngoingViewModel @Inject constructor(
                     }
 
                     is LoginState.LoggedOut -> {
-                        silentLogIn().onFailure {
-                            if (it is LoginError) {
-                                this@AudioCallOngoingViewModel.loginState.value = LoginState.LoggedIn
+                        silentLogIn().onFailure { throwable ->
+                            if (throwable is LoginError) {
+                                this@AudioCallOngoingViewModel.loginState.value = LoginState.Failed(throwable)
                             }
                         }
                     }
 
                     is LoginState.Failed -> {
-                        silentLogIn().onFailure {
-                            if (it is LoginError) {
+                        silentLogIn().onFailure { throwable ->
+                            if (throwable is LoginError) {
                                 viewModelScope.launch {
-                                    this@AudioCallOngoingViewModel.loginState.value = LoginState.Failed(it)
+                                    this@AudioCallOngoingViewModel.loginState.value = LoginState.Failed(throwable)
                                     cancel()
                                 }
                             }
