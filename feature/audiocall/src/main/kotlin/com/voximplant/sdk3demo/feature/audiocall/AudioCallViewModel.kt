@@ -6,8 +6,8 @@ import com.voximplant.sdk3demo.core.domain.CreateCallUseCase
 import com.voximplant.sdk3demo.core.domain.GetCallStateUseCase
 import com.voximplant.sdk3demo.core.domain.GetCallUseCase
 import com.voximplant.sdk3demo.core.domain.GetUserUseCase
-import com.voximplant.sdk3demo.core.domain.StartListeningIncomingCallsUseCase
-import com.voximplant.sdk3demo.core.domain.StopListeningIncomingCallsUseCase
+import com.voximplant.sdk3demo.core.domain.StartListeningForIncomingCallsUseCase
+import com.voximplant.sdk3demo.core.domain.StopListeningForIncomingCallsUseCase
 import com.voximplant.sdk3demo.core.model.data.Call
 import com.voximplant.sdk3demo.core.model.data.CallApiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +25,8 @@ class AudioCallViewModel @Inject constructor(
     private val createCallUseCase: CreateCallUseCase,
     getCall: GetCallUseCase,
     getCallState: GetCallStateUseCase,
-    startListeningIncomingCallsUseCase: StartListeningIncomingCallsUseCase,
-    private val stopListeningIncomingCallsUseCase: StopListeningIncomingCallsUseCase,
+    startListeningForIncomingCallsUseCase: StartListeningForIncomingCallsUseCase,
+    private val stopListeningForIncomingCallsUseCase: StopListeningForIncomingCallsUseCase,
 ) : ViewModel() {
     val user = getUserUseCase().stateIn(
         scope = viewModelScope,
@@ -44,7 +44,7 @@ class AudioCallViewModel @Inject constructor(
     )
 
     init {
-        startListeningIncomingCallsUseCase()
+        startListeningForIncomingCallsUseCase()
     }
 
     suspend fun createCall(username: String): Call? = viewModelScope.async {
@@ -56,7 +56,7 @@ class AudioCallViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        stopListeningIncomingCallsUseCase()
+        stopListeningForIncomingCallsUseCase()
     }
 }
 

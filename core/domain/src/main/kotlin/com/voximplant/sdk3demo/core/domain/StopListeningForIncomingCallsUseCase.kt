@@ -3,7 +3,7 @@ package com.voximplant.sdk3demo.core.domain
 import com.voximplant.sdk3demo.core.data.repository.AudioCallRepository
 import javax.inject.Inject
 
-class StopListeningIncomingCallsUseCase @Inject constructor(
+class StopListeningForIncomingCallsUseCase @Inject constructor(
     private val audioCallRepository: AudioCallRepository,
 ) {
 
