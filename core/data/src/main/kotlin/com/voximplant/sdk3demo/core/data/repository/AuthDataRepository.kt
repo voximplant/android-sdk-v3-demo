@@ -6,9 +6,12 @@ import com.voximplant.sdk3demo.core.foundation.model.asUserData
 import com.voximplant.sdk3demo.core.model.data.UserData
 import javax.inject.Inject
 
-class UserDataRepository @Inject constructor(
+class AuthDataRepository @Inject constructor(
     private val datasource: AuthDataSource,
 ) {
+    val loginState
+        get() = datasource.loginState
+
     suspend fun logIn(username: String, password: String): Result<UserData> {
         datasource.logIn(username, password).let { result: Result<NetworkUserData> ->
             result.fold(
@@ -35,7 +38,7 @@ class UserDataRepository @Inject constructor(
         }
     }
 
-    fun logOut() {
+    suspend fun logOut() {
         datasource.disconnect()
     }
 }

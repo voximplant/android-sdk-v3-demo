@@ -3,6 +3,8 @@ package com.voximplant.sdk3demo.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.voximplant.sdk3demo.feature.audiocall.incoming.navigation.audioCallIncomingScreen
+import com.voximplant.sdk3demo.feature.audiocall.incoming.navigation.navigateToAudioCallIncoming
 import com.voximplant.sdk3demo.feature.audiocall.navigation.audioCallRoute
 import com.voximplant.sdk3demo.feature.audiocall.navigation.audioCallScreen
 import com.voximplant.sdk3demo.feature.audiocall.navigation.navigateToAudioCall
@@ -48,8 +50,20 @@ fun VoxNavHost(
             onLoginClick = {
                 navController.navigateToLogin()
             },
-            onCallClick = { callId, username ->
+            onIncomingCall = { callId, displayName ->
+                navController.navigateToAudioCallIncoming(callId, displayName)
+            },
+            onCallCreated = { callId, username ->
                 navController.navigateToAudioCallOngoing(callId, username)
+            },
+        )
+        audioCallIncomingScreen(
+            onCallEnded = {
+                navController.popBackStack()
+            },
+            onCallAnswered = { callId ->
+                navController.popBackStack()
+                navController.navigateToAudioCallOngoing(callId, "")
             },
         )
         audioCallOngoingScreen(

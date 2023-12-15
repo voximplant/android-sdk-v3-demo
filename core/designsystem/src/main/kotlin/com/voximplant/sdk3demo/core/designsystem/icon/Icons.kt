@@ -9,7 +9,7 @@ object Icons {
     val Call = R.drawable.ic_phone_call
     val Check = R.drawable.ic_check
     val Earpiece = R.drawable.ic_earpiece
-    val Hangup = R.drawable.ic_phone_hangup
+    val Hangup = R.drawable.ic_phone_down
     val Hold = R.drawable.ic_pause
     val Microphone = R.drawable.ic_microphone
     val MicrophoneMuted = R.drawable.ic_microphone_off

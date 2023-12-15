@@ -8,5 +8,5 @@ import javax.inject.Inject
 class GetCallStateUseCase @Inject constructor(
     private val callRepository: AudioCallRepository,
 ) {
-    operator fun invoke(): Flow<CallApiState> = callRepository.state
+    operator fun invoke(): Flow<CallApiState?> = callRepository.state
 }

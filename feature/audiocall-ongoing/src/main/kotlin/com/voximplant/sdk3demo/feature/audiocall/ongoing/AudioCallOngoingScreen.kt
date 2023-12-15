@@ -59,16 +59,16 @@ fun AudioCallOngoingRoute(
     viewModel: AudioCallOngoingViewModel = hiltViewModel(),
     onCallEnded: () -> Unit,
 ) {
-    val callUiState by viewModel.callUiState.collectAsStateWithLifecycle()
+    val callOngoingUiState by viewModel.callOngoingUiState.collectAsStateWithLifecycle()
 
     var showCallFailedDialog by rememberSaveable { mutableStateOf(false) }
 
     var showAudioDevices by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(callUiState) {
-        if (callUiState.state is CallState.Disconnected) {
+    LaunchedEffect(callOngoingUiState) {
+        if (callOngoingUiState.state is CallState.Disconnected) {
             onCallEnded()
-        } else if (callUiState.state is CallState.Failed) {
+        } else if (callOngoingUiState.state is CallState.Failed) {
             showCallFailedDialog = true
         }
     }
@@ -94,7 +94,7 @@ fun AudioCallOngoingRoute(
                     LazyColumn(
                         Modifier.weight(1f, fill = false), contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
-                        items(callUiState.audioDevices) { audioDevice ->
+                        items(callOngoingUiState.audioDevices) { audioDevice ->
                             ListItem(
                                 headlineContent = {
                                     Text(text = audioDevice.name)
@@ -114,7 +114,7 @@ fun AudioCallOngoingRoute(
                                     Icon(painter = painterResource(id = icon), contentDescription = null)
                                 },
                                 trailingContent = {
-                                    if (callUiState.audioDevice == audioDevice) {
+                                    if (callOngoingUiState.audioDevice == audioDevice) {
                                         Icon(painter = painterResource(id = Icons.Check), contentDescription = null)
                                     }
                                 },
@@ -130,7 +130,7 @@ fun AudioCallOngoingRoute(
     Scaffold { paddingValues ->
         AudioCallOngoingScreen(
             modifier = Modifier.padding(paddingValues),
-            callUiState = callUiState,
+            callOngoingUiState = callOngoingUiState,
             onMuteClick = viewModel::toggleMute,
             onHoldClick = viewModel::toggleHold,
             onAudioDevicesClick = { showAudioDevices = true },
@@ -142,7 +142,7 @@ fun AudioCallOngoingRoute(
 @Composable
 fun AudioCallOngoingScreen(
     modifier: Modifier = Modifier,
-    callUiState: CallUiState,
+    callOngoingUiState: CallOngoingUiState,
     onAudioDevicesClick: () -> Unit,
     onMuteClick: () -> Unit,
     onHoldClick: () -> Unit,
@@ -187,10 +187,10 @@ fun AudioCallOngoingScreen(
                                 fontWeight = FontWeight.SemiBold,
                             ),
                         ) {
-                            Text(text = callUiState.call?.remoteDisplayName ?: callUiState.username)
+                            Text(text = callOngoingUiState.call?.remoteDisplayName ?: callOngoingUiState.username)
                         }
                         ProvideTextStyle(value = Typography.bodySmall.copy(color = Gray10)) {
-                            val stateText = when (callUiState.state) {
+                            val stateText = when (callOngoingUiState.state) {
                                 is CallState.Connected -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.call_state_connected)
                                 is CallState.Connecting -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.call_state_connecting)
                                 is CallState.Disconnected -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.call_state_disconnected)
@@ -201,14 +201,14 @@ fun AudioCallOngoingScreen(
 
                             var duration by remember { mutableIntStateOf(0) }
 
-                            LaunchedEffect(callUiState.state, duration) {
-                                if (callUiState.state is CallState.Connected) {
+                            LaunchedEffect(callOngoingUiState.state, duration) {
+                                if (callOngoingUiState.state is CallState.Connected) {
                                     delay(1_000)
                                     duration++
                                 }
                             }
 
-                            if (callUiState.state is CallState.Connected && duration != 0) {
+                            if (callOngoingUiState.state is CallState.Connected && duration != 0) {
                                 Text(text = formatDuration(duration))
                             } else {
                                 Text(text = stateText)
@@ -226,7 +226,7 @@ fun AudioCallOngoingScreen(
                     ) {
                         CallActionButton(
                             icon = {
-                                if (callUiState.isMuted) {
+                                if (callOngoingUiState.isMuted) {
                                     Icon(painter = painterResource(id = Icons.MicrophoneMuted), contentDescription = null)
                                 } else {
                                     Icon(painter = painterResource(id = Icons.Microphone), contentDescription = null)
@@ -236,8 +236,8 @@ fun AudioCallOngoingScreen(
                                 Text(text = "Mute")
                             },
                             onClick = onMuteClick,
-                            enabled = callUiState !is CallUiState.Inactive,
-                            color = animateColorAsState(if (callUiState.isMuted) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
+                            enabled = callOngoingUiState !is CallOngoingUiState.Inactive,
+                            color = animateColorAsState(if (callOngoingUiState.isMuted) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
                         )
                         CallActionButton(
                             icon = {
@@ -247,12 +247,12 @@ fun AudioCallOngoingScreen(
                                 Text(text = "Hold")
                             },
                             onClick = onHoldClick,
-                            enabled = callUiState is CallUiState.Active,
-                            color = animateColorAsState(if (callUiState.isOnHold) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
+                            enabled = callOngoingUiState is CallOngoingUiState.Active,
+                            color = animateColorAsState(if (callOngoingUiState.isOnHold) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
                         )
                         CallActionButton(
                             icon = {
-                                val icon = when (callUiState.audioDevice?.type) {
+                                val icon = when (callOngoingUiState.audioDevice?.type) {
                                     AudioDevice.Type.EARPIECE -> Icons.Earpiece
                                     AudioDevice.Type.SPEAKER -> Icons.Speaker
                                     AudioDevice.Type.WIRED_HEADSET -> Icons.WiredHeadset
@@ -263,10 +263,10 @@ fun AudioCallOngoingScreen(
                                 Icon(painter = painterResource(id = icon), contentDescription = null)
                             },
                             text = {
-                                Text(text = callUiState.audioDevice?.name.orEmpty())
+                                Text(text = callOngoingUiState.audioDevice?.name.orEmpty())
                             },
                             onClick = onAudioDevicesClick,
-                            enabled = callUiState !is CallUiState.Inactive,
+                            enabled = callOngoingUiState !is CallOngoingUiState.Inactive,
                         )
                     }
                     Row(
@@ -305,9 +305,9 @@ private fun formatDuration(durationInSeconds: Int): String {
 fun PreviewAudioCallScreen() {
     var isMuted by remember { mutableStateOf(false) }
 
-    val callUiState by remember(isMuted) {
+    val callOngoingUiState by remember(isMuted) {
         mutableStateOf(
-            CallUiState.Inactive(
+            CallOngoingUiState.Inactive(
                 state = CallState.Connecting,
                 username = "username",
                 isMuted = isMuted,
@@ -320,7 +320,7 @@ fun PreviewAudioCallScreen() {
 
     VoximplantTheme {
         AudioCallOngoingScreen(
-            callUiState = callUiState,
+            callOngoingUiState = callOngoingUiState,
             onAudioDevicesClick = {},
             onMuteClick = { isMuted = !isMuted },
             onHoldClick = { },

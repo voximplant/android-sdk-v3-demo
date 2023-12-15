@@ -11,10 +11,10 @@ import javax.inject.Inject
 class AudioCallRepository @Inject constructor(
     private val callDataSource: CallDataSource,
 ) {
-    val call: Flow<Call>
-        get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData.asCall() }
+    val call: Flow<Call?>
+        get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData?.asCall() }
 
-    val state: Flow<CallApiState>
+    val state: Flow<CallApiState?>
         get() = callDataSource.callStateFlow
 
     val isMuted: Flow<Boolean>
@@ -22,6 +22,14 @@ class AudioCallRepository @Inject constructor(
 
     val isOnHold: Flow<Boolean>
         get() = callDataSource.isOnHold
+
+    fun startListeningIncomingCalls() {
+        callDataSource.startListeningIncomingCalls()
+    }
+
+    fun stopListeningIncomingCalls() {
+        callDataSource.stopListeningIncomingCalls()
+    }
 
     fun createCall(username: String): Result<Call> {
         callDataSource.createCall(username).let { callDataResult ->
@@ -59,5 +67,9 @@ class AudioCallRepository @Inject constructor(
 
     fun hangUp() {
         callDataSource.hangUp()
+    }
+
+    fun reject() {
+        callDataSource.reject()
     }
 }

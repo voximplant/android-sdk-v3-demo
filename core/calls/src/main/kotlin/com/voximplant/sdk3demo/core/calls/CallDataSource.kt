@@ -9,6 +9,8 @@ import com.voximplant.calls.CallListener
 import com.voximplant.calls.CallManager
 import com.voximplant.calls.CallSettings
 import com.voximplant.calls.CallState
+import com.voximplant.calls.IncomingCallListener
+import com.voximplant.calls.RejectMode
 import com.voximplant.sdk3demo.core.calls.model.CallApiData
 import com.voximplant.sdk3demo.core.common.Dispatcher
 import com.voximplant.sdk3demo.core.common.VoxDispatchers.Default
@@ -16,9 +18,7 @@ import com.voximplant.sdk3demo.core.model.data.CallApiState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -30,7 +30,7 @@ class CallDataSource @Inject constructor(
     @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
     private val coroutineScope: CoroutineScope,
 ) {
-    private var call: Call? = null
+    private var activeCall: Call? = null
 
     private val callListener = object : CallListener {
 
@@ -45,6 +45,8 @@ class CallDataSource @Inject constructor(
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
                 _callState.emit(call.state)
+                activeCall?.setCallListener(null)
+                activeCall = null
             }
         }
 
@@ -52,6 +54,8 @@ class CallDataSource @Inject constructor(
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
                 _callState.emit(call.state)
+                activeCall?.setCallListener(null)
+                activeCall = null
             }
         }
 
@@ -63,12 +67,29 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    private val _callApiDataFlow: MutableSharedFlow<CallApiData> = MutableSharedFlow()
-    val callApiDataFlow: Flow<CallApiData> = _callApiDataFlow.asSharedFlow()
+    private val incomingCallListener = object : IncomingCallListener {
+        override fun onIncomingCall(call: Call, hasIncomingVideo: Boolean, headers: Map<String, String>?) {
+            if (activeCall != null) {
+                // Indicates that the user is unavailable only on the device with an active call.
+                call.reject(RejectMode.BUSY, null)
+                return
+            }
 
-    private val _callState: MutableSharedFlow<CallState> = MutableSharedFlow()
-    val callStateFlow: Flow<CallApiState> = _callState.asSharedFlow().map { callState ->
-        callState.asExternalModel
+            call.setCallListener(callListener)
+            activeCall = call
+            coroutineScope.launch {
+                _callApiDataFlow.emit(call.asCallData())
+                _callState.emit(call.state)
+            }
+        }
+    }
+
+    private val _callApiDataFlow: MutableStateFlow<CallApiData?> = MutableStateFlow(null)
+    val callApiDataFlow: Flow<CallApiData?> = _callApiDataFlow.asStateFlow()
+
+    private val _callState: MutableStateFlow<CallState?> = MutableStateFlow(null)
+    val callStateFlow: Flow<CallApiState?> = _callState.asStateFlow().map { callState ->
+        callState?.asExternalModel
     }.flowOn(defaultDispatcher)
 
     private val _isMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -83,7 +104,10 @@ class CallDataSource @Inject constructor(
         }
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
-                this.call = call
+                coroutineScope.launch {
+                    _callApiDataFlow.emit(call.asCallData())
+                }
+                activeCall = call
                 return Result.success(call.asCallData())
             } else {
                 return Result.failure(IllegalStateException())
@@ -91,24 +115,40 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    fun startCall(id: String): Result<CallApiData> {
-        Log.d("DemoV3", "startCall: $call")
-        if (call?.id != id) return Result.failure(Throwable("Call not found"))
+    fun startListeningIncomingCalls() {
+        callManager.setIncomingCallListener(incomingCallListener)
+    }
 
-        if (call?.callDirection == CallDirection.OUTGOING) {
-            return try {
-                call?.let {
-                    it.setCallListener(callListener)
-                    it.start()
-                    Result.success(it.asCallData())
-                } ?: return Result.failure(Throwable("Failed to start call"))
-            } catch (exception: CallException) {
-                Result.failure(exception)
+    fun stopListeningIncomingCalls() {
+        callManager.setIncomingCallListener(null)
+    }
+
+    fun startCall(id: String): Result<CallApiData> {
+        Log.d("DemoV3", "startCall: $activeCall")
+
+        activeCall?.let { call ->
+            if (call.id != id) return Result.failure(Throwable("Call not found"))
+
+            when (call.callDirection) {
+                CallDirection.OUTGOING -> {
+                    return try {
+                        call.setCallListener(callListener)
+                        call.start()
+                        Result.success(call.asCallData())
+                    } catch (exception: CallException) {
+                        Result.failure(exception)
+                    }
+                }
+
+                CallDirection.INCOMING -> {
+                    call.let {
+                        it.setCallListener(callListener)
+                        it.answer(CallSettings())
+                        return Result.success(it.asCallData())
+                    }
+                }
             }
-        } else {
-            return Result.failure(Throwable("Incoming call not implemented yet"))
-            // TODO (Oleg): Incoming call
-        }
+        } ?: return Result.failure(Throwable("Call not found"))
         // TODO (Oleg): Start service
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 //                    ServiceCompat.startForeground(AudioCallService(), 0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
@@ -119,11 +159,11 @@ class CallDataSource @Inject constructor(
 
     fun mute(value: Boolean) {
         _isMuted.value = value
-        call?.sendAudio(!value)
+        activeCall?.sendAudio(!value)
     }
 
     fun hold(value: Boolean) {
-        call?.hold(value, object : CallCallback {
+        activeCall?.hold(value, object : CallCallback {
             override fun onFailure(exception: CallException) {
                 Log.e("DemoV3", "CallDataSource::hold failed")
             }
@@ -139,6 +179,10 @@ class CallDataSource @Inject constructor(
         coroutineScope.launch {
             _callState.emit(CallState.DISCONNECTING)
         }
-        call?.hangup(null)
+        activeCall?.hangup(null)
+    }
+
+    fun reject() {
+        activeCall?.reject(RejectMode.DECLINE, null)
     }
 }

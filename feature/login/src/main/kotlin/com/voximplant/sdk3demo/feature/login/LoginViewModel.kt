@@ -3,7 +3,7 @@ package com.voximplant.sdk3demo.feature.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.sdk3demo.core.domain.LogInUseCase
-import com.voximplant.sdk3demo.core.model.data.AuthError
+import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ class LoginViewModel @Inject constructor(
                     _loginUiState.value = LoginUiState.Success(user)
                 }
                 .onFailure { throwable ->
-                    _loginUiState.value = LoginUiState.Failure(throwable as AuthError)
+                    _loginUiState.value = LoginUiState.Failure(throwable as LoginError)
                 }
         }
     }
@@ -39,5 +39,5 @@ sealed interface LoginUiState {
     data object Init : LoginUiState
     data object Loading : LoginUiState
     data class Success(val user: User) : LoginUiState
-    data class Failure(val error: AuthError) : LoginUiState
+    data class Failure(val error: LoginError) : LoginUiState
 }
