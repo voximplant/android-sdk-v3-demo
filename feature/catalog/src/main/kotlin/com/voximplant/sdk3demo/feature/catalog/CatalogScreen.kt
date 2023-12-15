@@ -48,7 +48,7 @@ fun CatalogRoute(
     val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
     val user by viewModel.user.collectAsStateWithLifecycle()
 
-    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
 
     var loginError: LoginError? by rememberSaveable(loginUiState) {

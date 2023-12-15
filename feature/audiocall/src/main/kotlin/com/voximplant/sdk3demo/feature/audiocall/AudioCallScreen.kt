@@ -59,9 +59,9 @@ fun AudioCallRoute(
     val audioCallUiState by viewModel.audioCallUiState.collectAsStateWithLifecycle()
     val rememberCall = remember { (audioCallUiState as? AudioCallUiState.Active)?.call }
 
-    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
-    var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var microphonePermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
 
     var showLoginRequiredDialog by rememberSaveable { mutableStateOf(false) }
