@@ -15,7 +15,7 @@ ksp = "1.9.20-1.0.14"
 androidxNavigation = "2.7.5"
 accompanist = "0.32.0"
 kotlinxCoroutines = "1.7.3"
-voximplantSdk = "3.0.0-alpha-38.0"
+voximplantSdk = "3.0.0-alpha-39-rc1"
 androidxDataStore = "1.0.0"
 protobufPlugin = "0.9.4"
 protobuf = "3.25.1"
@@ -45,6 +45,7 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 voximplant-bom = { group = "com.voximplant", name = "voximplant-bom", version.ref = "voximplantSdk" }
 voximplant-core = { group = "com.voximplant", name = "voximplant-core" }
+voximplant-calls = { group = "com.voximplant", name = "voximplant-calls", version.ref = "voximplantSdk" }
 androidx-dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
