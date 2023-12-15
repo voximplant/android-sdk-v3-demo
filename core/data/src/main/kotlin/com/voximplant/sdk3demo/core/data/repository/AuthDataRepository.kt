@@ -13,7 +13,9 @@ class AuthDataRepository @Inject constructor(
         get() = datasource.loginState
 
     suspend fun logIn(username: String, password: String): Result<UserData> {
-        datasource.logIn(username, password).let { result: Result<NetworkUserData> ->
+        val modifiedUsername = if (username.endsWith(domain)) username else username.plus(domain)
+
+        datasource.logIn(modifiedUsername, password).let { result: Result<NetworkUserData> ->
             result.fold(
                 onSuccess = { networkUser ->
                     return Result.success(networkUser.asUserData())
@@ -40,5 +42,9 @@ class AuthDataRepository @Inject constructor(
 
     suspend fun logOut() {
         datasource.disconnect()
+    }
+
+    companion object {
+        const val domain = ".voximplant.com"
     }
 }
