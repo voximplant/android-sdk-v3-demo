@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
-import com.voximplant.sdk3demo.core.model.data.AuthError
+import com.voximplant.sdk3demo.core.model.data.LoginError
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,7 +50,7 @@ fun LoginRoute(
     val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var authError: AuthError? by rememberSaveable(loginUiState) {
+    var loginError: LoginError? by rememberSaveable(loginUiState) {
         when (loginUiState) {
             is LoginUiState.Success -> {
                 onLoginSuccess()
@@ -59,14 +59,14 @@ fun LoginRoute(
 
             is LoginUiState.Failure -> {
                 when (val error = (loginUiState as LoginUiState.Failure).error) {
-                    AuthError.AccountFrozen,
-                    AuthError.InternalError,
-                    AuthError.Interrupted,
-                    AuthError.InvalidState,
-                    AuthError.MauAccessDenied,
-                    AuthError.NetworkIssue,
-                    AuthError.TimeOut,
-                    AuthError.TokenExpired,
+                    LoginError.AccountFrozen,
+                    LoginError.InternalError,
+                    LoginError.Interrupted,
+                    LoginError.InvalidState,
+                    LoginError.MauAccessDenied,
+                    LoginError.NetworkIssue,
+                    LoginError.TimeOut,
+                    LoginError.TokenExpired,
                     -> error
 
                     else -> null
@@ -81,15 +81,15 @@ fun LoginRoute(
         }
     }
 
-    when (authError) {
-        AuthError.AccountFrozen -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.account_frozen_login_error)
-        AuthError.InternalError -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.internal_login_error)
-        AuthError.Interrupted -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.interrupted_by_user_error)
-        AuthError.InvalidState -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.invalid_state_error)
-        AuthError.MauAccessDenied -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.mau_access_denied_error)
-        AuthError.NetworkIssue -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.network_issue_error)
-        AuthError.TimeOut -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.timeout_error)
-        AuthError.TokenExpired -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.token_expired_error)
+    when (loginError) {
+        LoginError.AccountFrozen -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.account_frozen_login_error)
+        LoginError.InternalError -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.internal_login_error)
+        LoginError.Interrupted -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.interrupted_by_user_error)
+        LoginError.InvalidState -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.invalid_state_error)
+        LoginError.MauAccessDenied -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.mau_access_denied_error)
+        LoginError.NetworkIssue -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.network_issue_error)
+        LoginError.TimeOut -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.timeout_error)
+        LoginError.TokenExpired -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.token_expired_error)
         else -> null
     }?.let { errorMessage ->
         scope.launch {
@@ -97,7 +97,7 @@ fun LoginRoute(
                 message = errorMessage,
                 duration = SnackbarDuration.Short,
             ).let {
-                authError = null
+                loginError = null
             }
         }
     }
@@ -126,10 +126,10 @@ fun LoginScreen(
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
     val invalidUsername = if (loginUiState is LoginUiState.Failure) {
-        loginUiState.error is AuthError.InvalidUsername
+        loginUiState.error is LoginError.InvalidUsername
     } else false
     val invalidPassword = if (loginUiState is LoginUiState.Failure) {
-        loginUiState.error is AuthError.InvalidPassword
+        loginUiState.error is LoginError.InvalidPassword
     } else false
 
     Surface(modifier = modifier.fillMaxSize()) {

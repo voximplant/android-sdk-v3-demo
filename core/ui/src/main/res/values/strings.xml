@@ -6,4 +6,6 @@
     <string name="permission_record_audio_description">To make a call, allow the Microphone permission.</string>
     <string name="allow_notifications">Allow notifications</string>
     <string name="allow_microphone">Allow microphone</string>
+    <string name="login_required">Login required</string>
+    <string name="login_required_description">Login required to make call</string>
 </resources>

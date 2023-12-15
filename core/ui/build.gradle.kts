@@ -24,7 +24,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
 }
 
@@ -32,7 +32,7 @@ dependencies {
     api(project(":core:designsystem"))
     api(project(":core:resource"))
 
-    api(platform(libs.compose.bom))
+    api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.ui)
     api(libs.androidx.compose.ui.tooling.preview)

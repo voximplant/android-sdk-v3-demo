@@ -42,16 +42,18 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
     }
 }
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:domain"))
     implementation(project(":core:permissions"))
     implementation(project(":core:resource"))
     implementation(project(":core:ui"))
 
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

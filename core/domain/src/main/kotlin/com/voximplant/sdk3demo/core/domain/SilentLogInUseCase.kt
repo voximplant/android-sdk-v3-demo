@@ -1,8 +1,8 @@
 package com.voximplant.sdk3demo.core.domain
 
-import com.voximplant.sdk3demo.core.data.UserDataRepository
+import com.voximplant.sdk3demo.core.data.repository.AuthDataRepository
 import com.voximplant.sdk3demo.core.datastore.UserPreferencesDataSource
-import com.voximplant.sdk3demo.core.model.data.AuthError
+import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.User
 import com.voximplant.sdk3demo.core.model.data.UserCredentials
 import com.voximplant.sdk3demo.core.model.data.UserData
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 class SilentLogInUseCase @Inject constructor(
-    private val userDataRepository: UserDataRepository,
+    private val authDataRepository: AuthDataRepository,
     private val userPreferencesDataSource: UserPreferencesDataSource,
 ) {
     private var attempt = 0
@@ -23,9 +23,9 @@ class SilentLogInUseCase @Inject constructor(
         userPreferencesDataSource.userData.firstOrNull().let { userData ->
             if (userData == null) {
                 attempt = 0
-                return Result.failure(AuthError.NoInfo)
+                return Result.failure(LoginError.NoInfo)
             }
-            userDataRepository.logInWithToken(userData.user.username, userData.accessToken).let { userDataResult ->
+            authDataRepository.logInWithToken(userData.user.username, userData.accessToken).let { userDataResult ->
                 userDataResult.fold(
                     onSuccess = { userData ->
                         userPreferencesDataSource.updateUser(userData)
@@ -33,9 +33,9 @@ class SilentLogInUseCase @Inject constructor(
                         return Result.success(userData.user)
                     },
                     onFailure = { throwable ->
-                        if (throwable in listOf(AuthError.TimeOut, AuthError.NetworkIssue) && attempt < maxAttempts) {
+                        if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue, LoginError.InternalError) && attempt < maxAttempts) {
                             return invoke()
-                        } else if (throwable is AuthError.TokenExpired) {
+                        } else if (throwable is LoginError.TokenExpired) {
                             refreshToken(userData).let { refreshResult ->
                                 refreshResult.fold(
                                     onSuccess = { return invoke() },
@@ -53,14 +53,14 @@ class SilentLogInUseCase @Inject constructor(
     }
 
     private suspend fun refreshToken(userData: UserData): Result<UserCredentials> {
-        userDataRepository.refreshToken(userData.user.username, userData.refreshToken).let { authParamsResult ->
+        authDataRepository.refreshToken(userData.user.username, userData.refreshToken).let { authParamsResult ->
             authParamsResult.fold(
                 onSuccess = { authParams ->
                     userPreferencesDataSource.updateTokens(authParams.accessToken, authParams.refreshToken)
                     return Result.success(authParams)
                 },
                 onFailure = { throwable ->
-                    if (throwable in listOf(AuthError.TimeOut, AuthError.NetworkIssue) && attempt < maxAttempts) {
+                    if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue, LoginError.InternalError) && attempt < maxAttempts) {
                         return refreshToken(userData)
                     } else {
                         attempt = 0

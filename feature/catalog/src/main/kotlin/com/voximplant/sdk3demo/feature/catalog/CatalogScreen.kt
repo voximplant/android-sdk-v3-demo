@@ -32,7 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.sdk3demo.core.designsystem.theme.Gray70
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
-import com.voximplant.sdk3demo.core.model.data.AuthError
+import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.User
 import com.voximplant.sdk3demo.core.permissions.NotificationsPermissionEffect
 import com.voximplant.sdk3demo.core.ui.NotificationsBanner
@@ -48,15 +48,15 @@ fun CatalogRoute(
     val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
     val user by viewModel.user.collectAsStateWithLifecycle()
 
-    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
 
-    var authError: AuthError? by rememberSaveable(loginUiState) {
+    var loginError: LoginError? by rememberSaveable(loginUiState) {
         if (loginUiState is LoginUiState.Failure) {
             when (val error = (loginUiState as LoginUiState.Failure).error) {
-                AuthError.AccountFrozen,
-                AuthError.MauAccessDenied,
-                AuthError.TokenExpired,
+                LoginError.AccountFrozen,
+                LoginError.MauAccessDenied,
+                LoginError.TokenExpired,
                 -> error
 
                 else -> null
@@ -68,13 +68,13 @@ fun CatalogRoute(
         }
     }
 
-    when (authError) {
-        AuthError.AccountFrozen -> {
+    when (loginError) {
+        LoginError.AccountFrozen -> {
             AlertDialog(
-                onDismissRequest = { authError = null },
+                onDismissRequest = { loginError = null },
                 confirmButton = {
                     Button(
-                        onClick = { authError = null },
+                        onClick = { loginError = null },
                     ) {
                         Text(text = stringResource(id = android.R.string.ok))
                     }
@@ -88,12 +88,12 @@ fun CatalogRoute(
             )
         }
 
-        AuthError.MauAccessDenied -> {
+        LoginError.MauAccessDenied -> {
             AlertDialog(
-                onDismissRequest = { authError = null },
+                onDismissRequest = { loginError = null },
                 confirmButton = {
                     Button(
-                        onClick = { authError = null },
+                        onClick = { loginError = null },
                     ) {
                         Text(text = stringResource(id = android.R.string.ok))
                     }
@@ -107,13 +107,13 @@ fun CatalogRoute(
             )
         }
 
-        AuthError.TokenExpired -> {
+        LoginError.TokenExpired -> {
             AlertDialog(
-                onDismissRequest = { authError = null },
+                onDismissRequest = { loginError = null },
                 confirmButton = {
                     Button(
                         onClick = {
-                            authError = null
+                            loginError = null
                             onLoginClick()
                         },
                     ) {
@@ -122,7 +122,7 @@ fun CatalogRoute(
                 },
                 dismissButton = {
                     TextButton(
-                        onClick = { authError = null },
+                        onClick = { loginError = null },
                     ) {
                         Text(text = stringResource(id = android.R.string.cancel))
                     }

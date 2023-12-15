@@ -19,8 +19,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,23 +32,64 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.sdk3demo.core.designsystem.icon.Icons
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
+import com.voximplant.sdk3demo.core.model.data.Call
+import com.voximplant.sdk3demo.core.model.data.CallDirection
 import com.voximplant.sdk3demo.core.permissions.MicrophonePermissionEffect
 import com.voximplant.sdk3demo.core.permissions.NotificationsPermissionEffect
+import com.voximplant.sdk3demo.core.ui.LoginRequiredDialog
 import com.voximplant.sdk3demo.core.ui.MicrophoneBanner
 import com.voximplant.sdk3demo.core.ui.NotificationsBanner
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioCallRoute(
+    viewModel: AudioCallViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onCallClick: (String) -> Unit,
+    onLoginClick: () -> Unit,
+    onIncomingCall: (String, String?) -> Unit,
+    onCallCreated: (String, String) -> Unit,
 ) {
-    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val audioCallUiState by viewModel.audioCallUiState.collectAsStateWithLifecycle()
+    val rememberCall = remember { (audioCallUiState as? AudioCallUiState.Active)?.call }
+
+    var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
-    var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
+    var microphonePermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
+
+    var showLoginRequiredDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(audioCallUiState) {
+        if (audioCallUiState is AudioCallUiState.Active) {
+            val call = (audioCallUiState as AudioCallUiState.Active).call
+            val state = (audioCallUiState as AudioCallUiState.Active).state
+
+            if (call == rememberCall) return@LaunchedEffect
+
+            if (call.direction == CallDirection.INCOMING && state is CallState.Created) {
+                onIncomingCall(call.id, call.remoteDisplayName)
+            }
+        }
+    }
+
+    if (showLoginRequiredDialog) {
+        LoginRequiredDialog(
+            onDismiss = {
+                showLoginRequiredDialog = false
+            },
+            onConfirm = {
+                showLoginRequiredDialog = false
+                onLoginClick()
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -71,7 +115,19 @@ fun AudioCallRoute(
             },
             onCallClick = { username ->
                 if (microphonePermissionGranted) {
-                    onCallClick(username)
+                    scope.launch {
+                        if (viewModel.user.value != null) {
+                            viewModel.createCall(username).let { call: Call? ->
+                                if (call != null) {
+                                    onCallCreated(call.id, username)
+                                } else {
+                                    // TODO (Oleg): show error
+                                }
+                            }
+                        } else {
+                            showLoginRequiredDialog = true
+                        }
+                    }
                 } else {
                     showMicrophoneRationale = true
                 }
