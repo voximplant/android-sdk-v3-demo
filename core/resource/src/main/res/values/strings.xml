@@ -27,4 +27,5 @@
     <string name="reject">Reject</string>
     <string name="answer">Answer</string>
     <string name="unknown_user">Unknown user</string>
+    <string name="incoming_call">Incoming call</string>
 </resources>

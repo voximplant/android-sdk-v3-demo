@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -117,8 +118,18 @@ fun AudioCallIncomingScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                ProvideTextStyle(value = Typography.titleLarge.copy(color = Gray10)) {
+                    Text(text = stringResource(com.voximplant.sdk3demo.core.resource.R.string.incoming_call))
+                }
+            }
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(64.dp)
+                    .padding(horizontal = 64.dp)
                     .weight(1f), contentAlignment = Alignment.TopCenter
             ) {
                 Column(
@@ -151,8 +162,6 @@ fun AudioCallIncomingScreen(
                             ),
                         ) {
                             Text(text = audioCallIncomingUiState.displayName ?: stringResource(com.voximplant.sdk3demo.core.resource.R.string.unknown_user))
-                        }
-                        ProvideTextStyle(value = Typography.bodySmall.copy(color = Gray10)) {
                         }
                     }
                 }
