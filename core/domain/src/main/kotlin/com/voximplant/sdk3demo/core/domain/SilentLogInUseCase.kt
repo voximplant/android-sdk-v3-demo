@@ -31,7 +31,7 @@ class SilentLogInUseCase @Inject constructor(
                         return Result.success(userData.user)
                     },
                     onFailure = { throwable ->
-                        if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue) && attempt < maxAttempts) {
+                        if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue, LoginError.InternalError) && attempt < maxAttempts) {
                             return invoke()
                         } else {
                             attempt = 0
