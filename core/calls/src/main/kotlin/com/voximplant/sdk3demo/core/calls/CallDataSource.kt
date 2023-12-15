@@ -70,6 +70,7 @@ class CallDataSource @Inject constructor(
     private val incomingCallListener = object : IncomingCallListener {
         override fun onIncomingCall(call: Call, hasIncomingVideo: Boolean, headers: Map<String, String>?) {
             if (activeCall != null) {
+                // Indicates that the user is unavailable only on the device with an active call.
                 call.reject(RejectMode.BUSY, null)
                 return
             }
