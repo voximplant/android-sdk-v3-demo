@@ -11,18 +11,18 @@ import com.voximplant.sdk3demo.feature.audiocall.ongoing.AudioCallOngoingRoute
 const val audioCallOngoingRoute = "audio_call_ongoing_route"
 
 internal const val idArg = "id"
-internal const val usernameArg = "username"
+internal const val displayNameArg = "displayName"
 
-internal class OngoingCallArgs(val id: String, val username: String) {
+internal class OngoingCallArgs(val id: String, val displayName: String?) {
     constructor(savedStateHandle: SavedStateHandle) :
             this(
                 checkNotNull(savedStateHandle.get<String>(idArg)),
-                checkNotNull(savedStateHandle.get<String>(usernameArg)),
+                savedStateHandle.get<String>(displayNameArg),
             )
 }
 
-fun NavController.navigateToAudioCallOngoing(id: String, username: String?) {
-    this.navigate("$audioCallOngoingRoute/$id?username=$username") {
+fun NavController.navigateToAudioCallOngoing(id: String, displayName: String?) {
+    this.navigate("$audioCallOngoingRoute/$id?displayName=$displayName") {
         launchSingleTop = true
     }
 }
@@ -31,10 +31,13 @@ fun NavGraphBuilder.audioCallOngoingScreen(
     onCallEnded: () -> Unit,
 ) {
     composable(
-        route = "$audioCallOngoingRoute/{$idArg}?username={$usernameArg}",
+        route = "$audioCallOngoingRoute/{$idArg}?displayName={$displayNameArg}",
         arguments = listOf(
             navArgument(idArg) { type = NavType.StringType },
-            navArgument(usernameArg) { type = NavType.StringType },
+            navArgument(displayNameArg) {
+                type = NavType.StringType
+                nullable = true
+            },
         ),
     ) {
         AudioCallOngoingRoute(

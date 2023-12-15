@@ -17,7 +17,7 @@ fun NavGraphBuilder.audioCallScreen(
     onBackClick: () -> Unit,
     onLoginClick: () -> Unit,
     onIncomingCall: (String, String?) -> Unit,
-    onCallCreated: (String, String) -> Unit,
+    onCallCreated: (String, String?) -> Unit,
 ) {
     composable(route = audioCallRoute) {
         AudioCallRoute(

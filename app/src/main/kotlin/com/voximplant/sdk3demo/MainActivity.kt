@@ -1,5 +1,6 @@
 package com.voximplant.sdk3demo
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,16 +20,20 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.voximplant.sdk3demo.MainActivityUiState.Loading
 import com.voximplant.sdk3demo.MainActivityUiState.Success
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
+import com.voximplant.sdk3demo.feature.audiocall.incoming.navigation.navigateToAudioCallIncoming
 import com.voximplant.sdk3demo.ui.VoxApp
+import com.voximplant.sdk3demo.ui.VoxAppState
+import com.voximplant.sdk3demo.ui.rememberVoxAppState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     private val viewModel: MainActivityViewModel by viewModels()
+    private lateinit var voxAppState: VoxAppState
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -56,6 +61,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            voxAppState = rememberVoxAppState()
             val darkTheme = isSystemInDarkTheme()
 
             DisposableEffect(darkTheme) {
@@ -74,7 +80,23 @@ class MainActivity : ComponentActivity() {
             VoximplantTheme(
                 darkTheme = darkTheme,
             ) {
-                VoxApp()
+                VoxApp(voxAppState)
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        val action = intent?.action ?: return
+        lifecycleScope.launch {
+            // In some cases navController may not be initialized here.
+            while (!::voxAppState.isInitialized) delay(1)
+            if (action == "com.voximplant.sdk3demo.ACTION_ANSWER_CALL") {
+                val id = intent.extras?.getString("id") ?: return@launch
+                val displayName = intent.extras?.getString("displayName")
+
+                voxAppState.navController.navigateToAudioCallIncoming(id, displayName, action)
             }
         }
     }

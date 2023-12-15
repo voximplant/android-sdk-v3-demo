@@ -52,7 +52,7 @@ fun AudioCallRoute(
     onBackClick: () -> Unit,
     onLoginClick: () -> Unit,
     onIncomingCall: (String, String?) -> Unit,
-    onCallCreated: (String, String) -> Unit,
+    onCallCreated: (String, String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -75,6 +75,8 @@ fun AudioCallRoute(
 
             if (call.direction == CallDirection.INCOMING && state is CallState.Created) {
                 onIncomingCall(call.id, call.remoteDisplayName)
+            } else if (state is CallState.Connected) {
+                onCallCreated(call.id, call.remoteDisplayName)
             }
         }
     }

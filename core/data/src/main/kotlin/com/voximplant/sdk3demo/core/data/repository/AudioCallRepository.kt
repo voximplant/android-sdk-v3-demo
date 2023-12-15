@@ -1,15 +1,27 @@
 package com.voximplant.sdk3demo.core.data.repository
 
+import android.content.Context
+import com.voximplant.core.notifications.Notifier
 import com.voximplant.sdk3demo.core.calls.CallDataSource
 import com.voximplant.sdk3demo.core.calls.model.asCall
+import com.voximplant.sdk3demo.core.common.VoxBroadcastReceiver
 import com.voximplant.sdk3demo.core.model.data.Call
 import com.voximplant.sdk3demo.core.model.data.CallApiState
+import com.voximplant.sdk3demo.core.model.data.CallDirection
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class AudioCallRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val callDataSource: CallDataSource,
+    private val notifier: Notifier,
+    coroutineScope: CoroutineScope,
 ) {
     val call: Flow<Call?>
         get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData?.asCall() }
@@ -22,6 +34,44 @@ class AudioCallRepository @Inject constructor(
 
     val isOnHold: Flow<Boolean>
         get() = callDataSource.isOnHold
+
+    private val br = VoxBroadcastReceiver(
+        onHangUpReceived = {
+            hangUp()
+        },
+        onRejectReceived = {
+            reject()
+        },
+        onAnswerReceived = {
+            coroutineScope.launch {
+                call.firstOrNull()?.id?.let { id ->
+                    startCall(id)
+                }
+            }
+        },
+    )
+
+    init {
+        coroutineScope.launch {
+            combine(call, state, ::Pair).collect {
+                val call = it.first ?: return@collect
+                val state = it.second ?: return@collect
+
+                if (state == CallApiState.CREATED) {
+                    if (call.direction == CallDirection.INCOMING) {
+                        br.register(context)
+                        notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
+                    }
+                } else if (state == CallApiState.CONNECTED) {
+                    br.register(context)
+                    notifier.postOngoingCallNotification(call.id, call.remoteDisplayName)
+                } else if (state == CallApiState.DISCONNECTED || state == CallApiState.FAILED) {
+                    br.unregister(context)
+                    notifier.stopCallNotification()
+                }
+            }
+        }
+    }
 
     fun startListeningIncomingCalls() {
         callDataSource.startListeningIncomingCalls()

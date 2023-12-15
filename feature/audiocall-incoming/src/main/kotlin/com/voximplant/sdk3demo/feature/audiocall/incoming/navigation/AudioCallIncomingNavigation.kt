@@ -12,30 +12,35 @@ const val audioCallIncomingRoute = "audio_call_incoming_route"
 
 internal const val idArg = "id"
 internal const val displayNameArg = "displayName"
+internal const val actionArg = "action"
 
-internal class IncomingCallArgs(val id: String, val displayName: String) {
+internal class IncomingCallArgs(val id: String, val displayName: String?) {
     constructor(savedStateHandle: SavedStateHandle) :
             this(
                 checkNotNull(savedStateHandle.get<String>(idArg)),
-                checkNotNull(savedStateHandle.get<String>(displayNameArg)),
+                savedStateHandle.get<String>(displayNameArg),
             )
 }
 
-fun NavController.navigateToAudioCallIncoming(id: String, displayName: String?) {
-    this.navigate("$audioCallIncomingRoute/$id?displayName=$displayName") {
+fun NavController.navigateToAudioCallIncoming(id: String, displayName: String?, action: String? = null) {
+    this.navigate("$audioCallIncomingRoute/$id?displayName=$displayName&action=$action") {
         launchSingleTop = true
     }
 }
 
 fun NavGraphBuilder.audioCallIncomingScreen(
     onCallEnded: () -> Unit,
-    onCallAnswered: (String) -> Unit,
+    onCallAnswered: (String, String?) -> Unit,
 ) {
     composable(
-        route = "$audioCallIncomingRoute/{$idArg}?displayName={$displayNameArg}",
+        route = "$audioCallIncomingRoute/{$idArg}?displayName={$displayNameArg}&action={$actionArg}",
         arguments = listOf(
             navArgument(idArg) { type = NavType.StringType },
             navArgument(displayNameArg) {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument(actionArg) {
                 type = NavType.StringType
                 nullable = true
             },
