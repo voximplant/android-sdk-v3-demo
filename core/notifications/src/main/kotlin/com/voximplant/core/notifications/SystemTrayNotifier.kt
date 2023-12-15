@@ -22,7 +22,7 @@ import javax.inject.Singleton
 
 private const val ONGOING_CALL_NOTIFICATION_REQUEST_CODE = 0
 private const val INCOMING_CALL_NOTIFICATION_REQUEST_CODE = 1
-private const val CALL_NOTIFICATION_ID = 0
+private const val CALL_NOTIFICATION_ID = 1
 private const val ONGOING_CALL_NOTIFICATION_CHANNEL_ID = "ONGOING_CALL_NOTIFICATIONS"
 private const val INCOMING_CALL_NOTIFICATION_CHANNEL_ID = "INCOMING_CALL_NOTIFICATIONS"
 
@@ -31,21 +31,18 @@ class SystemTrayNotifier @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : Notifier {
 
-    override fun postOngoingCallNotification(id: String, displayName: String?) = with(context) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+    override fun createOngoingCallNotification(id: String, displayName: String?): Notification? = with(context) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return null
 
-        val ongoingCallNotification = createOngoingCallNotification(id, displayName)
-
-        val notificationManager = NotificationManagerCompat.from(this)
-        notificationManager.notify(CALL_NOTIFICATION_ID, ongoingCallNotification)
+        return@with createOngoingCallNotification(id, displayName)
     }
 
     override fun postIncomingCallNotification(id: String, displayName: String?) = with(context) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
 
+        val notificationManager = NotificationManagerCompat.from(this)
         val incomingCallNotification = createIncomingCallNotification(id, displayName)
 
-        val notificationManager = NotificationManagerCompat.from(this)
         notificationManager.notify(CALL_NOTIFICATION_ID, incomingCallNotification)
     }
 
@@ -65,7 +62,7 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
             putExtra("id", id)
             putExtra("displayName", displayName)
         },
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
     val rejectIntent = Intent(VoxBroadcastReceiver.ACTION_REJECT_CALL)
@@ -89,7 +86,7 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.sdk3demo.core.resource.R.string.unknown_user)).setImportant(true).build()
+    val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.sdk3demo.core.resource.R.string.unknown_user)).setImportant(false).build()
 
     return NotificationCompat.Builder(this, INCOMING_CALL_NOTIFICATION_CHANNEL_ID).apply {
         setFullScreenIntent(incomingCallPendingIntent, true)
