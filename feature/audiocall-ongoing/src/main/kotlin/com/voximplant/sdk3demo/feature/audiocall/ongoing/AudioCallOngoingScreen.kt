@@ -100,6 +100,7 @@ fun AudioCallOngoingRoute(
                                     Text(text = audioDevice.name)
                                 },
                                 modifier = Modifier.clickable {
+                                    showAudioDevices = false
                                     viewModel.selectAudioDevice(audioDevice)
                                 },
                                 leadingContent = {
