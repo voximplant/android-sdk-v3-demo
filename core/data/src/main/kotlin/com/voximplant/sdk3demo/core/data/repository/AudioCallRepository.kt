@@ -67,7 +67,7 @@ class AudioCallRepository @Inject constructor(
                     notifier.postOngoingCallNotification(call.id, call.remoteDisplayName)
                 } else if (state == CallApiState.DISCONNECTED || state == CallApiState.FAILED) {
                     br.unregister(context)
-                    notifier.stopCallNotification()
+                    notifier.cancelCallNotification()
                 }
             }
         }
