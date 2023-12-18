@@ -46,7 +46,7 @@ class SystemTrayNotifier @Inject constructor(
         notificationManager.notify(CALL_NOTIFICATION_ID, incomingCallNotification)
     }
 
-    override fun stopCallNotification() = with(context) {
+    override fun cancelCallNotification() = with(context) {
         val notificationManager = NotificationManagerCompat.from(this)
         notificationManager.cancel(CALL_NOTIFICATION_ID)
     }

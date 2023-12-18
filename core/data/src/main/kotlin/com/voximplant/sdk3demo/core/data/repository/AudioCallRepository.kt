@@ -76,7 +76,7 @@ class AudioCallRepository @Inject constructor(
                     }
                 } else if (state == CallApiState.DISCONNECTED || state == CallApiState.FAILED) {
                     br.unregister(context)
-                    notifier.stopCallNotification()
+                    notifier.cancelCallNotification()
                     context.stopService(ongoingCallIntent)
                 }
             }

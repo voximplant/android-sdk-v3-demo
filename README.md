@@ -1,2 +1,2 @@
-# voximplant-sdk3-android-demo
-Voximplant SDK v3 Demo for Android
+# voximplant-android-sdk-demo
+Voximplant SDK Demo for Android

@@ -146,6 +146,9 @@ fun LoginScreen(
                     .padding(horizontal = 12.dp),
                 enabled = interactionAvailable,
                 label = { Text(text = stringResource(R.string.username)) },
+                suffix = {
+                    Text(text = stringResource(R.string.username_suffix))
+                },
                 supportingText = {
                     if (invalidUsername) {
                         Text(
@@ -154,6 +157,7 @@ fun LoginScreen(
                         )
                     }
                 },
+                singleLine = true,
                 isError = invalidUsername,
                 shape = RoundedCornerShape(32.dp),
             )
