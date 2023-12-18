@@ -1,3 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name=".VoxBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.voximplant.sdk3demo.ACTION_HANG_UP_CALL" />
+                <action android:name="com.voximplant.sdk3demo.ACTION_REJECT_CALL" />
+                <action android:name="com.voximplant.sdk3demo.ACTION_ANSWER_CALL" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

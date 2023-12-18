@@ -53,17 +53,17 @@ fun VoxNavHost(
             onIncomingCall = { callId, displayName ->
                 navController.navigateToAudioCallIncoming(callId, displayName)
             },
-            onCallCreated = { callId, username ->
-                navController.navigateToAudioCallOngoing(callId, username)
+            onCallCreated = { callId, displayName ->
+                navController.navigateToAudioCallOngoing(callId, displayName)
             },
         )
         audioCallIncomingScreen(
             onCallEnded = {
                 navController.popBackStack()
             },
-            onCallAnswered = { callId ->
+            onCallAnswered = { callId, displayName ->
                 navController.popBackStack()
-                navController.navigateToAudioCallOngoing(callId, "")
+                navController.navigateToAudioCallOngoing(callId, displayName)
             },
         )
         audioCallOngoingScreen(

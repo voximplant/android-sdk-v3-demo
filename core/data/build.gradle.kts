@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:foundation"))
     implementation(project(":core:model"))
+    implementation(project(":core:notifications"))
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)
