@@ -31,7 +31,15 @@ class OngoingAudioCallService @Inject constructor(
             return START_NOT_STICKY
         }
 
-        val notification = SystemTrayNotifier(applicationContext).createOngoingCallNotification("id", "displayName")
+        val id = intent?.getStringExtra("id")
+        val displayName = intent?.getStringExtra("displayName")
+
+        if (id == null) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        val notification = SystemTrayNotifier(applicationContext).createOngoingCallNotification(id, displayName)
         if (notification == null) {
             stopSelf()
             return START_NOT_STICKY
