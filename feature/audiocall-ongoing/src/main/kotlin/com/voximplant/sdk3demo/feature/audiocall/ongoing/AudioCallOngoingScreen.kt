@@ -100,6 +100,7 @@ fun AudioCallOngoingRoute(
                                     Text(text = audioDevice.name)
                                 },
                                 modifier = Modifier.clickable {
+                                    showAudioDevices = false
                                     viewModel.selectAudioDevice(audioDevice)
                                 },
                                 leadingContent = {
@@ -283,7 +284,6 @@ fun AudioCallOngoingScreen(
                                     tint = Color.White,
                                 )
                             },
-                            text = {},
                             color = Color(0xFFF5222D),
                             onClick = onHangUpClick,
                         )
