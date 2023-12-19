@@ -1,4 +1,4 @@
-package com.voximplant.sdk3demo
+package com.voximplant.demo.sdk
 
 sealed interface MainActivityUiState {
     data object Loading : MainActivityUiState

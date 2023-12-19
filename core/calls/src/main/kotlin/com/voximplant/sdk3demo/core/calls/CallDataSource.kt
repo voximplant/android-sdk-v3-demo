@@ -116,11 +116,11 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    fun startListeningIncomingCalls() {
+    fun startListeningForIncomingCalls() {
         callManager.setIncomingCallListener(incomingCallListener)
     }
 
-    fun stopListeningIncomingCalls() {
+    fun stopListeningForIncomingCalls() {
         callManager.setIncomingCallListener(null)
     }
 

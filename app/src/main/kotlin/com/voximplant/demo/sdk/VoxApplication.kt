@@ -1,4 +1,4 @@
-package com.voximplant.sdk3demo
+package com.voximplant.demo.sdk
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

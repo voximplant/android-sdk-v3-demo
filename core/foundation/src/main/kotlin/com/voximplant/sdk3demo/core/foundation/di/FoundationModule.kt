@@ -39,7 +39,7 @@ object FoundationModule {
     fun providesUserDataSource(
         @ApplicationContext context: Context,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): AuthDataSource = AuthDataSource(client = Client.getInstance(context), coroutineScope)
+    ): AuthDataSource = AuthDataSource(context, coroutineScope, client = Client.getInstance(context))
 
     @Provides
     @Singleton
