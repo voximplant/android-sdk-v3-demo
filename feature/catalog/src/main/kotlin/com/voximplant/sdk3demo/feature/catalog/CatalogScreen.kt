@@ -142,7 +142,7 @@ fun CatalogRoute(
         else -> {}
     }
 
-    LaunchedEffect(catalogUiState.call) {
+    LaunchedEffect(catalogUiState.call, catalogUiState.callState) {
         if (catalogUiState.call != null && catalogUiState.callState !is CallState.Disconnected) {
             onModuleClick(audioCallRoute)
         }

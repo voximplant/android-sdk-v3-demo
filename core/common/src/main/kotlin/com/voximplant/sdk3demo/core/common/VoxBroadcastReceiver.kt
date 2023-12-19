@@ -30,11 +30,7 @@ class VoxBroadcastReceiver(
                     onAnswerReceived()
                 } else {
                     // Start an activity to request permissions
-                    val answerIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-                        action = ACTION_ANSWER_CALL
-                        putExtras(intent)
-                    }
-                    context.startActivity(answerIntent)
+                    context.startActivity(intent)
                 }
             }
         }
