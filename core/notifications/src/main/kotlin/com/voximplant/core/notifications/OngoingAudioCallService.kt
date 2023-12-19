@@ -23,8 +23,8 @@ class OngoingAudioCallService @Inject constructor(
         // Before starting the service as foreground check that the app has the
         // appropriate runtime permissions. In this case, verify that the user has
         // granted the RECORD_AUDIO permission.
-        val cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-        if (cameraPermission == PackageManager.PERMISSION_DENIED) {
+        val recordAudioPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+        if (recordAudioPermission == PackageManager.PERMISSION_DENIED) {
             // Without microphone permissions the service cannot run in the foreground
             // Consider informing user or updating your app UI if visible.
             stopSelf()
