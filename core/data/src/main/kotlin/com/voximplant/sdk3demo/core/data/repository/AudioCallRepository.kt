@@ -61,8 +61,8 @@ class AudioCallRepository @Inject constructor(
                 val state = it.second ?: return@collect
 
                 val ongoingCallIntent = Intent(context, OngoingAudioCallService::class.java).apply {
-                    extras?.putString("id", call.id)
-                    extras?.putString("displayName", call.remoteDisplayName)
+                    putExtra("id", call.id)
+                    putExtra("displayName", call.remoteDisplayName)
                 }
 
                 if (state == CallApiState.CREATED) {

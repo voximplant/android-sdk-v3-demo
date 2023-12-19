@@ -11,12 +11,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class OngoingAudioCallService @Inject constructor(
-) : Service() {
+class OngoingAudioCallService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
