@@ -1,7 +1,10 @@
 package com.voximplant.sdk3demo.core.data.repository
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import com.voximplant.core.notifications.Notifier
+import com.voximplant.core.notifications.OngoingAudioCallService
 import com.voximplant.sdk3demo.core.calls.CallDataSource
 import com.voximplant.sdk3demo.core.calls.model.asCall
 import com.voximplant.sdk3demo.core.common.VoxBroadcastReceiver
@@ -57,6 +60,11 @@ class AudioCallRepository @Inject constructor(
                 val call = it.first ?: return@collect
                 val state = it.second ?: return@collect
 
+                val ongoingCallIntent = Intent(context, OngoingAudioCallService::class.java).apply {
+                    putExtra("id", call.id)
+                    putExtra("displayName", call.remoteDisplayName)
+                }
+
                 if (state == CallApiState.CREATED) {
                     if (call.direction == CallDirection.INCOMING) {
                         br.register(context)
@@ -64,10 +72,15 @@ class AudioCallRepository @Inject constructor(
                     }
                 } else if (state == CallApiState.CONNECTED) {
                     br.register(context)
-                    notifier.postOngoingCallNotification(call.id, call.remoteDisplayName)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(ongoingCallIntent)
+                    } else {
+                        context.startService(ongoingCallIntent)
+                    }
                 } else if (state == CallApiState.DISCONNECTED || state == CallApiState.FAILED) {
                     br.unregister(context)
                     notifier.cancelCallNotification()
+                    context.stopService(ongoingCallIntent)
                 }
             }
         }
