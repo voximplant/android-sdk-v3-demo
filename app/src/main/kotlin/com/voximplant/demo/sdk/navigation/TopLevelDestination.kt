@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.voximplant.sdk3demo.navigation
+package com.voximplant.demo.sdk.navigation
 
 sealed class TopLevelDestination {
     sealed class CATALOG : TopLevelDestination() {

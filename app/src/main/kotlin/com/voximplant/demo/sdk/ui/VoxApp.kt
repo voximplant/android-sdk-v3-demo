@@ -1,7 +1,7 @@
-package com.voximplant.sdk3demo.ui
+package com.voximplant.demo.sdk.ui
 
 import androidx.compose.runtime.Composable
-import com.voximplant.sdk3demo.navigation.VoxNavHost
+import com.voximplant.demo.sdk.navigation.VoxNavHost
 
 @Composable
 fun VoxApp(appState: VoxAppState = rememberVoxAppState()) {

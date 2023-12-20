@@ -14,6 +14,7 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.app.TaskStackBuilder
 import com.voximplant.sdk3demo.core.common.VoxBroadcastReceiver
 import com.voximplant.sdk3demo.core.notifications.R
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -79,12 +80,25 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         putExtra("displayName", displayName)
     }
 
-    val answerPendingIntent = PendingIntent.getBroadcast(
-        this,
-        INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
-        answerIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
+    val answerPendingIntent: PendingIntent? = if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+        PendingIntent.getBroadcast(
+            this,
+            INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+            answerIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    } else {
+        TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                putExtra("id", id)
+                putExtra("displayName", displayName)
+            } ?: return@run null)
+            getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+    }
 
     val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.sdk3demo.core.resource.R.string.unknown_user)).setImportant(false).build()
 
@@ -94,7 +108,8 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         setSmallIcon(com.voximplant.sdk3demo.core.common.R.drawable.ic_notification)
         priority = NotificationCompat.PRIORITY_MAX
         setCategory(NotificationCompat.CATEGORY_CALL)
-        setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, rejectPendingIntent, answerPendingIntent))
+        setShowWhen(false)
+        setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, rejectPendingIntent, answerPendingIntent ?: incomingCallPendingIntent))
     }.build()
 }
 
@@ -127,6 +142,7 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
         setUsesChronometer(true)
         setFullScreenIntent(ongoingCallIntent, false)
         setContentIntent(ongoingCallIntent)
+        setShowWhen(false)
         setSmallIcon(com.voximplant.sdk3demo.core.common.R.drawable.ic_notification)
         setStyle(NotificationCompat.CallStyle.forOngoingCall(callee, hangUpPendingIntent))
     }.build()

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.data"
+    namespace = "com.voximplant.sdk3demo.core.push"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -20,15 +20,24 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
+    }
 }
 
 dependencies {
-    implementation(project(":core:calls"))
-    implementation(project(":core:common"))
-    implementation(project(":core:datastore"))
-    implementation(project(":core:foundation"))
-    implementation(project(":core:model"))
-    implementation(project(":core:notifications"))
+    api(project(":core:common"))
+    api(project(":core:data"))
+    api(project(":core:notifications"))
+    api(project(":core:resource"))
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)

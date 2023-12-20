@@ -86,12 +86,12 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
-    fun startListeningIncomingCalls() {
-        callDataSource.startListeningIncomingCalls()
+    fun startListeningForIncomingCalls() {
+        callDataSource.startListeningForIncomingCalls()
     }
 
-    fun stopListeningIncomingCalls() {
-        callDataSource.stopListeningIncomingCalls()
+    fun stopListeningForIncomingCalls() {
+        callDataSource.stopListeningForIncomingCalls()
     }
 
     fun createCall(username: String): Result<Call> {

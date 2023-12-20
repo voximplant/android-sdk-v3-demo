@@ -1,7 +1,6 @@
 package com.voximplant.sdk3demo.core.domain
 
 import com.voximplant.sdk3demo.core.data.repository.AuthDataRepository
-import com.voximplant.sdk3demo.core.datastore.UserPreferencesDataSource
 import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.User
 import kotlinx.coroutines.delay
@@ -9,7 +8,6 @@ import javax.inject.Inject
 
 class LogInUseCase @Inject constructor(
     private val authDataRepository: AuthDataRepository,
-    private val userPreferencesDataSource: UserPreferencesDataSource,
 ) {
     private var attempt = 0
 
@@ -20,7 +18,6 @@ class LogInUseCase @Inject constructor(
         authDataRepository.logIn(username, password).let { userDataResult ->
             userDataResult.fold(
                 onSuccess = { userData ->
-                    userPreferencesDataSource.updateUser(userData)
                     attempt = 0
                     return Result.success(userData.user)
                 },

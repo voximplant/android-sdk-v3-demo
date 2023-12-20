@@ -8,6 +8,6 @@ class StartListeningForIncomingCallsUseCase @Inject constructor(
 ) {
 
     operator fun invoke() {
-        return audioCallRepository.startListeningIncomingCalls()
+        return audioCallRepository.startListeningForIncomingCalls()
     }
 }

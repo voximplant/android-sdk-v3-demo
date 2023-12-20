@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,9 +34,11 @@ import com.voximplant.sdk3demo.core.designsystem.theme.Gray70
 import com.voximplant.sdk3demo.core.designsystem.theme.Typography
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.LoginError
+import com.voximplant.sdk3demo.core.model.data.LoginState
 import com.voximplant.sdk3demo.core.model.data.User
 import com.voximplant.sdk3demo.core.permissions.NotificationsPermissionEffect
 import com.voximplant.sdk3demo.core.ui.NotificationsBanner
+import com.voximplant.sdk3demo.feature.audiocall.navigation.audioCallRoute
 import com.voximplant.sdk3demo.feature.catalog.component.CatalogItem
 import com.voximplant.sdk3demo.feature.catalog.component.UserBanner
 
@@ -45,15 +48,15 @@ fun CatalogRoute(
     onLoginClick: () -> Unit,
     onModuleClick: (String) -> Unit,
 ) {
-    val loginUiState by viewModel.loginUiState.collectAsStateWithLifecycle()
+    val catalogUiState by viewModel.catalogUiState.collectAsStateWithLifecycle()
     val user by viewModel.user.collectAsStateWithLifecycle()
 
     var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
 
-    var loginError: LoginError? by rememberSaveable(loginUiState) {
-        if (loginUiState is LoginUiState.Failure) {
-            when (val error = (loginUiState as LoginUiState.Failure).error) {
+    var loginError: LoginError? by rememberSaveable(catalogUiState) {
+        if (catalogUiState.loginState is LoginState.Failed) {
+            when (val error = (catalogUiState.loginState as LoginState.Failed).error) {
                 LoginError.AccountFrozen,
                 LoginError.MauAccessDenied,
                 LoginError.TokenExpired,
@@ -139,6 +142,12 @@ fun CatalogRoute(
         else -> {}
     }
 
+    LaunchedEffect(catalogUiState.call, catalogUiState.callState) {
+        if (catalogUiState.call != null && catalogUiState.callState !is CallState.Disconnected) {
+            onModuleClick(audioCallRoute)
+        }
+    }
+
     CatalogScreen(
         user = user,
         onLoginClick = onLoginClick,
@@ -201,7 +210,7 @@ fun CatalogScreen(
                     CatalogItem(
                         title = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.audio_call),
                         description = stringResource(id = com.voximplant.sdk3demo.core.resource.R.string.audio_call_description),
-                        onClick = { onModuleClick("audio_call_route") },
+                        onClick = { onModuleClick(audioCallRoute) },
                         image = painterResource(id = R.drawable.ic_phone_call_circle),
                     )
                 }
