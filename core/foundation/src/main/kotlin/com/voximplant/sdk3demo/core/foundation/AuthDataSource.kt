@@ -7,10 +7,12 @@ import com.voximplant.core.Client
 import com.voximplant.core.ClientSessionListener
 import com.voximplant.core.ClientState.CONNECTED
 import com.voximplant.core.ClientState.DISCONNECTED
+import com.voximplant.core.ConnectOptions
 import com.voximplant.core.ConnectionCallback
 import com.voximplant.core.ConnectionError
 import com.voximplant.core.DisconnectReason
 import com.voximplant.core.LoginCallback
+import com.voximplant.core.Node
 import com.voximplant.core.PushConfig
 import com.voximplant.core.PushTokenError
 import com.voximplant.core.RegisterPushTokenCallback
@@ -35,6 +37,9 @@ class AuthDataSource(
 
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.LoggedOut)
     val loginState: Flow<LoginState> = _loginState.asStateFlow()
+
+    private val _node: MutableStateFlow<Node?> = MutableStateFlow(null)
+    val node: Flow<Node?> = _node.asStateFlow()
 
     private val clientSessionListener = object : ClientSessionListener {
         override fun onConnectionClosed(reason: DisconnectReason) {
@@ -253,16 +258,29 @@ class AuthDataSource(
         client.handlePushNotification(push)
     }
 
-    private suspend fun connect() = suspendCoroutine { continuation ->
-        client.connect(object : ConnectionCallback {
-            override fun onFailure(error: ConnectionError) {
-                continuation.resume(ConnectionResult.Failure(error))
-            }
+    fun selectNode(node: Node) {
+        _node.value = node
+    }
 
-            override fun onSuccess() {
-                continuation.resume(ConnectionResult.Success)
+    private suspend fun connect() = suspendCoroutine { continuation ->
+        _node.value.let { node ->
+            if (node == null) {
+                continuation.resume(ConnectionResult.Failure(ConnectionError.INVALID_STATE))
+                return@suspendCoroutine
             }
-        })
+            client.connect(
+                options = ConnectOptions(node),
+                callback = object : ConnectionCallback {
+                    override fun onFailure(error: ConnectionError) {
+                        continuation.resume(ConnectionResult.Failure(error))
+                    }
+
+                    override fun onSuccess() {
+                        continuation.resume(ConnectionResult.Success)
+                    }
+                },
+            )
+        }
     }
 
     suspend fun disconnect() {
