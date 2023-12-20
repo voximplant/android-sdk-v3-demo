@@ -84,16 +84,16 @@ class AuthDataRepository @Inject constructor(
         }
     }
 
-    suspend fun refreshToken(token: String) {
+    suspend fun updateAccessToken(token: String) {
         if (loginState.first() is LoginState.LoggedIn) {
             authDataSource.registerPush(token)
         } else {
             logInWithToken().fold(
                 onSuccess = {
-                    refreshToken(token)
+                    updateAccessToken(token)
                 },
                 onFailure = { throwable ->
-                    Log.e("DemoV3", "AuthDataRepository::refreshToken: failure: $throwable")
+                    Log.e("DemoV3", "AuthDataRepository::updateAccessToken: failure: $throwable")
                 }
             )
         }
