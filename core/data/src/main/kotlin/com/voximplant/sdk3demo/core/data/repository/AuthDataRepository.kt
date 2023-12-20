@@ -32,7 +32,7 @@ class AuthDataRepository @Inject constructor(
         authDataSource.logIn(modifiedUsername, password).let { result: Result<NetworkUserData> ->
             result.fold(
                 onSuccess = { networkUser ->
-                    authDataSource.registerPush(pushTokenProvider.getToken())
+                    authDataSource.registerPushToken(pushTokenProvider.getToken())
                     userPreferencesDataSource.updateUser(networkUser.asUserData())
                     return Result.success(networkUser.asUserData())
                 },
@@ -51,7 +51,7 @@ class AuthDataRepository @Inject constructor(
             authDataSource.logInWithToken(userData.user.username, userData.accessToken).let { result: Result<NetworkUserData> ->
                 result.fold(
                     onSuccess = { networkUser ->
-                        authDataSource.registerPush(pushTokenProvider.getToken())
+                        authDataSource.registerPushToken(pushTokenProvider.getToken())
                         userPreferencesDataSource.updateUser(networkUser.asUserData())
                         return Result.success(networkUser.asUserData())
                     },
@@ -84,16 +84,16 @@ class AuthDataRepository @Inject constructor(
         }
     }
 
-    suspend fun updateAccessToken(token: String) {
+    suspend fun updatePushToken(token: String) {
         if (loginState.first() is LoginState.LoggedIn) {
-            authDataSource.registerPush(token)
+            authDataSource.registerPushToken(token)
         } else {
             logInWithToken().fold(
                 onSuccess = {
-                    updateAccessToken(token)
+                    updatePushToken(token)
                 },
                 onFailure = { throwable ->
-                    Log.e("DemoV3", "AuthDataRepository::updateAccessToken: failure: $throwable")
+                    Log.e("DemoV3", "AuthDataRepository::updatePushToken: failure: $throwable")
                 }
             )
         }

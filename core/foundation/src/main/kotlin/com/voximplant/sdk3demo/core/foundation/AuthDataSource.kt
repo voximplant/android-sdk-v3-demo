@@ -215,12 +215,12 @@ class AuthDataSource(
         }
     }
 
-    suspend fun registerPush(token: String) = suspendCoroutine {
+    suspend fun registerPushToken(token: String) = suspendCoroutine {
         client.registerForPushNotifications(
             pushConfig = PushConfig(token, context.packageName),
             callback = object : RegisterPushTokenCallback {
                 override fun onFailure(error: PushTokenError) {
-                    Log.e("DemoV3", "AuthDataSource::registerPush failure: $error")
+                    Log.e("DemoV3", "AuthDataSource::registerPushToken failure: $error")
                     it.resumeWithException(Exception(error.toString()))
                 }
 

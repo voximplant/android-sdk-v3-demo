@@ -18,6 +18,6 @@ class FirebasePushManager @Inject constructor(
     }
 
     override suspend fun onTokenUpdated(token: String) {
-        authDataRepository.updateAccessToken(token)
+        authDataRepository.updatePushToken(token)
     }
 }
