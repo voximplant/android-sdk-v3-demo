@@ -229,6 +229,7 @@ fun LoginScreen(
                     readOnly = true,
                     value = selectedNode?.toString().orEmpty(),
                     onValueChange = {},
+                    enabled = interactionAvailable,
                     label = { Text("Node") },
                     supportingText = {
                         if (isNodeError) {
