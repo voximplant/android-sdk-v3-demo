@@ -11,6 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +43,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.LoginError
+import com.voximplant.sdk3demo.core.model.data.Node
+import com.voximplant.sdk3demo.core.model.data.Node1
+import com.voximplant.sdk3demo.core.model.data.Node10
+import com.voximplant.sdk3demo.core.model.data.Node2
+import com.voximplant.sdk3demo.core.model.data.Node3
+import com.voximplant.sdk3demo.core.model.data.Node4
+import com.voximplant.sdk3demo.core.model.data.Node5
+import com.voximplant.sdk3demo.core.model.data.Node6
+import com.voximplant.sdk3demo.core.model.data.Node7
+import com.voximplant.sdk3demo.core.model.data.Node8
+import com.voximplant.sdk3demo.core.model.data.Node9
 import kotlinx.coroutines.launch
 
 @Composable
@@ -51,14 +66,14 @@ fun LoginRoute(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var loginError: LoginError? by rememberSaveable(loginUiState) {
-        when (loginUiState) {
-            is LoginUiState.Success -> {
+        when (loginUiState.loginState) {
+            is LoginState.Success -> {
                 onLoginSuccess()
                 mutableStateOf(null)
             }
 
-            is LoginUiState.Failure -> {
-                when (val error = (loginUiState as LoginUiState.Failure).error) {
+            is LoginState.Failure -> {
+                when (val error = (loginUiState.loginState as LoginState.Failure).error) {
                     LoginError.AccountFrozen,
                     LoginError.InternalError,
                     LoginError.Interrupted,
@@ -113,24 +128,35 @@ fun LoginRoute(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     loginUiState: LoginUiState,
     modifier: Modifier = Modifier,
-    onLogInClick: (String, String) -> Unit,
+    onLogInClick: (String, String, Node) -> Unit,
 ) {
-    val interactionAvailable = loginUiState !is LoginUiState.Loading && loginUiState !is LoginUiState.Success
+    val interactionAvailable = loginUiState.loginState !is LoginState.Loading && loginUiState.loginState !is LoginState.Success
 
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
-    val invalidUsername = if (loginUiState is LoginUiState.Failure) {
-        loginUiState.error is LoginError.InvalidUsername
+    val nodes = listOf(Node1, Node2, Node3, Node4, Node5, Node6, Node7, Node8, Node9, Node10)
+    var nodesExpanded by remember { mutableStateOf(false) }
+    var selectedNode: Node? by remember { mutableStateOf(null) }
+
+    val invalidUsername = if (loginUiState.loginState is LoginState.Failure) {
+        loginUiState.loginState.error is LoginError.InvalidUsername
     } else false
-    val invalidPassword = if (loginUiState is LoginUiState.Failure) {
-        loginUiState.error is LoginError.InvalidPassword
+    val invalidPassword = if (loginUiState.loginState is LoginState.Failure) {
+        loginUiState.loginState.error is LoginError.InvalidPassword
     } else false
+    var isNodeError by rememberSaveable { mutableStateOf(false) }
+
+    fun validateNode(): Boolean {
+        isNodeError = selectedNode == null
+        return !isNodeError
+    }
 
     Surface(modifier = modifier.fillMaxSize()) {
         Column(
@@ -189,10 +215,59 @@ fun LoginScreen(
                 },
                 shape = RoundedCornerShape(32.dp),
             )
+            ExposedDropdownMenuBox(
+                expanded = nodesExpanded,
+                onExpandedChange = { nodesExpanded = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    readOnly = true,
+                    value = selectedNode?.toString().orEmpty(),
+                    onValueChange = {},
+                    enabled = interactionAvailable,
+                    label = { Text("Node") },
+                    supportingText = {
+                        if (isNodeError) {
+                            Text(
+                                text = stringResource(R.string.required_field),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = nodesExpanded) },
+                    isError = isNodeError,
+                    shape = RoundedCornerShape(32.dp),
+                )
+                ExposedDropdownMenu(
+                    expanded = nodesExpanded,
+                    onDismissRequest = { nodesExpanded = false },
+                ) {
+                    nodes.forEach { node ->
+                        DropdownMenuItem(
+                            text = { Text(node.toString()) },
+                            onClick = {
+                                selectedNode = node
+                                isNodeError = false
+                                nodesExpanded = false
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        )
+                    }
+                }
+            }
             Button(
                 onClick = {
                     passwordHidden = true
-                    onLogInClick(username, password)
+                    if (validateNode()) {
+                        selectedNode?.let { node ->
+                            onLogInClick(username, password, node)
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -210,8 +285,8 @@ fun LoginScreen(
 private fun LoginScreenPreview() {
     VoximplantTheme {
         LoginScreen(
-            loginUiState = LoginUiState.Init,
-            onLogInClick = { _, _ -> },
+            loginUiState = LoginUiState(),
+            onLogInClick = { _, _, _ -> },
         )
     }
 }

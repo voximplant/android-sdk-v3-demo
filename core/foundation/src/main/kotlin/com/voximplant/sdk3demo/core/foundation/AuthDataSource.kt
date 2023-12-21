@@ -7,10 +7,12 @@ import com.voximplant.core.Client
 import com.voximplant.core.ClientSessionListener
 import com.voximplant.core.ClientState.CONNECTED
 import com.voximplant.core.ClientState.DISCONNECTED
+import com.voximplant.core.ConnectOptions
 import com.voximplant.core.ConnectionCallback
 import com.voximplant.core.ConnectionError
 import com.voximplant.core.DisconnectReason
 import com.voximplant.core.LoginCallback
+import com.voximplant.core.Node
 import com.voximplant.core.PushConfig
 import com.voximplant.core.PushTokenError
 import com.voximplant.core.RegisterPushTokenCallback
@@ -48,13 +50,13 @@ class AuthDataSource(
         client.setClientSessionListener(clientSessionListener)
     }
 
-    suspend fun logIn(username: String, password: String): Result<NetworkUserData> {
+    suspend fun logIn(username: String, password: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
             DISCONNECTED -> {
-                when (val connectionResult = connect()) {
+                when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
-                        logIn(username, password).let { networkUserResult ->
+                        logIn(username, password, node).let { networkUserResult ->
                             return networkUserResult
                         }
                     }
@@ -132,13 +134,13 @@ class AuthDataSource(
         }
     }
 
-    suspend fun logInWithToken(username: String, accessToken: String): Result<NetworkUserData> {
+    suspend fun logInWithToken(username: String, accessToken: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
             DISCONNECTED -> {
-                when (val connectionResult = connect()) {
+                when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
-                        logInWithToken(username, accessToken).let { networkUserResult ->
+                        logInWithToken(username, accessToken, node).let { networkUserResult ->
                             return networkUserResult
                         }
                     }
@@ -253,16 +255,19 @@ class AuthDataSource(
         client.handlePushNotification(push)
     }
 
-    private suspend fun connect() = suspendCoroutine { continuation ->
-        client.connect(object : ConnectionCallback {
-            override fun onFailure(error: ConnectionError) {
-                continuation.resume(ConnectionResult.Failure(error))
-            }
+    private suspend fun connect(node: Node) = suspendCoroutine { continuation ->
+        client.connect(
+            options = ConnectOptions(node),
+            callback = object : ConnectionCallback {
+                override fun onFailure(error: ConnectionError) {
+                    continuation.resume(ConnectionResult.Failure(error))
+                }
 
-            override fun onSuccess() {
-                continuation.resume(ConnectionResult.Success)
-            }
-        })
+                override fun onSuccess() {
+                    continuation.resume(ConnectionResult.Success)
+                }
+            },
+        )
     }
 
     suspend fun disconnect() {

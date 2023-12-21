@@ -12,4 +12,5 @@ fun NetworkUserData.asUserData() = UserData(
     user = user.asUser(),
     accessToken = accessToken,
     refreshToken = refreshToken,
+    node = null,
 )
