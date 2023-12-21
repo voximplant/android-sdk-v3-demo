@@ -14,11 +14,11 @@ class SilentLogInUseCase @Inject constructor(
     suspend operator fun invoke(): Result<User> {
         delay(attempt * attemptDelay)
         attempt++
-        authDataRepository.logInWithToken().let { userDataResult ->
-            userDataResult.fold(
-                onSuccess = { userData ->
+        authDataRepository.logInWithToken().let { userResult ->
+            userResult.fold(
+                onSuccess = { user ->
                     attempt = 0
-                    return Result.success(userData.user)
+                    return Result.success(user)
                 },
                 onFailure = { throwable ->
                     if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue, LoginError.InternalError) && attempt < maxAttempts) {
