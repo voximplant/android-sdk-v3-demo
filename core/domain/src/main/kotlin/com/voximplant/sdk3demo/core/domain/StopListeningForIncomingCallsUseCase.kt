@@ -8,6 +8,6 @@ class StopListeningForIncomingCallsUseCase @Inject constructor(
 ) {
 
     operator fun invoke() {
-        return audioCallRepository.stopListeningIncomingCalls()
+        return audioCallRepository.stopListeningForIncomingCalls()
     }
 }

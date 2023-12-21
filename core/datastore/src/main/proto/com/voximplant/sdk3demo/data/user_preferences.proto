@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "com/voximplant/sdk3demo/data/user.proto";
+import "com/voximplant/sdk3demo/data/node.proto";
 
 option java_package = "com.voximplant.sdk3demo.core.datastore";
 option java_multiple_files = true;
@@ -9,4 +10,5 @@ message UserPreferences {
   UserProto user = 1;
   string access_token = 2;
   string refresh_token = 3;
+  NodeProto node = 4;
 }

@@ -25,8 +25,10 @@ android {
 dependencies {
     implementation(project(":core:calls"))
     implementation(project(":core:common"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:foundation"))
     implementation(project(":core:model"))
+    implementation(project(":core:notifications"))
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)

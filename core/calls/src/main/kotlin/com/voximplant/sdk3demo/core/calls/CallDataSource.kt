@@ -100,7 +100,8 @@ class CallDataSource @Inject constructor(
 
     fun createCall(username: String): Result<CallApiData> {
         coroutineScope.launch {
-            _callState.emit(CallState.CONNECTING)
+            _callApiDataFlow.emit(null)
+            _callState.emit(CallState.CREATED)
         }
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
@@ -115,17 +116,19 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    fun startListeningIncomingCalls() {
+    fun startListeningForIncomingCalls() {
         callManager.setIncomingCallListener(incomingCallListener)
     }
 
-    fun stopListeningIncomingCalls() {
+    fun stopListeningForIncomingCalls() {
         callManager.setIncomingCallListener(null)
     }
 
     fun startCall(id: String): Result<CallApiData> {
         Log.d("DemoV3", "startCall: $activeCall")
-
+        coroutineScope.launch {
+            _callState.emit(CallState.CONNECTING)
+        }
         activeCall?.let { call ->
             if (call.id != id) return Result.failure(Throwable("Call not found"))
 
@@ -159,7 +162,7 @@ class CallDataSource @Inject constructor(
 
     fun mute(value: Boolean) {
         _isMuted.value = value
-        activeCall?.sendAudio(!value)
+        activeCall?.muteAudio(value)
     }
 
     fun hold(value: Boolean) {

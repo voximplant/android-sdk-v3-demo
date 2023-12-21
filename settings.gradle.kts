@@ -18,7 +18,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Voximplant SDK v3 Demo"
+rootProject.name = "Voximplant SDK Demo"
 include(":app")
 
 include(":core:calls")
@@ -29,7 +29,9 @@ include(":core:designsystem")
 include(":core:domain")
 include(":core:foundation")
 include(":core:model")
+include(":core:notifications")
 include(":core:permissions")
+include(":core:push")
 include(":core:resource")
 include(":core:ui")
 

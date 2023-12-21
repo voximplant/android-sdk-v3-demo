@@ -1,4 +1,4 @@
-package com.voximplant.sdk3demo
+package com.voximplant.demo.sdk
 
 import android.graphics.Color
 import android.os.Bundle
@@ -16,10 +16,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.voximplant.sdk3demo.MainActivityUiState.Loading
-import com.voximplant.sdk3demo.MainActivityUiState.Success
+import com.voximplant.demo.sdk.MainActivityUiState.Loading
+import com.voximplant.demo.sdk.MainActivityUiState.Success
+import com.voximplant.demo.sdk.ui.VoxApp
+import com.voximplant.demo.sdk.ui.VoxAppState
+import com.voximplant.demo.sdk.ui.rememberVoxAppState
 import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
-import com.voximplant.sdk3demo.ui.VoxApp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
@@ -27,8 +29,8 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     private val viewModel: MainActivityViewModel by viewModels()
+    private lateinit var voxAppState: VoxAppState
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -56,6 +58,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+            voxAppState = rememberVoxAppState()
             val darkTheme = isSystemInDarkTheme()
 
             DisposableEffect(darkTheme) {
@@ -74,7 +77,7 @@ class MainActivity : ComponentActivity() {
             VoximplantTheme(
                 darkTheme = darkTheme,
             ) {
-                VoxApp()
+                VoxApp(voxAppState)
             }
         }
     }

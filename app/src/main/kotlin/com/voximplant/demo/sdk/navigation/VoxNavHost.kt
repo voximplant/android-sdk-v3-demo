@@ -1,8 +1,9 @@
-package com.voximplant.sdk3demo.navigation
+package com.voximplant.demo.sdk.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.voximplant.demo.sdk.ui.VoxAppState
 import com.voximplant.sdk3demo.feature.audiocall.incoming.navigation.audioCallIncomingScreen
 import com.voximplant.sdk3demo.feature.audiocall.incoming.navigation.navigateToAudioCallIncoming
 import com.voximplant.sdk3demo.feature.audiocall.navigation.audioCallRoute
@@ -14,7 +15,6 @@ import com.voximplant.sdk3demo.feature.catalog.navigation.catalogRoute
 import com.voximplant.sdk3demo.feature.catalog.navigation.catalogScreen
 import com.voximplant.sdk3demo.feature.login.navigation.loginScreen
 import com.voximplant.sdk3demo.feature.login.navigation.navigateToLogin
-import com.voximplant.sdk3demo.ui.VoxAppState
 
 @Composable
 fun VoxNavHost(
@@ -53,17 +53,17 @@ fun VoxNavHost(
             onIncomingCall = { callId, displayName ->
                 navController.navigateToAudioCallIncoming(callId, displayName)
             },
-            onCallCreated = { callId, username ->
-                navController.navigateToAudioCallOngoing(callId, username)
+            onCallCreated = { callId, displayName ->
+                navController.navigateToAudioCallOngoing(callId, displayName)
             },
         )
         audioCallIncomingScreen(
             onCallEnded = {
                 navController.popBackStack()
             },
-            onCallAnswered = { callId ->
+            onCallAnswered = { callId, displayName ->
                 navController.popBackStack()
-                navController.navigateToAudioCallOngoing(callId, "")
+                navController.navigateToAudioCallOngoing(callId, displayName)
             },
         )
         audioCallOngoingScreen(

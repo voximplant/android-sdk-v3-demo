@@ -1,5 +1,6 @@
 package com.voximplant.sdk3demo.feature.audiocall.incoming
 
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,22 +49,31 @@ import kotlinx.coroutines.launch
 fun AudioCallIncomingRoute(
     viewModel: AudioCallIncomingViewModel = hiltViewModel(),
     onCallEnded: () -> Unit,
-    onCallAnswered: (String) -> Unit,
+    onCallAnswered: (String, String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val action = (context as Activity).intent.action
 
     val audioCallIncomingUiState by viewModel.callIncomingUiState.collectAsStateWithLifecycle()
 
     var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
-    var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
+    var showMicrophoneRationale by rememberSaveable {
+        if (action == "com.voximplant.sdk3demo.ACTION_ANSWER_CALL" && !microphonePermissionGranted) {
+            mutableStateOf(true)
+        } else {
+            mutableStateOf(false)
+        }
+    }
 
     var showCallFailedDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(audioCallIncomingUiState) {
-        if (audioCallIncomingUiState.state is CallState.Disconnected) {
-            onCallEnded()
-        } else if (audioCallIncomingUiState.state is CallState.Failed) {
-            showCallFailedDialog = true
+        when (audioCallIncomingUiState.state) {
+            is CallState.Connected -> onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
+            is CallState.Disconnected -> onCallEnded()
+            is CallState.Failed -> showCallFailedDialog = true
+            else -> {}
         }
     }
 
@@ -87,7 +98,7 @@ fun AudioCallIncomingRoute(
             onAnswerClick = {
                 if (microphonePermissionGranted) {
                     scope.launch {
-                        onCallAnswered(viewModel.id)
+                        onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
                     }
                 } else {
                     showMicrophoneRationale = true

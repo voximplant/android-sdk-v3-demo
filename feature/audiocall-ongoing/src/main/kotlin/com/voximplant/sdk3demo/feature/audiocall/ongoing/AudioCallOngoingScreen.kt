@@ -100,6 +100,7 @@ fun AudioCallOngoingRoute(
                                     Text(text = audioDevice.name)
                                 },
                                 modifier = Modifier.clickable {
+                                    showAudioDevices = false
                                     viewModel.selectAudioDevice(audioDevice)
                                 },
                                 leadingContent = {
@@ -187,7 +188,7 @@ fun AudioCallOngoingScreen(
                                 fontWeight = FontWeight.SemiBold,
                             ),
                         ) {
-                            Text(text = callOngoingUiState.call?.remoteDisplayName ?: callOngoingUiState.username)
+                            Text(text = callOngoingUiState.call?.remoteDisplayName ?: callOngoingUiState.displayName ?: stringResource(com.voximplant.sdk3demo.core.resource.R.string.unknown_user))
                         }
                         ProvideTextStyle(value = Typography.bodySmall.copy(color = Gray10)) {
                             val stateText = when (callOngoingUiState.state) {
@@ -283,7 +284,6 @@ fun AudioCallOngoingScreen(
                                     tint = Color.White,
                                 )
                             },
-                            text = {},
                             color = Color(0xFFF5222D),
                             onClick = onHangUpClick,
                         )
@@ -309,7 +309,7 @@ fun PreviewAudioCallScreen() {
         mutableStateOf(
             CallOngoingUiState.Inactive(
                 state = CallState.Connecting,
-                username = "username",
+                displayName = "Display Name",
                 isMuted = isMuted,
                 audioDevices = emptyList(),
                 audioDevice = AudioDevice(true, id = null, name = "Speaker", type = AudioDevice.Type.SPEAKER),

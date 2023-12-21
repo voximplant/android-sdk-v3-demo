@@ -4,4 +4,6 @@
     <string name="password">Password</string>
     <string name="invalid_username_error">Invalid username</string>
     <string name="invalid_password_error">Invalid password</string>
+    <string name="required_field">Required</string>
+    <string name="username_suffix">.voximplant.com</string>
 </resources>
