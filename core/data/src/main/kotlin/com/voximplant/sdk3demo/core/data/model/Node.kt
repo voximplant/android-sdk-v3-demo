@@ -24,16 +24,3 @@ fun Node.asExternal(): com.voximplant.core.Node = when (this) {
     Node9 -> com.voximplant.core.Node.Node9
     Node10 -> com.voximplant.core.Node.Node10
 }
-
-fun com.voximplant.core.Node.asInternal(): Node = when (this) {
-    com.voximplant.core.Node.Node1 -> Node1
-    com.voximplant.core.Node.Node2 -> Node2
-    com.voximplant.core.Node.Node3 -> Node3
-    com.voximplant.core.Node.Node4 -> Node4
-    com.voximplant.core.Node.Node5 -> Node5
-    com.voximplant.core.Node.Node6 -> Node6
-    com.voximplant.core.Node.Node7 -> Node7
-    com.voximplant.core.Node.Node8 -> Node8
-    com.voximplant.core.Node.Node9 -> Node9
-    com.voximplant.core.Node.Node10 -> Node10
-}
