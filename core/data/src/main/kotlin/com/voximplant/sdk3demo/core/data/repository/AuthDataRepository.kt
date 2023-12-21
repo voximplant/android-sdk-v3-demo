@@ -11,6 +11,7 @@ import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.LoginState
 import com.voximplant.sdk3demo.core.model.data.Node
 import com.voximplant.sdk3demo.core.model.data.User
+import com.voximplant.sdk3demo.core.model.data.UserCredentials
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -72,6 +73,25 @@ class AuthDataRepository @Inject constructor(
         }
     }
 
+    suspend fun refreshToken(): Result<UserCredentials> {
+        userPreferencesDataSource.userData.firstOrNull().let { userData ->
+            if (userData == null) {
+                return Result.failure(LoginError.NoInfo)
+            }
+            authDataSource.refreshToken(userData.user.username, userData.refreshToken).let { authParamsResult ->
+                authParamsResult.fold(
+                    onSuccess = { authParams ->
+                        userPreferencesDataSource.updateTokens(authParams.accessToken, authParams.refreshToken)
+                        return Result.success(authParams)
+                    },
+                    onFailure = { throwable ->
+                        return Result.failure(throwable)
+                    },
+                )
+            }
+        }
+    }
+
     suspend fun logOut() {
         authDataSource.unregisterPush(pushTokenProvider.getToken())
         authDataSource.disconnect()
@@ -82,14 +102,11 @@ class AuthDataRepository @Inject constructor(
         if (loginState.first() is LoginState.LoggedIn) {
             authDataSource.handlePush(push)
         } else {
-            logInWithToken().fold(
-                onSuccess = {
-                    handlePush(push)
-                },
-                onFailure = { throwable ->
-                    Log.e("DemoV3", "AuthDataRepository::handlePush: failure: $throwable")
-                }
-            )
+            logInWithToken().fold(onSuccess = {
+                handlePush(push)
+            }, onFailure = { throwable ->
+                Log.e("DemoV3", "AuthDataRepository::handlePush: failure: $throwable")
+            })
         }
     }
 
@@ -97,14 +114,11 @@ class AuthDataRepository @Inject constructor(
         if (loginState.first() is LoginState.LoggedIn) {
             authDataSource.registerPushToken(token)
         } else {
-            logInWithToken().fold(
-                onSuccess = {
-                    updatePushToken(token)
-                },
-                onFailure = { throwable ->
-                    Log.e("DemoV3", "AuthDataRepository::updatePushToken: failure: $throwable")
-                }
-            )
+            logInWithToken().fold(onSuccess = {
+                updatePushToken(token)
+            }, onFailure = { throwable ->
+                Log.e("DemoV3", "AuthDataRepository::updatePushToken: failure: $throwable")
+            })
         }
     }
 
