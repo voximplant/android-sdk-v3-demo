@@ -162,7 +162,7 @@ class CallDataSource @Inject constructor(
 
     fun mute(value: Boolean) {
         _isMuted.value = value
-        activeCall?.sendAudio(!value)
+        activeCall?.muteAudio(value)
     }
 
     fun hold(value: Boolean) {
