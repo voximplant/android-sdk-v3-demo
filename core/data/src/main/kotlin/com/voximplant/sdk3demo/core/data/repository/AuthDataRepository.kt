@@ -12,7 +12,6 @@ import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.LoginState
 import com.voximplant.sdk3demo.core.model.data.Node
 import com.voximplant.sdk3demo.core.model.data.User
-import com.voximplant.sdk3demo.core.model.data.UserData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -52,7 +51,7 @@ class AuthDataRepository @Inject constructor(
         }
     }
 
-    suspend fun logInWithToken(): Result<UserData> {
+    suspend fun logInWithToken(): Result<User> {
         userPreferencesDataSource.userData.firstOrNull().let { userData ->
             if (userData == null) {
                 return Result.failure(LoginError.InternalError)
@@ -70,7 +69,7 @@ class AuthDataRepository @Inject constructor(
                         authDataSource.registerPushToken(pushTokenProvider.getToken())
                         userPreferencesDataSource.updateUser(networkUser.asUserData())
                         userPreferencesDataSource.updateNode(node)
-                        return Result.success(networkUser.asUserData())
+                        return Result.success(networkUser.asUserData().user)
                     },
                     onFailure = { throwable ->
                         return Result.failure(throwable)

@@ -15,11 +15,11 @@ class LogInUseCase @Inject constructor(
         delay(attempt * attemptDelay)
         attempt++
 
-        authDataRepository.logIn(username, password).let { userDataResult ->
-            userDataResult.fold(
-                onSuccess = { userData ->
+        authDataRepository.logIn(username, password).let { userResult ->
+            userResult.fold(
+                onSuccess = { user ->
                     attempt = 0
-                    return Result.success(userData.user)
+                    return Result.success(user)
                 },
                 onFailure = { throwable ->
                     if (throwable in listOf(LoginError.TimeOut, LoginError.NetworkIssue, LoginError.InternalError) && attempt < maxAttempts) {
