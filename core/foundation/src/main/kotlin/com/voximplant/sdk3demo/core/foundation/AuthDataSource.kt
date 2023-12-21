@@ -38,9 +38,6 @@ class AuthDataSource(
     private val _loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.LoggedOut)
     val loginState: Flow<LoginState> = _loginState.asStateFlow()
 
-    private val _node: MutableStateFlow<Node?> = MutableStateFlow(null)
-    val node: Flow<Node?> = _node.asStateFlow()
-
     private val clientSessionListener = object : ClientSessionListener {
         override fun onConnectionClosed(reason: DisconnectReason) {
             coroutineScope.launch {
@@ -53,13 +50,13 @@ class AuthDataSource(
         client.setClientSessionListener(clientSessionListener)
     }
 
-    suspend fun logIn(username: String, password: String): Result<NetworkUserData> {
+    suspend fun logIn(username: String, password: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
             DISCONNECTED -> {
-                when (val connectionResult = connect()) {
+                when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
-                        logIn(username, password).let { networkUserResult ->
+                        logIn(username, password, node).let { networkUserResult ->
                             return networkUserResult
                         }
                     }
@@ -137,13 +134,13 @@ class AuthDataSource(
         }
     }
 
-    suspend fun logInWithToken(username: String, accessToken: String): Result<NetworkUserData> {
+    suspend fun logInWithToken(username: String, accessToken: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
             DISCONNECTED -> {
-                when (val connectionResult = connect()) {
+                when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
-                        logInWithToken(username, accessToken).let { networkUserResult ->
+                        logInWithToken(username, accessToken, node).let { networkUserResult ->
                             return networkUserResult
                         }
                     }
@@ -258,29 +255,19 @@ class AuthDataSource(
         client.handlePushNotification(push)
     }
 
-    fun selectNode(node: Node) {
-        _node.value = node
-    }
+    private suspend fun connect(node: Node) = suspendCoroutine { continuation ->
+        client.connect(
+            options = ConnectOptions(node),
+            callback = object : ConnectionCallback {
+                override fun onFailure(error: ConnectionError) {
+                    continuation.resume(ConnectionResult.Failure(error))
+                }
 
-    private suspend fun connect() = suspendCoroutine { continuation ->
-        _node.value.let { node ->
-            if (node == null) {
-                continuation.resume(ConnectionResult.Failure(ConnectionError.INVALID_STATE))
-                return@suspendCoroutine
-            }
-            client.connect(
-                options = ConnectOptions(node),
-                callback = object : ConnectionCallback {
-                    override fun onFailure(error: ConnectionError) {
-                        continuation.resume(ConnectionResult.Failure(error))
-                    }
-
-                    override fun onSuccess() {
-                        continuation.resume(ConnectionResult.Success)
-                    }
-                },
-            )
-        }
+                override fun onSuccess() {
+                    continuation.resume(ConnectionResult.Success)
+                }
+            },
+        )
     }
 
     suspend fun disconnect() {

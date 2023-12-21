@@ -2,7 +2,6 @@ package com.voximplant.sdk3demo.core.data.repository
 
 import android.util.Log
 import com.voximplant.sdk3demo.core.data.model.asExternal
-import com.voximplant.sdk3demo.core.data.model.asInternal
 import com.voximplant.sdk3demo.core.data.util.PushTokenProvider
 import com.voximplant.sdk3demo.core.datastore.UserPreferencesDataSource
 import com.voximplant.sdk3demo.core.foundation.AuthDataSource
@@ -28,20 +27,15 @@ class AuthDataRepository @Inject constructor(
     val loginState: Flow<LoginState>
         get() = authDataSource.loginState
 
-    val node: Flow<Node?>
-        get() = authDataSource.node.map { nodeApi -> nodeApi?.asInternal() }
-
-    suspend fun logIn(username: String, password: String): Result<User> {
+    suspend fun logIn(username: String, password: String, node: Node): Result<User> {
         val modifiedUsername = if (username.endsWith(domain)) username else username.plus(domain)
 
-        authDataSource.logIn(modifiedUsername, password).let { result: Result<NetworkUserData> ->
+        authDataSource.logIn(modifiedUsername, password, node.asExternal()).let { result: Result<NetworkUserData> ->
             result.fold(
                 onSuccess = { networkUser ->
                     authDataSource.registerPushToken(pushTokenProvider.getToken())
                     userPreferencesDataSource.updateUser(networkUser.asUserData())
-                    node.firstOrNull()?.let { node ->
-                        userPreferencesDataSource.updateNode(node)
-                    }
+                    userPreferencesDataSource.updateNode(node)
                     return Result.success(networkUser.asUserData().user)
                 },
                 onFailure = { throwable ->
@@ -62,8 +56,7 @@ class AuthDataRepository @Inject constructor(
                 return Result.failure(LoginError.InternalError)
             }
 
-            authDataSource.selectNode(node.asExternal())
-            authDataSource.logInWithToken(userData.user.username, userData.accessToken).let { result: Result<NetworkUserData> ->
+            authDataSource.logInWithToken(userData.user.username, userData.accessToken, node.asExternal()).let { result: Result<NetworkUserData> ->
                 result.fold(
                     onSuccess = { networkUser ->
                         authDataSource.registerPushToken(pushTokenProvider.getToken())
@@ -114,8 +107,6 @@ class AuthDataRepository @Inject constructor(
             )
         }
     }
-
-    fun selectNode(node: Node) = authDataSource.selectNode(node.asExternal())
 
     companion object {
         const val domain = ".voximplant.com"

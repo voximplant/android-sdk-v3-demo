@@ -2,9 +2,7 @@ package com.voximplant.sdk3demo.feature.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.voximplant.sdk3demo.core.domain.GetNodeUseCase
 import com.voximplant.sdk3demo.core.domain.LogInUseCase
-import com.voximplant.sdk3demo.core.domain.SelectNodeUseCase
 import com.voximplant.sdk3demo.core.model.data.LoginError
 import com.voximplant.sdk3demo.core.model.data.Node
 import com.voximplant.sdk3demo.core.model.data.User
@@ -21,26 +19,23 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LogInUseCase,
-    getNode: GetNodeUseCase,
-    private val selectNodeUseCase: SelectNodeUseCase,
 ) : ViewModel() {
 
     private val loginState: MutableStateFlow<LoginState> = MutableStateFlow(LoginState.LoggedOut)
 
     val loginUiState: StateFlow<LoginUiState> = catalogUiState(
         loginStateFlow = loginState,
-        nodeFlow = getNode(),
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = LoginUiState(),
     )
 
-    fun logIn(username: String, password: String) {
+    fun logIn(username: String, password: String, node: Node) {
         loginState.value = LoginState.Loading
 
         viewModelScope.launch {
-            loginUseCase(username, password)
+            loginUseCase(username, password, node)
                 .onSuccess { user ->
                     loginState.value = LoginState.Success(user)
                 }
@@ -50,26 +45,18 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun selectNode(node: Node) {
-        viewModelScope.launch {
-            selectNodeUseCase(node)
-        }
-    }
 }
 
 private fun catalogUiState(
     loginStateFlow: Flow<LoginState>,
-    nodeFlow: Flow<Node?>,
-): Flow<LoginUiState> = combine(loginStateFlow, nodeFlow) { loginState, node ->
+): Flow<LoginUiState> = combine(loginStateFlow) {
     LoginUiState(
-        loginState = loginState,
-        node = node,
+        loginState = it.first(),
     )
 }
 
 data class LoginUiState(
     val loginState: LoginState = LoginState.LoggedOut,
-    val node: Node? = null,
 )
 
 sealed interface LoginState {

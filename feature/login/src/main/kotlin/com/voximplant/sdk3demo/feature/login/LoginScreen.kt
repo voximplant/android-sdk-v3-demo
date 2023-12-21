@@ -123,7 +123,6 @@ fun LoginRoute(
         LoginScreen(
             loginUiState = loginUiState,
             modifier = Modifier.padding(paddingValues),
-            onNodeClick = viewModel::selectNode,
             onLogInClick = viewModel::logIn,
         )
     }
@@ -134,8 +133,7 @@ fun LoginRoute(
 fun LoginScreen(
     loginUiState: LoginUiState,
     modifier: Modifier = Modifier,
-    onNodeClick: (Node) -> Unit,
-    onLogInClick: (String, String) -> Unit,
+    onLogInClick: (String, String, Node) -> Unit,
 ) {
     val interactionAvailable = loginUiState.loginState !is LoginState.Loading && loginUiState.loginState !is LoginState.Success
 
@@ -145,7 +143,7 @@ fun LoginScreen(
 
     val nodes = listOf(Node1, Node2, Node3, Node4, Node5, Node6, Node7, Node8, Node9, Node10)
     var nodesExpanded by remember { mutableStateOf(false) }
-    var selectedNode: Node? by remember(loginUiState.node) { mutableStateOf(loginUiState.node) }
+    var selectedNode: Node? by remember { mutableStateOf(null) }
 
     val invalidUsername = if (loginUiState.loginState is LoginState.Failure) {
         loginUiState.loginState.error is LoginError.InvalidUsername
@@ -156,7 +154,7 @@ fun LoginScreen(
     var isNodeError by rememberSaveable { mutableStateOf(false) }
 
     fun validateNode(): Boolean {
-        isNodeError = loginUiState.node == null
+        isNodeError = selectedNode == null
         return !isNodeError
     }
 
@@ -252,7 +250,6 @@ fun LoginScreen(
                         DropdownMenuItem(
                             text = { Text(node.toString()) },
                             onClick = {
-                                onNodeClick(node)
                                 selectedNode = node
                                 isNodeError = false
                                 nodesExpanded = false
@@ -266,7 +263,9 @@ fun LoginScreen(
                 onClick = {
                     passwordHidden = true
                     if (validateNode()) {
-                        onLogInClick(username, password)
+                        selectedNode?.let { node ->
+                            onLogInClick(username, password, node)
+                        }
                     }
                 },
                 modifier = Modifier
@@ -286,8 +285,7 @@ private fun LoginScreenPreview() {
     VoximplantTheme {
         LoginScreen(
             loginUiState = LoginUiState(),
-            onNodeClick = {},
-            onLogInClick = { _, _ -> },
+            onLogInClick = { _, _, _ -> },
         )
     }
 }
