@@ -29,7 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,7 +51,6 @@ import com.voximplant.sdk3demo.core.designsystem.theme.VoximplantTheme
 import com.voximplant.sdk3demo.core.model.data.AudioDevice
 import com.voximplant.sdk3demo.core.ui.CallActionButton
 import com.voximplant.sdk3demo.core.ui.CallFailedDialog
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,6 +148,10 @@ fun AudioCallOngoingScreen(
     onHoldClick: () -> Unit,
     onHangUpClick: () -> Unit,
 ) {
+    var duration: Long by remember(callOngoingUiState.call) {
+        mutableLongStateOf(callOngoingUiState.call?.duration ?: 0L)
+    }
+
     Surface(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -200,16 +203,7 @@ fun AudioCallOngoingScreen(
                                 is CallState.Reconnecting -> stringResource(com.voximplant.sdk3demo.core.resource.R.string.call_state_reconnecting)
                             }
 
-                            var duration by remember { mutableIntStateOf(0) }
-
-                            LaunchedEffect(callOngoingUiState.state, duration) {
-                                if (callOngoingUiState.state is CallState.Connected) {
-                                    delay(1_000)
-                                    duration++
-                                }
-                            }
-
-                            if (callOngoingUiState.state is CallState.Connected && duration != 0) {
+                            if (callOngoingUiState.state is CallState.Connected && duration != 0L) {
                                 Text(text = formatDuration(duration))
                             } else {
                                 Text(text = stateText)
@@ -294,9 +288,9 @@ fun AudioCallOngoingScreen(
     }
 }
 
-private fun formatDuration(durationInSeconds: Int): String {
-    val minutes = durationInSeconds / 60
-    val seconds = durationInSeconds % 60
+private fun formatDuration(durationInMillis: Long): String {
+    val minutes = (durationInMillis / 1000) / 60
+    val seconds = (durationInMillis / 1000) % 60
     return String.format("%02d:%02d", minutes, seconds)
 }
 

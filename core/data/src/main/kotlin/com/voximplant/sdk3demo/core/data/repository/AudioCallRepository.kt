@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +26,17 @@ class AudioCallRepository @Inject constructor(
     coroutineScope: CoroutineScope,
 ) {
     val call: Flow<Call?>
-        get() = callDataSource.callApiDataFlow.map { callApiData -> callApiData?.asCall() }
+        get() = combine(callDataSource.callApiDataFlow, callDataSource.duration) { callApiData, duration ->
+            if (callApiData == null) return@combine null
+
+            Call(
+                id = callApiData.id,
+                direction = callApiData.callDirection,
+                duration = duration,
+                remoteDisplayName = callApiData.remoteDisplayName,
+                remoteSipUri = callApiData.remoteSipUri,
+            )
+        }
 
     val state: Flow<CallApiState?>
         get() = callDataSource.callStateFlow
@@ -71,6 +80,8 @@ class AudioCallRepository @Inject constructor(
                         notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
                     }
                 } else if (state == CallApiState.CONNECTED) {
+                    if (call.duration != 0L) return@collect
+
                     br.register(context)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         context.startForegroundService(ongoingCallIntent)
