@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 pluginManagement {
     repositories {
         mavenLocal()
@@ -32,7 +36,7 @@ include(":core:model")
 include(":core:notifications")
 include(":core:permissions")
 include(":core:push")
-include(":core:resource")
+include(":core:resources")
 include(":core:ui")
 
 include(":feature:catalog")

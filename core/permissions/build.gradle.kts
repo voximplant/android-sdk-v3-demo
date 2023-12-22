@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.permissions"
+    namespace = "com.voximplant.demos.sdk.core.permissions"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -30,7 +34,7 @@ android {
 
 dependencies {
     api(project(":core:designsystem"))
-    api(project(":core:resource"))
+    api(project(":core:resources"))
     api(project(":core:ui"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)

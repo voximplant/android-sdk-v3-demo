@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.designsystem"
+    namespace = "com.voximplant.demos.sdk.core.designsystem"
     compileSdk = 34
     defaultConfig {
         minSdk = 21

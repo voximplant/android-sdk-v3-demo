@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
@@ -6,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.notifications"
+    namespace = "com.voximplant.demos.sdk.core.notifications"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -33,7 +37,7 @@ android {
 dependencies {
     api(project(":core:common"))
     api(project(":core:designsystem"))
-    api(project(":core:resource"))
+    api(project(":core:resources"))
     api(project(":core:ui"))
 
     implementation(libs.androidx.core.ktx)

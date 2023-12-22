@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--
+  ~ Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
@@ -7,9 +11,9 @@
             android:name=".VoxBroadcastReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.voximplant.sdk3demo.ACTION_HANG_UP_CALL" />
-                <action android:name="com.voximplant.sdk3demo.ACTION_REJECT_CALL" />
-                <action android:name="com.voximplant.sdk3demo.ACTION_ANSWER_CALL" />
+                <action android:name="com.voximplant.demos.sdk.ACTION_HANG_UP_CALL" />
+                <action android:name="com.voximplant.demos.sdk.ACTION_REJECT_CALL" />
+                <action android:name="com.voximplant.demos.sdk.ACTION_ANSWER_CALL" />
             </intent-filter>
         </receiver>
     </application>

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
@@ -7,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.datastore"
+    namespace = "com.voximplant.demos.sdk.core.datastore"
     compileSdk = 34
 
     defaultConfig {

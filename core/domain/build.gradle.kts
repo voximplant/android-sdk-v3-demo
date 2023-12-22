@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
@@ -6,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.domain"
+    namespace = "com.voximplant.demos.sdk.core.domain"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
