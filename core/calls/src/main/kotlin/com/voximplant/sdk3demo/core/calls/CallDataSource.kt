@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.util.Timer
 import javax.inject.Inject
+import kotlin.concurrent.scheduleAtFixedRate
 
 class CallDataSource @Inject constructor(
     private val callManager: CallManager,
@@ -39,6 +41,7 @@ class CallDataSource @Inject constructor(
                 _callApiDataFlow.emit(call.asCallData())
                 _callState.emit(call.state)
             }
+            startCallTimer(call)
         }
 
         override fun onCallDisconnected(call: Call, headers: Map<String, String>?, answeredElsewhere: Boolean) {
@@ -47,6 +50,9 @@ class CallDataSource @Inject constructor(
                 _callState.emit(call.state)
                 activeCall?.setCallListener(null)
                 activeCall = null
+                callTimer.cancel()
+                callTimer.purge()
+                _duration.value = 0L
             }
         }
 
@@ -56,6 +62,9 @@ class CallDataSource @Inject constructor(
                 _callState.emit(call.state)
                 activeCall?.setCallListener(null)
                 activeCall = null
+                callTimer.cancel()
+                callTimer.purge()
+                _duration.value = 0L
             }
         }
 
@@ -92,11 +101,16 @@ class CallDataSource @Inject constructor(
         callState?.asExternalModel
     }.flowOn(defaultDispatcher)
 
+    private val _duration: MutableStateFlow<Long> = MutableStateFlow(0L)
+    val duration: Flow<Long> = _duration.asStateFlow()
+
     private val _isMuted: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isMuted: Flow<Boolean> = _isMuted.asStateFlow()
 
     private val _isOnHold: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isOnHold: Flow<Boolean> = _isOnHold.asStateFlow()
+
+    private var callTimer: Timer = Timer("callTimer")
 
     fun createCall(username: String): Result<CallApiData> {
         coroutineScope.launch {
@@ -188,4 +202,14 @@ class CallDataSource @Inject constructor(
     fun reject() {
         activeCall?.reject(RejectMode.DECLINE, null)
     }
+
+    private fun startCallTimer(call: Call) {
+        callTimer = Timer("callTimer").apply {
+            scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
+                _duration.value = call.callDuration
+            }
+        }
+    }
 }
+
+private const val TIMER_DELAY_MS = 1000L
