@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
@@ -6,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.foundation"
+    namespace = "com.voximplant.demos.sdk.core.foundation"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -26,8 +30,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:model"))
 
-    implementation(libs.voximplant.bom)
-    api(libs.voximplant.core)
+    implementation(libs.voximplant.sdk.bom)
+    api(libs.voximplant.sdk.core)
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)

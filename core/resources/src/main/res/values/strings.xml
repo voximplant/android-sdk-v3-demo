@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+  -->
+
+<resources>
+    <string name="log_in">Log in</string>
+    <string name="account_frozen_login_error">Account frozen</string>
+    <string name="internal_login_error">Internal error</string>
+    <string name="interrupted_by_user_error">Interrupted by user</string>
+    <string name="invalid_state_error">Invalid state</string>
+    <string name="mau_access_denied_error">MAU access denied</string>
+    <string name="network_issue_error">Network issue</string>
+    <string name="timeout_error">Timeout</string>
+    <string name="token_expired_error">Token expired</string>
+    <string name="login_problem">Login problem</string>
+    <string name="confirm">Confirm</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="audio_call">Audio call</string>
+    <string name="audio_call_description">Make and receive an audio call</string>
+    <string name="call_to_user">Username</string>
+    <string name="empty_username_error">The username must be filled in</string>
+    <string name="make_call">Call</string>
+    <string name="audio_devices">Audio devices</string>
+    <string name="call_state_connected">Connected</string>
+    <string name="call_state_connecting">Connecting</string>
+    <string name="call_state_disconnected">Disconnected</string>
+    <string name="call_state_disconnecting">Disconnecting</string>
+    <string name="call_state_failed">Failed</string>
+    <string name="call_state_reconnecting">Reconnecting</string>
+    <string name="reject">Reject</string>
+    <string name="answer">Answer</string>
+    <string name="unknown_user">Unknown user</string>
+    <string name="incoming_call">Incoming call</string>
+</resources>

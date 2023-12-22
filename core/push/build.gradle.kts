@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ */
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
@@ -6,7 +10,7 @@ plugins {
 }
 
 android {
-    namespace = "com.voximplant.sdk3demo.core.push"
+    namespace = "com.voximplant.demos.sdk.core.push"
     compileSdk = 34
     defaultConfig {
         minSdk = 21
@@ -34,7 +38,7 @@ dependencies {
     api(project(":core:common"))
     api(project(":core:data"))
     api(project(":core:notifications"))
-    api(project(":core:resource"))
+    api(project(":core:resources"))
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
