@@ -1,16 +1,16 @@
 package com.voximplant.sdk3demo.core.calls
 
-import com.voximplant.calls.Call
-import com.voximplant.calls.CallDirection.INCOMING
-import com.voximplant.calls.CallDirection.OUTGOING
-import com.voximplant.calls.CallState
-import com.voximplant.calls.CallState.CONNECTED
-import com.voximplant.calls.CallState.CONNECTING
-import com.voximplant.calls.CallState.CREATED
-import com.voximplant.calls.CallState.DISCONNECTED
-import com.voximplant.calls.CallState.DISCONNECTING
-import com.voximplant.calls.CallState.FAILED
-import com.voximplant.calls.CallState.RECONNECTING
+import com.voximplant.android.sdk.calls.Call
+import com.voximplant.android.sdk.calls.CallDirection.Incoming
+import com.voximplant.android.sdk.calls.CallDirection.Outgoing
+import com.voximplant.android.sdk.calls.CallState
+import com.voximplant.android.sdk.calls.CallState.Connected
+import com.voximplant.android.sdk.calls.CallState.Connecting
+import com.voximplant.android.sdk.calls.CallState.Created
+import com.voximplant.android.sdk.calls.CallState.Disconnected
+import com.voximplant.android.sdk.calls.CallState.Disconnecting
+import com.voximplant.android.sdk.calls.CallState.Failed
+import com.voximplant.android.sdk.calls.CallState.Reconnecting
 import com.voximplant.sdk3demo.core.calls.model.CallApiData
 import com.voximplant.sdk3demo.core.model.data.CallApiState
 import com.voximplant.sdk3demo.core.model.data.CallDirection
@@ -18,8 +18,8 @@ import com.voximplant.sdk3demo.core.model.data.CallDirection
 fun Call.asCallData() = CallApiData(
     id = id,
     callDirection = when (callDirection) {
-        INCOMING -> CallDirection.INCOMING
-        OUTGOING -> CallDirection.OUTGOING
+        Incoming -> CallDirection.INCOMING
+        Outgoing -> CallDirection.OUTGOING
     },
     callDuration = callDuration,
     remoteDisplayName = remoteDisplayName,
@@ -28,11 +28,11 @@ fun Call.asCallData() = CallApiData(
 
 val CallState.asExternalModel
     get() = when (this) {
-        CREATED -> CallApiState.CREATED
-        CONNECTING -> CallApiState.CONNECTING
-        CONNECTED -> CallApiState.CONNECTED
-        RECONNECTING -> CallApiState.RECONNECTING
-        DISCONNECTING -> CallApiState.DISCONNECTING
-        DISCONNECTED -> CallApiState.DISCONNECTED
-        FAILED -> CallApiState.FAILED
+        Created -> CallApiState.CREATED
+        Connecting -> CallApiState.CONNECTING
+        Connected -> CallApiState.CONNECTED
+        Reconnecting -> CallApiState.RECONNECTING
+        Disconnecting -> CallApiState.DISCONNECTING
+        Disconnected -> CallApiState.DISCONNECTED
+        Failed -> CallApiState.FAILED
     }

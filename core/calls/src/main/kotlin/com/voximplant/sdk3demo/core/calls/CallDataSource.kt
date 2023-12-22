@@ -1,16 +1,16 @@
 package com.voximplant.sdk3demo.core.calls
 
 import android.util.Log
-import com.voximplant.calls.Call
-import com.voximplant.calls.CallCallback
-import com.voximplant.calls.CallDirection
-import com.voximplant.calls.CallException
-import com.voximplant.calls.CallListener
-import com.voximplant.calls.CallManager
-import com.voximplant.calls.CallSettings
-import com.voximplant.calls.CallState
-import com.voximplant.calls.IncomingCallListener
-import com.voximplant.calls.RejectMode
+import com.voximplant.android.sdk.calls.Call
+import com.voximplant.android.sdk.calls.CallCallback
+import com.voximplant.android.sdk.calls.CallDirection
+import com.voximplant.android.sdk.calls.CallException
+import com.voximplant.android.sdk.calls.CallListener
+import com.voximplant.android.sdk.calls.CallManager
+import com.voximplant.android.sdk.calls.CallSettings
+import com.voximplant.android.sdk.calls.CallState
+import com.voximplant.android.sdk.calls.IncomingCallListener
+import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.sdk3demo.core.calls.model.CallApiData
 import com.voximplant.sdk3demo.core.common.Dispatcher
 import com.voximplant.sdk3demo.core.common.VoxDispatchers.Default
@@ -80,7 +80,7 @@ class CallDataSource @Inject constructor(
         override fun onIncomingCall(call: Call, hasIncomingVideo: Boolean, headers: Map<String, String>?) {
             if (activeCall != null) {
                 // Indicates that the user is unavailable only on the device with an active call.
-                call.reject(RejectMode.BUSY, null)
+                call.reject(RejectMode.Busy, null)
                 return
             }
 
@@ -115,7 +115,7 @@ class CallDataSource @Inject constructor(
     fun createCall(username: String): Result<CallApiData> {
         coroutineScope.launch {
             _callApiDataFlow.emit(null)
-            _callState.emit(CallState.CREATED)
+            _callState.emit(CallState.Created)
         }
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
@@ -141,13 +141,13 @@ class CallDataSource @Inject constructor(
     fun startCall(id: String): Result<CallApiData> {
         Log.d("DemoV3", "startCall: $activeCall")
         coroutineScope.launch {
-            _callState.emit(CallState.CONNECTING)
+            _callState.emit(CallState.Connecting)
         }
         activeCall?.let { call ->
             if (call.id != id) return Result.failure(Throwable("Call not found"))
 
             when (call.callDirection) {
-                CallDirection.OUTGOING -> {
+                CallDirection.Outgoing -> {
                     return try {
                         call.setCallListener(callListener)
                         call.start()
@@ -157,7 +157,7 @@ class CallDataSource @Inject constructor(
                     }
                 }
 
-                CallDirection.INCOMING -> {
+                CallDirection.Incoming -> {
                     call.let {
                         it.setCallListener(callListener)
                         it.answer(CallSettings())
@@ -194,13 +194,13 @@ class CallDataSource @Inject constructor(
 
     fun hangUp() {
         coroutineScope.launch {
-            _callState.emit(CallState.DISCONNECTING)
+            _callState.emit(CallState.Disconnecting)
         }
         activeCall?.hangup(null)
     }
 
     fun reject() {
-        activeCall?.reject(RejectMode.DECLINE, null)
+        activeCall?.reject(RejectMode.Decline, null)
     }
 
     private fun startCallTimer(call: Call) {

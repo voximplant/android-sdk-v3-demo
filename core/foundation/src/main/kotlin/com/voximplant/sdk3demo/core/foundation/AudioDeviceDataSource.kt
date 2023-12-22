@@ -1,8 +1,8 @@
 package com.voximplant.sdk3demo.core.foundation
 
-import com.voximplant.core.audio.AudioDevice
-import com.voximplant.core.audio.AudioDeviceEventsListener
-import com.voximplant.core.audio.AudioDeviceManager
+import com.voximplant.android.sdk.core.audio.AudioDevice
+import com.voximplant.android.sdk.core.audio.AudioDeviceEventsListener
+import com.voximplant.android.sdk.core.audio.AudioDeviceManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

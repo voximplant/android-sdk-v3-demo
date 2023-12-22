@@ -22,7 +22,7 @@ kotlinxCoroutines = "1.7.3"
 ksp = "1.9.21-1.0.15"
 protobuf = "3.25.1"
 protobufPlugin = "0.9.4"
-voximplantSdk = "3.0.0-alpha-39-rc2"
+voximplantSdk = "3.0.0-alpha-39-rc3"
 
 [libraries]
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
@@ -54,9 +54,9 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
-voximplant-bom = { group = "com.voximplant", name = "voximplant-bom", version.ref = "voximplantSdk" }
-voximplant-calls = { group = "com.voximplant", name = "voximplant-calls" }
-voximplant-core = { group = "com.voximplant", name = "voximplant-core" }
+voximplant-sdk-bom = { group = "com.voximplant", name = "android-sdk-bom", version.ref = "voximplantSdk" }
+voximplant-sdk-calls = { group = "com.voximplant", name = "android-sdk-calls" }
+voximplant-sdk-core = { group = "com.voximplant", name = "android-sdk-core" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }

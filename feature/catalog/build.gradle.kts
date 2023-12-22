@@ -26,7 +26,7 @@ android {
     compileSdk = 34
     defaultConfig {
         minSdk = 21
-        buildConfigField("String", "VOXIMPLANT_SDK_VERSION", "\"${libs.voximplant.bom.get().version}\"")
+        buildConfigField("String", "VOXIMPLANT_SDK_VERSION", "\"${libs.voximplant.sdk.bom.get().version}\"")
     }
 
     compileOptions {

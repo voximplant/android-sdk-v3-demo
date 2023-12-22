@@ -1,7 +1,7 @@
 package com.voximplant.sdk3demo.core.calls.di
 
 import android.content.Context
-import com.voximplant.calls.CallManager
+import com.voximplant.android.sdk.calls.CallManager
 import com.voximplant.sdk3demo.core.calls.CallDataSource
 import com.voximplant.sdk3demo.core.common.Dispatcher
 import com.voximplant.sdk3demo.core.common.VoxDispatchers.Default

@@ -1,13 +1,13 @@
 package com.voximplant.sdk3demo.core.foundation
 
-import com.voximplant.core.audio.AudioDevice
-import com.voximplant.core.audio.AudioDeviceType
-import com.voximplant.core.audio.AudioDeviceType.BLUETOOTH
-import com.voximplant.core.audio.AudioDeviceType.EARPIECE
-import com.voximplant.core.audio.AudioDeviceType.SPEAKER
-import com.voximplant.core.audio.AudioDeviceType.UNKNOWN
-import com.voximplant.core.audio.AudioDeviceType.USB
-import com.voximplant.core.audio.AudioDeviceType.WIRED_HEADSET
+import com.voximplant.android.sdk.core.audio.AudioDevice
+import com.voximplant.android.sdk.core.audio.AudioDeviceType
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.Bluetooth
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.Earpiece
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.Speaker
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.Unknown
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.Usb
+import com.voximplant.android.sdk.core.audio.AudioDeviceType.WiredHeadset
 import com.voximplant.sdk3demo.core.model.data.AudioDevice.Type
 
 fun AudioDevice.asExternalModel() = com.voximplant.sdk3demo.core.model.data.AudioDevice(
@@ -19,10 +19,10 @@ fun AudioDevice.asExternalModel() = com.voximplant.sdk3demo.core.model.data.Audi
 
 val AudioDeviceType.asExternalModel
     get() = when (this) {
-        UNKNOWN -> Type.UNKNOWN
-        EARPIECE -> Type.EARPIECE
-        SPEAKER -> Type.SPEAKER
-        WIRED_HEADSET -> Type.WIRED_HEADSET
-        BLUETOOTH -> Type.BLUETOOTH
-        USB -> Type.USB
+        Unknown -> Type.UNKNOWN
+        Earpiece -> Type.EARPIECE
+        Speaker -> Type.SPEAKER
+        WiredHeadset -> Type.WIRED_HEADSET
+        Bluetooth -> Type.BLUETOOTH
+        Usb -> Type.USB
     }

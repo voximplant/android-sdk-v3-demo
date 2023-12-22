@@ -26,8 +26,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:model"))
 
-    implementation(libs.voximplant.bom)
-    api(libs.voximplant.core)
+    implementation(libs.voximplant.sdk.bom)
+    api(libs.voximplant.sdk.core)
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)

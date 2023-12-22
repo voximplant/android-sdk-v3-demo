@@ -17,8 +17,8 @@
 package com.voximplant.sdk3demo.core.foundation.di
 
 import android.content.Context
-import com.voximplant.core.Client
-import com.voximplant.core.audio.AudioDeviceManager
+import com.voximplant.android.sdk.core.Client
+import com.voximplant.android.sdk.core.audio.AudioDeviceManager
 import com.voximplant.sdk3demo.core.common.di.ApplicationScope
 import com.voximplant.sdk3demo.core.foundation.AudioDeviceDataSource
 import com.voximplant.sdk3demo.core.foundation.AuthDataSource

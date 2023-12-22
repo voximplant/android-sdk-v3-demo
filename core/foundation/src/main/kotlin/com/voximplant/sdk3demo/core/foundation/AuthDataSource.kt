@@ -2,22 +2,22 @@ package com.voximplant.sdk3demo.core.foundation
 
 import android.content.Context
 import android.util.Log
-import com.voximplant.core.AuthParams
-import com.voximplant.core.Client
-import com.voximplant.core.ClientSessionListener
-import com.voximplant.core.ClientState.CONNECTED
-import com.voximplant.core.ClientState.DISCONNECTED
-import com.voximplant.core.ConnectOptions
-import com.voximplant.core.ConnectionCallback
-import com.voximplant.core.ConnectionError
-import com.voximplant.core.DisconnectReason
-import com.voximplant.core.LoginCallback
-import com.voximplant.core.LoginError
-import com.voximplant.core.RefreshTokenCallback
-import com.voximplant.core.Node
-import com.voximplant.core.PushConfig
-import com.voximplant.core.PushTokenError
-import com.voximplant.core.RegisterPushTokenCallback
+import com.voximplant.android.sdk.core.AuthParams
+import com.voximplant.android.sdk.core.Client
+import com.voximplant.android.sdk.core.ClientSessionListener
+import com.voximplant.android.sdk.core.ClientState.Connected
+import com.voximplant.android.sdk.core.ClientState.Disconnected
+import com.voximplant.android.sdk.core.ConnectOptions
+import com.voximplant.android.sdk.core.ConnectionCallback
+import com.voximplant.android.sdk.core.ConnectionError
+import com.voximplant.android.sdk.core.DisconnectReason
+import com.voximplant.android.sdk.core.LoginCallback
+import com.voximplant.android.sdk.core.LoginError
+import com.voximplant.android.sdk.core.Node
+import com.voximplant.android.sdk.core.PushConfig
+import com.voximplant.android.sdk.core.PushTokenError
+import com.voximplant.android.sdk.core.RefreshTokenCallback
+import com.voximplant.android.sdk.core.RegisterPushTokenCallback
 import com.voximplant.sdk3demo.core.foundation.model.NetworkUser
 import com.voximplant.sdk3demo.core.foundation.model.NetworkUserData
 import com.voximplant.sdk3demo.core.model.data.LoginState
@@ -56,7 +56,7 @@ class AuthDataSource(
     suspend fun logIn(username: String, password: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
-            DISCONNECTED -> {
+            Disconnected -> {
                 when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
                         logIn(username, password, node).let { networkUserResult ->
@@ -66,11 +66,11 @@ class AuthDataSource(
 
                     is ConnectionResult.Failure -> {
                         val loginError = when (connectionResult.error) {
-                            ConnectionError.INTERNAL_ERROR -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
-                            ConnectionError.INTERRUPTED -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
-                            ConnectionError.INVALID_STATE -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
-                            ConnectionError.NETWORK_ISSUE -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
-                            ConnectionError.TIMEOUT -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
+                            ConnectionError.InternalError -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
+                            ConnectionError.Interrupted -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
+                            ConnectionError.InvalidState -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
+                            ConnectionError.NetworkIssues -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
+                            ConnectionError.Timeout -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
                         }
                         _loginState.emit(LoginState.Failed(loginError))
                         return Result.failure(loginError)
@@ -78,7 +78,7 @@ class AuthDataSource(
                 }
             }
 
-            CONNECTED -> {
+            Connected -> {
                 val loginResult: LoginResult = suspendCoroutine { continuation ->
                     client.login(username, password, object : LoginCallback {
                         override fun onFailure(loginError: LoginError) {
@@ -89,7 +89,7 @@ class AuthDataSource(
 
                         override fun onSuccess(displayName: String, authParams: AuthParams?) {
                             if (authParams == null) {
-                                continuation.resume(LoginResult.Failure(LoginError.INTERNAL_ERROR))
+                                continuation.resume(LoginResult.Failure(LoginError.InternalError))
                                 return
                             }
                             continuation.resume(
@@ -112,16 +112,16 @@ class AuthDataSource(
 
                     is LoginResult.Failure -> {
                         val loginError = when (loginResult.error) {
-                            LoginError.INVALID_PASSWORD -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
-                            LoginError.INVALID_USERNAME -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
-                            LoginError.ACCOUNT_FROZEN -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
-                            LoginError.INTERNAL_ERROR -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
-                            LoginError.INVALID_STATE -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
-                            LoginError.INTERRUPTED -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
-                            LoginError.MAU_ACCESS_DENIED -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
-                            LoginError.NETWORK_ISSUES -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
-                            LoginError.TOKEN_EXPIRED -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
-                            LoginError.TIMEOUT -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
+                            LoginError.InvalidPassword -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
+                            LoginError.InvalidUsername -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
+                            LoginError.AccountFrozen -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
+                            LoginError.InternalError -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
+                            LoginError.InvalidState -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
+                            LoginError.Interrupted -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
+                            LoginError.MauAccessDenied -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
+                            LoginError.NetworkIssues -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
+                            LoginError.TokenExpired -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
+                            LoginError.Timeout -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
                         }
                         _loginState.emit(LoginState.Failed(loginError))
                         return Result.failure(loginError)
@@ -140,7 +140,7 @@ class AuthDataSource(
     suspend fun logInWithToken(username: String, accessToken: String, node: Node): Result<NetworkUserData> {
         _loginState.emit(LoginState.LoggingIn)
         when (client.clientState) {
-            DISCONNECTED -> {
+            Disconnected -> {
                 when (val connectionResult = connect(node)) {
                     is ConnectionResult.Success -> {
                         logInWithToken(username, accessToken, node).let { networkUserResult ->
@@ -151,11 +151,11 @@ class AuthDataSource(
                     is ConnectionResult.Failure -> {
                         Log.e("DemoV3", "AuthDataSource::logIn: failed to connect to the cloud.")
                         val loginError = when (connectionResult.error) {
-                            ConnectionError.INTERNAL_ERROR -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
-                            ConnectionError.INTERRUPTED -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
-                            ConnectionError.INVALID_STATE -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
-                            ConnectionError.NETWORK_ISSUE -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
-                            ConnectionError.TIMEOUT -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
+                            ConnectionError.InternalError -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
+                            ConnectionError.Interrupted -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
+                            ConnectionError.InvalidState -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
+                            ConnectionError.NetworkIssues -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
+                            ConnectionError.Timeout -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
                         }
                         _loginState.emit(LoginState.Failed(loginError))
                         return Result.failure(loginError)
@@ -163,7 +163,7 @@ class AuthDataSource(
                 }
             }
 
-            CONNECTED -> {
+            Connected -> {
                 val loginResult: LoginResult = suspendCoroutine { continuation ->
                     client.loginWithAccessToken(username, accessToken, object : LoginCallback {
                         override fun onFailure(loginError: LoginError) {
@@ -173,7 +173,7 @@ class AuthDataSource(
 
                         override fun onSuccess(displayName: String, authParams: AuthParams?) {
                             if (authParams == null) {
-                                continuation.resume(LoginResult.Failure(LoginError.INTERNAL_ERROR))
+                                continuation.resume(LoginResult.Failure(LoginError.InternalError))
                                 return
                             }
                             continuation.resume(
@@ -196,16 +196,16 @@ class AuthDataSource(
 
                     is LoginResult.Failure -> {
                         val loginError = when (loginResult.error) {
-                            LoginError.INVALID_PASSWORD -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
-                            LoginError.INVALID_USERNAME -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
-                            LoginError.ACCOUNT_FROZEN -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
-                            LoginError.INTERNAL_ERROR -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
-                            LoginError.INVALID_STATE -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
-                            LoginError.INTERRUPTED -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
-                            LoginError.MAU_ACCESS_DENIED -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
-                            LoginError.NETWORK_ISSUES -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
-                            LoginError.TOKEN_EXPIRED -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
-                            LoginError.TIMEOUT -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
+                            LoginError.InvalidPassword -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
+                            LoginError.InvalidUsername -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
+                            LoginError.AccountFrozen -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
+                            LoginError.InternalError -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
+                            LoginError.InvalidState -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
+                            LoginError.Interrupted -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
+                            LoginError.MauAccessDenied -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
+                            LoginError.NetworkIssues -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
+                            LoginError.TokenExpired -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
+                            LoginError.Timeout -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
                         }
                         _loginState.emit(LoginState.Failed(loginError))
                         return Result.failure(loginError)
@@ -243,16 +243,16 @@ class AuthDataSource(
 
             is RefreshResult.Failure -> {
                 val loginError = when (refreshResult.error) {
-                    LoginError.INVALID_PASSWORD -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
-                    LoginError.INVALID_USERNAME -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
-                    LoginError.ACCOUNT_FROZEN -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
-                    LoginError.INTERNAL_ERROR -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
-                    LoginError.INVALID_STATE -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
-                    LoginError.INTERRUPTED -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
-                    LoginError.MAU_ACCESS_DENIED -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
-                    LoginError.NETWORK_ISSUES -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
-                    LoginError.TOKEN_EXPIRED -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
-                    LoginError.TIMEOUT -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
+                    LoginError.InvalidPassword -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidPassword
+                    LoginError.InvalidUsername -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidUsername
+                    LoginError.AccountFrozen -> com.voximplant.sdk3demo.core.model.data.LoginError.AccountFrozen
+                    LoginError.InternalError -> com.voximplant.sdk3demo.core.model.data.LoginError.InternalError
+                    LoginError.InvalidState -> com.voximplant.sdk3demo.core.model.data.LoginError.InvalidState
+                    LoginError.Interrupted -> com.voximplant.sdk3demo.core.model.data.LoginError.Interrupted
+                    LoginError.MauAccessDenied -> com.voximplant.sdk3demo.core.model.data.LoginError.MauAccessDenied
+                    LoginError.NetworkIssues -> com.voximplant.sdk3demo.core.model.data.LoginError.NetworkIssue
+                    LoginError.TokenExpired -> com.voximplant.sdk3demo.core.model.data.LoginError.TokenExpired
+                    LoginError.Timeout -> com.voximplant.sdk3demo.core.model.data.LoginError.TimeOut
                 }
                 return Result.failure(loginError)
             }
