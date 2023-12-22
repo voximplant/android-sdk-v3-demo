@@ -19,7 +19,7 @@ class SilentLogInUseCase @Inject constructor(
     suspend operator fun invoke(): Result<User> {
         delay(attempt * attemptDelay)
         attempt++
-        authDataRepository.logInWithToken().let { userResult ->
+        authDataRepository.silentLogIn().let { userResult ->
             userResult.fold(
                 onSuccess = { user ->
                     attempt = 0
