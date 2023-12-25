@@ -10,8 +10,6 @@ import com.voximplant.demos.sdk.core.domain.CreateCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
-import com.voximplant.demos.sdk.core.domain.StartListeningForIncomingCallsUseCase
-import com.voximplant.demos.sdk.core.domain.StopListeningForIncomingCallsUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallApiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,8 +27,6 @@ class AudioCallViewModel @Inject constructor(
     private val createCallUseCase: CreateCallUseCase,
     getCall: GetCallUseCase,
     getCallState: GetCallStateUseCase,
-    startListeningForIncomingCallsUseCase: StartListeningForIncomingCallsUseCase,
-    private val stopListeningForIncomingCallsUseCase: StopListeningForIncomingCallsUseCase,
 ) : ViewModel() {
     val user = getUserUseCase().stateIn(
         scope = viewModelScope,
@@ -47,21 +43,12 @@ class AudioCallViewModel @Inject constructor(
         initialValue = AudioCallUiState.Inactive,
     )
 
-    init {
-        startListeningForIncomingCallsUseCase()
-    }
-
     suspend fun createCall(username: String): Call? = viewModelScope.async {
         createCallUseCase(username)
     }.await().fold(
         onSuccess = { return it },
         onFailure = { return null },
     )
-
-    override fun onCleared() {
-        super.onCleared()
-        stopListeningForIncomingCallsUseCase()
-    }
 }
 
 private fun audioCallUiState(
