@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class AuthDataSource(
@@ -269,7 +268,7 @@ class AuthDataSource(
             callback = object : RegisterPushTokenCallback {
                 override fun onFailure(error: PushTokenError) {
                     Log.e("DemoV3", "AuthDataSource::registerPushToken failure: $error")
-                    it.resumeWithException(Exception(error.toString()))
+                    it.resume(Exception(error.toString()))
                 }
 
                 override fun onSuccess() {
@@ -286,7 +285,7 @@ class AuthDataSource(
             callback = object : RegisterPushTokenCallback {
                 override fun onFailure(error: PushTokenError) {
                     Log.e("DemoV3", "AuthDataSource::unregisterPush failure: $error")
-                    it.resumeWithException(Exception(error.toString()))
+                    it.resume(Exception(error.toString()))
                 }
 
                 override fun onSuccess() {
