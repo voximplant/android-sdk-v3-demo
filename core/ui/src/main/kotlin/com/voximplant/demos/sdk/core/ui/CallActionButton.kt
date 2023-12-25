@@ -42,7 +42,7 @@ fun CallActionButton(
     modifier: Modifier = Modifier,
     text: @Composable() (() -> Unit)? = null,
     enabled: Boolean = true,
-    color: Color = Color(0x65202020),
+    color: Color = Color(0xFFDADAE6),
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -96,7 +96,7 @@ fun CallActionButton(
 @Preview
 @Composable
 private fun CallActionButtonPreview() {
-    var enabled by remember { mutableStateOf(true) }
+    var enabled by remember { mutableStateOf(false) }
 
     VoximplantTheme {
         Surface {
@@ -108,7 +108,7 @@ private fun CallActionButtonPreview() {
                     Text(text = "Mute")
                 },
                 onClick = { enabled = !enabled },
-                color = if (enabled) Color(0x65202020) else Color.White
+                color = if (enabled) Color(0xFF1F1C28) else Color(0xFFDADAE6)
             )
         }
     }
@@ -117,19 +117,19 @@ private fun CallActionButtonPreview() {
 @Preview
 @Composable
 private fun CallActionButtonWithLongTextPreview() {
-    var enabled by remember { mutableStateOf(true) }
+    var enabled by remember { mutableStateOf(false) }
 
     VoximplantTheme {
         Surface {
             CallActionButton(
                 icon = {
-                    Icon(painter = painterResource(id = Icons.Bluetooth), contentDescription = null)
+                    Icon(painter = painterResource(id = Icons.Bluetooth), contentDescription = null, tint = if (enabled) Color(0xFFDADAE6) else Color(0xFF1F1C28))
                 },
                 text = {
                     Text(text = "Google Pixel Buds Pro")
                 },
                 onClick = { enabled = !enabled },
-                color = if (enabled) Color(0x65202020) else Color.White
+                color = if (enabled) Color(0xFF1F1C28) else Color(0xFFDADAE6)
             )
         }
     }

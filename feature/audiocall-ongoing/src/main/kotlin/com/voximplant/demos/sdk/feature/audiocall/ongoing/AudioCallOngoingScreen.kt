@@ -227,9 +227,9 @@ fun AudioCallOngoingScreen(
                         CallActionButton(
                             icon = {
                                 if (callOngoingUiState.isMuted) {
-                                    Icon(painter = painterResource(id = Icons.MicrophoneMuted), contentDescription = null)
+                                    Icon(painter = painterResource(id = Icons.MicrophoneMuted), contentDescription = null, tint = Color(0xFFDADAE6))
                                 } else {
-                                    Icon(painter = painterResource(id = Icons.Microphone), contentDescription = null)
+                                    Icon(painter = painterResource(id = Icons.Microphone), contentDescription = null, tint = Color(0xFF1F1C28))
                                 }
                             },
                             text = {
@@ -237,18 +237,18 @@ fun AudioCallOngoingScreen(
                             },
                             onClick = onMuteClick,
                             enabled = callOngoingUiState !is CallOngoingUiState.Inactive,
-                            color = animateColorAsState(if (callOngoingUiState.isMuted) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
+                            color = animateColorAsState(if (callOngoingUiState.isMuted) Color(0xFF1F1C28) else Color(0xFFDADAE6), label = "ActiveAnimation").value,
                         )
                         CallActionButton(
                             icon = {
-                                Icon(painter = painterResource(id = Icons.Hold), contentDescription = null)
+                                Icon(painter = painterResource(id = Icons.Hold), contentDescription = null, tint = if (callOngoingUiState.isOnHold) Color(0xFFDADAE6) else Color(0xFF1F1C28))
                             },
                             text = {
                                 Text(text = "Hold")
                             },
                             onClick = onHoldClick,
                             enabled = callOngoingUiState is CallOngoingUiState.Active,
-                            color = animateColorAsState(if (callOngoingUiState.isOnHold) Color.White else Color(0x65202020), label = "ActiveAnimation").value,
+                            color = animateColorAsState(if (callOngoingUiState.isOnHold) Color(0xFF1F1C28) else Color(0xFFDADAE6), label = "ActiveAnimation").value,
                         )
                         CallActionButton(
                             icon = {
