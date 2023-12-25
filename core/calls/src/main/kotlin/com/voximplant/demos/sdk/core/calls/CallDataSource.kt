@@ -117,13 +117,13 @@ class CallDataSource @Inject constructor(
     private var callTimer: Timer = Timer("callTimer")
 
     fun createCall(username: String): Result<CallApiData> {
-        coroutineScope.launch {
-            _callApiDataFlow.emit(null)
-            _callState.emit(CallState.Created)
-        }
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
                 coroutineScope.launch {
+                    _callApiDataFlow.emit(null)
+                    _callState.emit(CallState.Created)
+                    _isMuted.value = false
+                    _isOnHold.value = false
                     _callApiDataFlow.emit(call.asCallData())
                 }
                 activeCall = call
@@ -170,12 +170,6 @@ class CallDataSource @Inject constructor(
                 }
             }
         } ?: return Result.failure(Throwable("Call not found"))
-        // TODO (Oleg): Start service
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                    ServiceCompat.startForeground(AudioCallService(), 0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
-//                } else {
-//                    ServiceCompat.startForeground(AudioCallService(), 0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
-//                }
     }
 
     fun mute(value: Boolean) {
