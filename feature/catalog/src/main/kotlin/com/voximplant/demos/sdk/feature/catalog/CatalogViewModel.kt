@@ -12,7 +12,7 @@ import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.domain.LogOutUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallApiState
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -77,21 +77,12 @@ class CatalogViewModel @Inject constructor(
 private fun catalogUiState(
     loginStateFlow: Flow<LoginState>,
     callFlow: Flow<Call?>,
-    callStateFlow: Flow<CallApiState?>,
+    callStateFlow: Flow<CallState?>,
 ): Flow<CatalogUiState> = combine(loginStateFlow, callFlow, callStateFlow) { loginState, call, callState ->
     CatalogUiState(
         loginState = loginState,
         call = call,
-        callState = when (callState) {
-            CallApiState.CREATED -> CallState.Created
-            CallApiState.CONNECTING -> CallState.Connecting
-            CallApiState.CONNECTED -> CallState.Connected
-            CallApiState.RECONNECTING -> CallState.Reconnecting
-            CallApiState.DISCONNECTING -> CallState.Disconnecting
-            CallApiState.DISCONNECTED -> CallState.Disconnected
-            CallApiState.FAILED -> CallState.Failed("audioCallUiState error")
-            null -> null
-        },
+        callState = callState,
     )
 }
 
@@ -100,15 +91,3 @@ data class CatalogUiState(
     val call: Call? = null,
     val callState: CallState? = null,
 )
-
-sealed class CallState {
-    data object Created : CallState()
-    data object Connecting : CallState()
-    data object Connected : CallState()
-    data object Disconnected : CallState()
-    data object Reconnecting : CallState()
-    data object Disconnecting : CallState()
-    data class Failed(
-        val error: String,
-    ) : CallState()
-}

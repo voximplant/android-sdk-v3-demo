@@ -9,14 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
 import com.voximplant.demos.sdk.core.domain.RejectIncomingCallUseCase
-import com.voximplant.demos.sdk.core.model.data.CallApiState
-import com.voximplant.demos.sdk.core.model.data.CallApiState.CONNECTED
-import com.voximplant.demos.sdk.core.model.data.CallApiState.CONNECTING
-import com.voximplant.demos.sdk.core.model.data.CallApiState.CREATED
-import com.voximplant.demos.sdk.core.model.data.CallApiState.DISCONNECTED
-import com.voximplant.demos.sdk.core.model.data.CallApiState.DISCONNECTING
-import com.voximplant.demos.sdk.core.model.data.CallApiState.FAILED
-import com.voximplant.demos.sdk.core.model.data.CallApiState.RECONNECTING
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.feature.audiocall.incoming.navigation.IncomingCallArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -60,34 +53,15 @@ class AudioCallIncomingViewModel @Inject constructor(
 
 private fun audioCallIncomingUiState(
     displayName: String?,
-    stateFlow: Flow<CallApiState?>,
+    stateFlow: Flow<CallState?>,
 ): Flow<AudioCallIncomingUiState> = combine(stateFlow) {
     AudioCallIncomingUiState(
         displayName = displayName,
-        state = when (it[0]) {
-            CREATED -> CallState.Connecting
-            CONNECTING -> CallState.Connecting
-            CONNECTED -> CallState.Connected
-            RECONNECTING -> CallState.Reconnecting
-            DISCONNECTING -> CallState.Disconnecting
-            DISCONNECTED -> CallState.Disconnected
-            FAILED, null -> CallState.Failed("audioCallIncomingUiState error")
-        },
+        state = it[0],
     )
 }
 
 data class AudioCallIncomingUiState(
     val displayName: String?,
-    val state: CallState,
+    val state: CallState?,
 )
-
-sealed class CallState {
-    data object Connecting : CallState()
-    data object Connected : CallState()
-    data object Disconnected : CallState()
-    data object Reconnecting : CallState()
-    data object Disconnecting : CallState()
-    data class Failed(
-        val error: String,
-    ) : CallState()
-}

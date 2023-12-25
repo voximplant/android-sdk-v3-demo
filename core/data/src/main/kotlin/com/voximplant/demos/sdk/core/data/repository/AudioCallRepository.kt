@@ -11,8 +11,8 @@ import com.voximplant.demos.sdk.core.calls.CallDataSource
 import com.voximplant.demos.sdk.core.calls.model.asCall
 import com.voximplant.demos.sdk.core.common.VoxBroadcastReceiver
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallApiState
 import com.voximplant.demos.sdk.core.model.data.CallDirection
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.notifications.Notifier
 import com.voximplant.demos.sdk.core.notifications.OngoingAudioCallService
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -42,7 +42,7 @@ class AudioCallRepository @Inject constructor(
             )
         }
 
-    val state: Flow<CallApiState?>
+    val state: Flow<CallState?>
         get() = callDataSource.callStateFlow
 
     val isMuted: Flow<Boolean>
@@ -78,12 +78,12 @@ class AudioCallRepository @Inject constructor(
                     putExtra("displayName", call.remoteDisplayName)
                 }
 
-                if (state == CallApiState.CREATED) {
+                if (state is CallState.Created) {
                     if (call.direction == CallDirection.INCOMING) {
                         br.register(context)
                         notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
                     }
-                } else if (state == CallApiState.CONNECTED) {
+                } else if (state is CallState.Connected) {
                     if (call.duration != 0L) return@collect
 
                     br.register(context)
@@ -92,7 +92,7 @@ class AudioCallRepository @Inject constructor(
                     } else {
                         context.startService(ongoingCallIntent)
                     }
-                } else if (state == CallApiState.DISCONNECTED || state == CallApiState.FAILED) {
+                } else if (state is CallState.Disconnected || state is CallState.Failed) {
                     br.unregister(context)
                     notifier.cancelCallNotification()
                     context.stopService(ongoingCallIntent)

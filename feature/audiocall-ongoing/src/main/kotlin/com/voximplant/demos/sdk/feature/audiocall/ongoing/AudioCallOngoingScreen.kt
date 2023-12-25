@@ -53,6 +53,7 @@ import com.voximplant.demos.sdk.core.designsystem.theme.Gray10
 import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
 import com.voximplant.demos.sdk.core.model.data.AudioDevice
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.resources.R
 import com.voximplant.demos.sdk.core.ui.CallActionButton
 import com.voximplant.demos.sdk.core.ui.CallFailedDialog
@@ -65,26 +66,27 @@ fun AudioCallOngoingRoute(
 ) {
     val callOngoingUiState by viewModel.callOngoingUiState.collectAsStateWithLifecycle()
 
-    var showCallFailedDialog by rememberSaveable { mutableStateOf(false) }
+    var callFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
     var showAudioDevices by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(callOngoingUiState) {
-        if (callOngoingUiState.state is CallState.Disconnected) {
-            onCallEnded()
-        } else if (callOngoingUiState.state is CallState.Failed) {
-            showCallFailedDialog = true
+        when (callOngoingUiState.state) {
+            is CallState.Disconnected -> onCallEnded()
+            is CallState.Failed -> callFailedDescription = (callOngoingUiState.state as CallState.Failed).description
+            else -> {}
         }
     }
 
     BackHandler {}
 
-    if (showCallFailedDialog) {
+    callFailedDescription?.let { description ->
         CallFailedDialog(
             onConfirm = {
-                showCallFailedDialog = false
+                callFailedDescription = null
                 onCallEnded()
             },
+            description = description,
         )
     }
 
@@ -200,7 +202,7 @@ fun AudioCallOngoingScreen(
                         }
                         ProvideTextStyle(value = Typography.bodySmall.copy(color = Gray10)) {
                             val stateText = when (callOngoingUiState.state) {
-                                is CallState.Connected -> stringResource(R.string.call_state_connected)
+                                is CallState.Created, is CallState.Connected -> stringResource(R.string.call_state_connected)
                                 is CallState.Connecting -> stringResource(R.string.call_state_connecting)
                                 is CallState.Disconnected -> stringResource(R.string.call_state_disconnected)
                                 is CallState.Disconnecting -> stringResource(R.string.call_state_disconnecting)

@@ -12,13 +12,12 @@ import com.voximplant.android.sdk.calls.CallException
 import com.voximplant.android.sdk.calls.CallListener
 import com.voximplant.android.sdk.calls.CallManager
 import com.voximplant.android.sdk.calls.CallSettings
-import com.voximplant.android.sdk.calls.CallState
 import com.voximplant.android.sdk.calls.IncomingCallListener
 import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
 import com.voximplant.demos.sdk.core.common.Dispatcher
 import com.voximplant.demos.sdk.core.common.VoxDispatchers.Default
-import com.voximplant.demos.sdk.core.model.data.CallApiState
+import com.voximplant.demos.sdk.core.model.data.CallState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +42,7 @@ class CallDataSource @Inject constructor(
         override fun onCallConnected(call: Call, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state)
+                _callState.emit(call.state.asInternalModel)
             }
             startCallTimer(call)
         }
@@ -51,7 +50,7 @@ class CallDataSource @Inject constructor(
         override fun onCallDisconnected(call: Call, headers: Map<String, String>?, answeredElsewhere: Boolean) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state)
+                _callState.emit(call.state.asInternalModel)
                 activeCall?.setCallListener(null)
                 activeCall = null
                 callTimer.cancel()
@@ -63,7 +62,7 @@ class CallDataSource @Inject constructor(
         override fun onCallFailed(call: Call, code: Int, description: String, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state)
+                _callState.emit(CallState.Failed(description))
                 activeCall?.setCallListener(null)
                 activeCall = null
                 callTimer.cancel()
@@ -75,7 +74,7 @@ class CallDataSource @Inject constructor(
         override fun onCallRinging(call: Call, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state)
+                _callState.emit(call.state.asInternalModel)
             }
         }
     }
@@ -92,7 +91,7 @@ class CallDataSource @Inject constructor(
             activeCall = call
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state)
+                _callState.emit(call.state.asInternalModel)
             }
         }
     }
@@ -101,8 +100,8 @@ class CallDataSource @Inject constructor(
     val callApiDataFlow: Flow<CallApiData?> = _callApiDataFlow.asStateFlow()
 
     private val _callState: MutableStateFlow<CallState?> = MutableStateFlow(null)
-    val callStateFlow: Flow<CallApiState?> = _callState.asStateFlow().map { callState ->
-        callState?.asExternalModel
+    val callStateFlow: Flow<CallState?> = _callState.asStateFlow().map { callState ->
+        callState
     }.flowOn(defaultDispatcher)
 
     private val _duration: MutableStateFlow<Long> = MutableStateFlow(0L)

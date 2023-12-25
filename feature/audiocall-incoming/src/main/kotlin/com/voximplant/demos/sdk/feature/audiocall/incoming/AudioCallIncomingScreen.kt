@@ -44,6 +44,7 @@ import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.Gray10
 import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.permissions.MicrophonePermissionEffect
 import com.voximplant.demos.sdk.core.resources.R
 import com.voximplant.demos.sdk.core.ui.CallActionButton
@@ -71,25 +72,26 @@ fun AudioCallIncomingRoute(
         }
     }
 
-    var showCallFailedDialog by rememberSaveable { mutableStateOf(false) }
+    var callFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
     LaunchedEffect(audioCallIncomingUiState) {
         when (audioCallIncomingUiState.state) {
             is CallState.Connected -> onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
             is CallState.Disconnected -> onCallEnded()
-            is CallState.Failed -> showCallFailedDialog = true
+            is CallState.Failed -> callFailedDescription = (audioCallIncomingUiState.state as CallState.Failed).description
             else -> {}
         }
     }
 
     BackHandler {}
 
-    if (showCallFailedDialog) {
+    callFailedDescription?.let { description ->
         CallFailedDialog(
             onConfirm = {
-                showCallFailedDialog = false
+                callFailedDescription = null
                 onCallEnded()
             },
+            description = description,
         )
     }
 

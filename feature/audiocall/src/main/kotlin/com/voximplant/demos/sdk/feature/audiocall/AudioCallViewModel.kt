@@ -11,7 +11,7 @@ import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallApiState
+import com.voximplant.demos.sdk.core.model.data.CallState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -53,22 +53,14 @@ class AudioCallViewModel @Inject constructor(
 
 private fun audioCallUiState(
     callFlow: Flow<Call?>,
-    callStateFlow: Flow<CallApiState?>,
+    callStateFlow: Flow<CallState?>,
 ): Flow<AudioCallUiState> = combine(callFlow, callStateFlow) { call, state ->
     if (call == null || state == null) {
         AudioCallUiState.Inactive
     } else {
         AudioCallUiState.Active(
             call = call,
-            state = when (state) {
-                CallApiState.CREATED -> CallState.Created
-                CallApiState.CONNECTING -> CallState.Connecting
-                CallApiState.CONNECTED -> CallState.Connected
-                CallApiState.RECONNECTING -> CallState.Reconnecting
-                CallApiState.DISCONNECTING -> CallState.Disconnecting
-                CallApiState.DISCONNECTED -> CallState.Disconnected
-                CallApiState.FAILED -> CallState.Failed("audioCallUiState error")
-            },
+            state = state,
         )
     }
 }
@@ -76,16 +68,4 @@ private fun audioCallUiState(
 sealed interface AudioCallUiState {
     data class Active(val call: Call, val state: CallState) : AudioCallUiState
     data object Inactive : AudioCallUiState
-}
-
-sealed class CallState {
-    data object Created : CallState()
-    data object Connecting : CallState()
-    data object Connected : CallState()
-    data object Disconnected : CallState()
-    data object Reconnecting : CallState()
-    data object Disconnecting : CallState()
-    data class Failed(
-        val error: String,
-    ) : CallState()
 }

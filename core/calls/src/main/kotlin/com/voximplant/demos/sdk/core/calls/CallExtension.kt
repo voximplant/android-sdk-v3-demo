@@ -7,17 +7,9 @@ package com.voximplant.demos.sdk.core.calls
 import com.voximplant.android.sdk.calls.Call
 import com.voximplant.android.sdk.calls.CallDirection.Incoming
 import com.voximplant.android.sdk.calls.CallDirection.Outgoing
-import com.voximplant.android.sdk.calls.CallState
-import com.voximplant.android.sdk.calls.CallState.Connected
-import com.voximplant.android.sdk.calls.CallState.Connecting
-import com.voximplant.android.sdk.calls.CallState.Created
-import com.voximplant.android.sdk.calls.CallState.Disconnected
-import com.voximplant.android.sdk.calls.CallState.Disconnecting
-import com.voximplant.android.sdk.calls.CallState.Failed
-import com.voximplant.android.sdk.calls.CallState.Reconnecting
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
-import com.voximplant.demos.sdk.core.model.data.CallApiState
 import com.voximplant.demos.sdk.core.model.data.CallDirection
+import com.voximplant.demos.sdk.core.model.data.CallState
 
 fun Call.asCallData() = CallApiData(
     id = id,
@@ -30,13 +22,14 @@ fun Call.asCallData() = CallApiData(
     remoteSipUri = remoteSipUri,
 )
 
-val CallState.asExternalModel
+val com.voximplant.android.sdk.calls.CallState.asInternalModel
     get() = when (this) {
-        Created -> CallApiState.CREATED
-        Connecting -> CallApiState.CONNECTING
-        Connected -> CallApiState.CONNECTED
-        Reconnecting -> CallApiState.RECONNECTING
-        Disconnecting -> CallApiState.DISCONNECTING
-        Disconnected -> CallApiState.DISCONNECTED
-        Failed -> CallApiState.FAILED
+        com.voximplant.android.sdk.calls.CallState.Created -> CallState.Created
+        com.voximplant.android.sdk.calls.CallState.Connecting -> CallState.Connecting
+        com.voximplant.android.sdk.calls.CallState.Connected -> CallState.Connected
+        com.voximplant.android.sdk.calls.CallState.Reconnecting -> CallState.Reconnecting
+        com.voximplant.android.sdk.calls.CallState.Disconnecting -> CallState.Disconnecting
+        com.voximplant.android.sdk.calls.CallState.Disconnected -> CallState.Disconnected
+        com.voximplant.android.sdk.calls.CallState.Failed -> CallState.Failed(null)
     }
+

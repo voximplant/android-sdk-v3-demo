@@ -22,7 +22,7 @@ import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
 import com.voximplant.demos.sdk.core.domain.StartCallUseCase
 import com.voximplant.demos.sdk.core.model.data.AudioDevice
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallApiState
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import com.voximplant.demos.sdk.feature.audiocall.ongoing.navigation.OngoingCallArgs
@@ -85,7 +85,7 @@ class AudioCallOngoingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (getCallState().first() != CallApiState.CREATED) return@launch
+            if (getCallState().first() != CallState.Created) return@launch
             getLoginState().collect { loginState ->
                 when (loginState) {
                     is LoginState.LoggedIn -> {
@@ -174,7 +174,7 @@ private fun callUiState(
     displayName: String?,
     loginStateFlow: Flow<LoginState>,
     callFlow: Flow<Call?>,
-    stateFlow: Flow<CallApiState?>,
+    stateFlow: Flow<CallState?>,
     isMutedFlow: Flow<Boolean>,
     isOnHoldFlow: Flow<Boolean>,
     audioDevicesFlow: Flow<List<AudioDevice>>,
@@ -189,18 +189,18 @@ private fun callUiState(
     audioDeviceFlow,
 ) { loginState, call, state, isMuted, isOnHold, audioDevices, audioDevice ->
     if (call == null || state == null) {
-        CallOngoingUiState.Inactive(state = CallState.Failed(error = "Call not found"), displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
+        CallOngoingUiState.Inactive(state = CallState.Failed("Call not found"), displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
     } else if (loginState is LoginState.Failed) {
-        CallOngoingUiState.Inactive(state = CallState.Failed(error = loginState.error.toString()), displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
+        CallOngoingUiState.Inactive(state = CallState.Failed(loginState.error.toString()), displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
     } else {
         when (state) {
-            CallApiState.CREATED -> CallOngoingUiState.Inactive(state = CallState.Connecting, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
-            CallApiState.CONNECTING -> CallOngoingUiState.Paused(state = CallState.Connecting, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
-            CallApiState.CONNECTED -> CallOngoingUiState.Active(state = CallState.Connected, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
-            CallApiState.RECONNECTING -> CallOngoingUiState.Paused(state = CallState.Reconnecting, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
-            CallApiState.DISCONNECTING -> CallOngoingUiState.Inactive(state = CallState.Disconnecting, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
-            CallApiState.DISCONNECTED -> CallOngoingUiState.Inactive(state = CallState.Disconnected, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
-            CallApiState.FAILED -> CallOngoingUiState.Inactive(state = CallState.Failed(error = state.toString()), displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            CallState.Created -> CallOngoingUiState.Inactive(state = CallState.Connecting, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
+            CallState.Connecting -> CallOngoingUiState.Paused(state = CallState.Connecting, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            CallState.Connected -> CallOngoingUiState.Active(state = CallState.Connected, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            CallState.Reconnecting -> CallOngoingUiState.Paused(state = CallState.Reconnecting, displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            CallState.Disconnecting -> CallOngoingUiState.Inactive(state = CallState.Disconnecting, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            CallState.Disconnected -> CallOngoingUiState.Inactive(state = CallState.Disconnected, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
+            is CallState.Failed -> CallOngoingUiState.Inactive(state = state, displayName = displayName, isMuted = isMuted, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
         }
     }
 }
@@ -242,15 +242,4 @@ sealed class CallOngoingUiState(
         override val audioDevice: AudioDevice?,
         override val call: Call,
     ) : CallOngoingUiState(state, displayName, isMuted, isOnHold, audioDevices, audioDevice, call)
-}
-
-sealed class CallState {
-    data object Connecting : CallState()
-    data object Connected : CallState()
-    data object Disconnected : CallState()
-    data object Reconnecting : CallState()
-    data object Disconnecting : CallState()
-    data class Failed(
-        val error: String,
-    ) : CallState()
 }
