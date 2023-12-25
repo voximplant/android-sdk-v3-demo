@@ -121,10 +121,12 @@ class CallDataSource @Inject constructor(
             if (call != null) {
                 coroutineScope.launch {
                     _callApiDataFlow.emit(null)
-                    _callState.emit(CallState.Created)
+                    _callState.emit(null)
                     _isMuted.value = false
                     _isOnHold.value = false
+
                     _callApiDataFlow.emit(call.asCallData())
+                    _callState.emit(CallState.Created)
                 }
                 activeCall = call
                 return Result.success(call.asCallData())
