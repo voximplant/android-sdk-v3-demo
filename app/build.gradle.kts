@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":feature:audiocall-incoming"))
     implementation(project(":feature:audiocall-ongoing"))
 
+    implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
     implementation(project(":core:push"))
