@@ -37,6 +37,7 @@ android {
 dependencies {
     api(project(":core:common"))
     api(project(":core:designsystem"))
+    api(project(":core:logger"))
     api(project(":core:resources"))
     api(project(":core:ui"))
 

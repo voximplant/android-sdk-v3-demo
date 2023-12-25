@@ -5,7 +5,6 @@
 package com.voximplant.demos.sdk.core.foundation
 
 import android.content.Context
-import android.util.Log
 import com.voximplant.android.sdk.core.AuthParams
 import com.voximplant.android.sdk.core.Client
 import com.voximplant.android.sdk.core.ClientSessionListener
@@ -24,6 +23,7 @@ import com.voximplant.android.sdk.core.RefreshTokenCallback
 import com.voximplant.android.sdk.core.RegisterPushTokenCallback
 import com.voximplant.demos.sdk.core.foundation.model.NetworkUser
 import com.voximplant.demos.sdk.core.foundation.model.NetworkUserData
+import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import com.voximplant.demos.sdk.core.model.data.UserCredentials
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -85,7 +85,7 @@ class AuthDataSource(
                 val loginResult: LoginResult = suspendCoroutine { continuation ->
                     client.login(username, password, object : LoginCallback {
                         override fun onFailure(loginError: LoginError) {
-                            Log.e("DemoV3", "AuthDataSource::logIn:onFailure: $loginError")
+                            Logger.error("AuthDataSource::logIn:onFailure: $loginError")
 
                             continuation.resume(LoginResult.Failure(loginError))
                         }
@@ -133,7 +133,7 @@ class AuthDataSource(
             }
 
             else -> {
-                Log.w("DemoV3", "AuthDataSource::logIn: client is in ${client.clientState}")
+                Logger.warning("AuthDataSource::logIn: client is in ${client.clientState}")
                 _loginState.emit(LoginState.Failed(com.voximplant.demos.sdk.core.model.data.LoginError.InternalError))
                 return Result.failure(com.voximplant.demos.sdk.core.model.data.LoginError.InternalError)
             }
@@ -152,7 +152,7 @@ class AuthDataSource(
                     }
 
                     is ConnectionResult.Failure -> {
-                        Log.e("DemoV3", "AuthDataSource::logIn: failed to connect to the cloud.")
+                        Logger.error("AuthDataSource::logIn: failed to connect to the cloud.")
                         val loginError = when (connectionResult.error) {
                             ConnectionError.InternalError -> com.voximplant.demos.sdk.core.model.data.LoginError.InternalError
                             ConnectionError.Interrupted -> com.voximplant.demos.sdk.core.model.data.LoginError.Interrupted
@@ -170,7 +170,7 @@ class AuthDataSource(
                 val loginResult: LoginResult = suspendCoroutine { continuation ->
                     client.loginWithAccessToken(username, accessToken, object : LoginCallback {
                         override fun onFailure(loginError: LoginError) {
-                            Log.e("DemoV3", "AuthDataSource::logIn:onFailure: $loginError")
+                            Logger.error("AuthDataSource::logIn:onFailure: $loginError")
                             continuation.resume(LoginResult.Failure(loginError))
                         }
 
@@ -217,7 +217,7 @@ class AuthDataSource(
             }
 
             else -> {
-                Log.w("DemoV3", "AuthDataSource::logIn: client is in ${client.clientState}")
+                Logger.warning("AuthDataSource::logIn: client is in ${client.clientState}")
                 return Result.failure(com.voximplant.demos.sdk.core.model.data.LoginError.InternalError)
             }
         }
@@ -267,7 +267,7 @@ class AuthDataSource(
             pushConfig = PushConfig(token, context.packageName),
             callback = object : RegisterPushTokenCallback {
                 override fun onFailure(error: PushTokenError) {
-                    Log.e("DemoV3", "AuthDataSource::registerPushToken failure: $error")
+                    Logger.error("AuthDataSource::registerPushToken failure: $error")
                     it.resume(Exception(error.toString()))
                 }
 
@@ -284,7 +284,7 @@ class AuthDataSource(
             pushConfig = PushConfig(token, context.packageName),
             callback = object : RegisterPushTokenCallback {
                 override fun onFailure(error: PushTokenError) {
-                    Log.e("DemoV3", "AuthDataSource::unregisterPush failure: $error")
+                    Logger.error("AuthDataSource::unregisterPush failure: $error")
                     it.resume(Exception(error.toString()))
                 }
 
