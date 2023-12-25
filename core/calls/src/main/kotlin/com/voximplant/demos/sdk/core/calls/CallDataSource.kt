@@ -4,7 +4,6 @@
 
 package com.voximplant.demos.sdk.core.calls
 
-import android.util.Log
 import com.voximplant.android.sdk.calls.Call
 import com.voximplant.android.sdk.calls.CallCallback
 import com.voximplant.android.sdk.calls.CallDirection
@@ -17,6 +16,7 @@ import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
 import com.voximplant.demos.sdk.core.common.Dispatcher
 import com.voximplant.demos.sdk.core.common.VoxDispatchers.Default
+import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.model.data.CallState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -144,7 +144,7 @@ class CallDataSource @Inject constructor(
     }
 
     fun startCall(id: String): Result<CallApiData> {
-        Log.d("DemoV3", "startCall: $activeCall")
+        Logger.debug("startCall: $activeCall")
         coroutineScope.launch {
             _callState.emit(CallState.Connecting)
         }
@@ -181,7 +181,7 @@ class CallDataSource @Inject constructor(
     fun hold(value: Boolean) {
         activeCall?.hold(value, object : CallCallback {
             override fun onFailure(exception: CallException) {
-                Log.e("DemoV3", "CallDataSource::hold failed")
+                Logger.error("CallDataSource::hold failed")
             }
 
             override fun onSuccess() {
