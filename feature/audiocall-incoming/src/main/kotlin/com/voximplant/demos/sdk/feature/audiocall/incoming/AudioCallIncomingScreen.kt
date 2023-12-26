@@ -5,6 +5,7 @@
 package com.voximplant.demos.sdk.feature.audiocall.incoming
 
 import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,7 +49,6 @@ import com.voximplant.demos.sdk.core.permissions.MicrophonePermissionEffect
 import com.voximplant.demos.sdk.core.resources.R
 import com.voximplant.demos.sdk.core.ui.CallActionButton
 import com.voximplant.demos.sdk.core.ui.CallFailedDialog
-import kotlinx.coroutines.launch
 
 @Composable
 fun AudioCallIncomingRoute(
@@ -57,7 +56,6 @@ fun AudioCallIncomingRoute(
     onCallEnded: () -> Unit,
     onCallAnswered: (String, String?) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val action = (context as Activity).intent.action
 
@@ -65,7 +63,7 @@ fun AudioCallIncomingRoute(
 
     var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
     var showMicrophoneRationale by rememberSaveable {
-        if (action == "com.voximplant.demos.sdk.ACTION_ANSWER_CALL" && !microphonePermissionGranted) {
+        if (action == Intent.ACTION_ANSWER && !microphonePermissionGranted) {
             mutableStateOf(true)
         } else {
             mutableStateOf(false)
@@ -104,9 +102,7 @@ fun AudioCallIncomingRoute(
             },
             onAnswerClick = {
                 if (microphonePermissionGranted) {
-                    scope.launch {
-                        onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
-                    }
+                    onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
                 } else {
                     showMicrophoneRationale = true
                 }
@@ -121,6 +117,12 @@ fun AudioCallIncomingRoute(
             showMicrophoneRationale = false
         },
     )
+
+    LaunchedEffect(Unit) {
+        if (action == Intent.ACTION_ANSWER && microphonePermissionGranted) {
+            onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
+        }
+    }
 }
 
 @Composable

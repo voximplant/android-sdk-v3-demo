@@ -13,7 +13,6 @@
             <intent-filter>
                 <action android:name="com.voximplant.demos.sdk.ACTION_HANG_UP_CALL" />
                 <action android:name="com.voximplant.demos.sdk.ACTION_REJECT_CALL" />
-                <action android:name="com.voximplant.demos.sdk.ACTION_ANSWER_CALL" />
             </intent-filter>
         </receiver>
     </application>

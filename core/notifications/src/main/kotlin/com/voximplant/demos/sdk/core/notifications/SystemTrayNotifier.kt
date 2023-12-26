@@ -78,7 +78,7 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val answerIntent = Intent(VoxBroadcastReceiver.ACTION_ANSWER_CALL).apply {
+    val answerIntent = Intent(Intent.ACTION_ANSWER).apply {
         putExtra("id", id)
         putExtra("displayName", displayName)
     }
@@ -92,12 +92,13 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         )
     } else {
         TaskStackBuilder.create(this).run {
-            addNextIntentWithParentStack(packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            addNextIntent(packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                action = Intent.ACTION_ANSWER
                 putExtra("id", id)
                 putExtra("displayName", displayName)
             } ?: return@run null)
             getPendingIntent(
-                0,
+                INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }

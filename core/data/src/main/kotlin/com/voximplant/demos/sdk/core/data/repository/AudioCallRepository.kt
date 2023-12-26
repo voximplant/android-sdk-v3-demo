@@ -57,6 +57,7 @@ class AudioCallRepository @Inject constructor(
             reject()
         },
         onAnswerReceived = {
+            notifier.cancelCallNotification()
             coroutineScope.launch {
                 callFlow.firstOrNull()?.id?.let { id ->
                     startCall(id)
@@ -106,6 +107,7 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun createCall(username: String): Result<Call> {
+        notifier.cancelCallNotification()
         callDataSource.createCall(username).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->

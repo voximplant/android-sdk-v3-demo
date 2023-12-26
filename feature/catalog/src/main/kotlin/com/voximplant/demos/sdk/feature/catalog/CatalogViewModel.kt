@@ -7,6 +7,7 @@ package com.voximplant.demos.sdk.feature.catalog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
+import com.voximplant.demos.sdk.core.domain.GetLoginStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.domain.LogOutUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
@@ -20,12 +21,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CatalogViewModel @Inject constructor(
+    getLoginState: GetLoginStateUseCase,
     getUserUseCase: GetUserUseCase,
     getCall: GetCallUseCase,
     private val silentLogInUseCase: SilentLogInUseCase,
@@ -51,6 +54,11 @@ class CatalogViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            if (getLoginState().first() == LoginState.LoggedIn) {
+                _loginState.value = LoginState.LoggedIn
+                return@launch
+            }
+
             _loginState.value = LoginState.LoggingIn
 
             silentLogInUseCase()

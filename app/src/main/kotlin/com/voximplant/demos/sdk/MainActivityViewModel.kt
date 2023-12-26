@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val audioCallRepository: AudioCallRepository,
+    audioCallRepository: AudioCallRepository,
 ) : ViewModel() {
     val uiState: StateFlow<MainActivityUiState> = MutableStateFlow(MainActivityUiState.Success)
 
@@ -21,8 +21,4 @@ class MainActivityViewModel @Inject constructor(
         audioCallRepository.startListeningForIncomingCalls()
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        audioCallRepository.stopListeningForIncomingCalls()
-    }
 }
