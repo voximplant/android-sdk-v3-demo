@@ -6,13 +6,11 @@ package com.voximplant.demos.sdk.feature.catalog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.domain.LogOutUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +28,6 @@ import javax.inject.Inject
 class CatalogViewModel @Inject constructor(
     getUserUseCase: GetUserUseCase,
     getCall: GetCallUseCase,
-    getCallState: GetCallStateUseCase,
     private val silentLogInUseCase: SilentLogInUseCase,
     private val logOutUseCase: LogOutUseCase,
 ) : ViewModel() {
@@ -46,7 +43,6 @@ class CatalogViewModel @Inject constructor(
     val catalogUiState: StateFlow<CatalogUiState> = catalogUiState(
         loginStateFlow = loginState,
         callFlow = getCall(),
-        callStateFlow = getCallState(),
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -77,17 +73,14 @@ class CatalogViewModel @Inject constructor(
 private fun catalogUiState(
     loginStateFlow: Flow<LoginState>,
     callFlow: Flow<Call?>,
-    callStateFlow: Flow<CallState?>,
-): Flow<CatalogUiState> = combine(loginStateFlow, callFlow, callStateFlow) { loginState, call, callState ->
+): Flow<CatalogUiState> = combine(loginStateFlow, callFlow) { loginState, call ->
     CatalogUiState(
         loginState = loginState,
         call = call,
-        callState = callState,
     )
 }
 
 data class CatalogUiState(
     val loginState: LoginState = LoginState.LoggedOut,
     val call: Call? = null,
-    val callState: CallState? = null,
 )

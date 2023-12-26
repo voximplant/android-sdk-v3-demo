@@ -29,21 +29,19 @@ class AudioCallRepository @Inject constructor(
     private val notifier: Notifier,
     coroutineScope: CoroutineScope,
 ) {
-    val call: Flow<Call?>
+    val callFlow: Flow<Call?>
         get() = combine(callDataSource.callApiDataFlow, callDataSource.duration) { callApiData, duration ->
             if (callApiData == null) return@combine null
 
             Call(
                 id = callApiData.id,
+                state = callApiData.state,
                 direction = callApiData.callDirection,
                 duration = duration,
                 remoteDisplayName = callApiData.remoteDisplayName,
                 remoteSipUri = callApiData.remoteSipUri,
             )
         }
-
-    val state: Flow<CallState?>
-        get() = callDataSource.callStateFlow
 
     val isMuted: Flow<Boolean>
         get() = callDataSource.isMuted
@@ -60,7 +58,7 @@ class AudioCallRepository @Inject constructor(
         },
         onAnswerReceived = {
             coroutineScope.launch {
-                call.firstOrNull()?.id?.let { id ->
+                callFlow.firstOrNull()?.id?.let { id ->
                     startCall(id)
                 }
             }
@@ -69,33 +67,31 @@ class AudioCallRepository @Inject constructor(
 
     init {
         coroutineScope.launch {
-            combine(call, state, ::Pair).collect {
-                val call = it.first ?: return@collect
-                val state = it.second ?: return@collect
+            callFlow.collect { call ->
+                val ongoingAudioCallService = Intent(context, OngoingAudioCallService::class.java)
 
-                val ongoingCallIntent = Intent(context, OngoingAudioCallService::class.java).apply {
-                    putExtra("id", call.id)
-                    putExtra("displayName", call.remoteDisplayName)
-                }
-
-                if (state is CallState.Created) {
+                if (call?.state is CallState.Created) {
                     if (call.direction == CallDirection.INCOMING) {
                         br.register(context)
                         notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
                     }
-                } else if (state is CallState.Connected) {
+                } else if (call?.state is CallState.Connected) {
                     if (call.duration != 0L) return@collect
 
                     br.register(context)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(ongoingCallIntent)
-                    } else {
-                        context.startService(ongoingCallIntent)
+                    ongoingAudioCallService.apply {
+                        putExtra("id", call.id)
+                        putExtra("displayName", call.remoteDisplayName)
                     }
-                } else if (state is CallState.Disconnected || state is CallState.Failed) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(ongoingAudioCallService)
+                    } else {
+                        context.startService(ongoingAudioCallService)
+                    }
+                } else if (call == null || call.state is CallState.Disconnected || call.state is CallState.Failed) {
                     br.unregister(context)
                     notifier.cancelCallNotification()
-                    context.stopService(ongoingCallIntent)
+                    context.stopService(ongoingAudioCallService)
                 }
             }
         }

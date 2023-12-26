@@ -75,10 +75,10 @@ fun AudioCallIncomingRoute(
     var callFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
     LaunchedEffect(audioCallIncomingUiState) {
-        when (audioCallIncomingUiState.state) {
+        when (val state = audioCallIncomingUiState.call?.state) {
             is CallState.Connected -> onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
             is CallState.Disconnected -> onCallEnded()
-            is CallState.Failed -> callFailedDescription = (audioCallIncomingUiState.state as CallState.Failed).description
+            is CallState.Failed -> callFailedDescription = state.description
             else -> {}
         }
     }
@@ -225,7 +225,7 @@ private fun PreviewAudioCallIncomingScreen() {
         mutableStateOf(
             AudioCallIncomingUiState(
                 displayName = "Display Name",
-                state = CallState.Connecting,
+                call = null,
             ),
         )
     }

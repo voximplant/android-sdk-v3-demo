@@ -7,11 +7,9 @@ package com.voximplant.demos.sdk.feature.audiocall
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.demos.sdk.core.domain.CreateCallUseCase
-import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
-import com.voximplant.demos.sdk.core.model.data.CallState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +24,6 @@ class AudioCallViewModel @Inject constructor(
     getUserUseCase: GetUserUseCase,
     private val createCallUseCase: CreateCallUseCase,
     getCall: GetCallUseCase,
-    getCallState: GetCallStateUseCase,
 ) : ViewModel() {
     val user = getUserUseCase().stateIn(
         scope = viewModelScope,
@@ -36,7 +33,6 @@ class AudioCallViewModel @Inject constructor(
 
     val audioCallUiState: StateFlow<AudioCallUiState> = audioCallUiState(
         callFlow = getCall(),
-        callStateFlow = getCallState(),
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -53,19 +49,16 @@ class AudioCallViewModel @Inject constructor(
 
 private fun audioCallUiState(
     callFlow: Flow<Call?>,
-    callStateFlow: Flow<CallState?>,
-): Flow<AudioCallUiState> = combine(callFlow, callStateFlow) { call, state ->
-    if (call == null || state == null) {
+): Flow<AudioCallUiState> = combine(callFlow) {
+    val call = it[0]
+    if (call == null) {
         AudioCallUiState.Inactive
     } else {
-        AudioCallUiState.Active(
-            call = call,
-            state = state,
-        )
+        AudioCallUiState.Active(call = call)
     }
 }
 
 sealed interface AudioCallUiState {
-    data class Active(val call: Call, val state: CallState) : AudioCallUiState
+    data class Active(val call: Call) : AudioCallUiState
     data object Inactive : AudioCallUiState
 }

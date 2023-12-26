@@ -6,9 +6,11 @@ package com.voximplant.demos.sdk.core.calls.model
 
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
+import com.voximplant.demos.sdk.core.model.data.CallState
 
 data class CallApiData(
     val id: String,
+    var state: CallState,
     val callDirection: CallDirection,
     val callDuration: Long,
     val remoteDisplayName: String?,
@@ -17,6 +19,7 @@ data class CallApiData(
 
 fun CallApiData.asCall() = Call(
     id = id,
+    state = state,
     direction = callDirection,
     duration = callDuration,
     remoteDisplayName = remoteDisplayName,

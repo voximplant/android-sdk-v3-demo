@@ -70,10 +70,10 @@ fun AudioCallOngoingRoute(
 
     var showAudioDevices by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(callOngoingUiState) {
-        when (callOngoingUiState.state) {
+    LaunchedEffect(callOngoingUiState.call) {
+        when (val state = callOngoingUiState.call?.state) {
             is CallState.Disconnected -> onCallEnded()
-            is CallState.Failed -> callFailedDescription = (callOngoingUiState.state as CallState.Failed).description
+            is CallState.Failed -> callFailedDescription = state.description
             else -> {}
         }
     }
@@ -201,16 +201,16 @@ fun AudioCallOngoingScreen(
                             Text(text = callOngoingUiState.call?.remoteDisplayName ?: callOngoingUiState.displayName ?: stringResource(R.string.unknown_user))
                         }
                         ProvideTextStyle(value = Typography.bodySmall.copy(color = Gray10)) {
-                            val stateText = when (callOngoingUiState.state) {
+                            val stateText = when (callOngoingUiState.call?.state) {
                                 is CallState.Created, is CallState.Connected -> stringResource(R.string.call_state_connected)
                                 is CallState.Connecting -> stringResource(R.string.call_state_connecting)
                                 is CallState.Disconnected -> stringResource(R.string.call_state_disconnected)
                                 is CallState.Disconnecting -> stringResource(R.string.call_state_disconnecting)
-                                is CallState.Failed -> stringResource(R.string.call_state_failed)
                                 is CallState.Reconnecting -> stringResource(R.string.call_state_reconnecting)
+                                is CallState.Failed, null -> stringResource(R.string.call_state_failed)
                             }
 
-                            if (callOngoingUiState.state is CallState.Connected && duration != 0L) {
+                            if (callOngoingUiState.call?.state is CallState.Connected && duration != 0L) {
                                 Text(text = formatDuration(duration))
                             } else {
                                 Text(text = stateText)
@@ -309,7 +309,6 @@ fun PreviewAudioCallScreen() {
     val callOngoingUiState by remember(isMuted) {
         mutableStateOf(
             CallOngoingUiState.Inactive(
-                state = CallState.Connecting,
                 displayName = "Display Name",
                 isMuted = isMuted,
                 audioDevices = emptyList(),

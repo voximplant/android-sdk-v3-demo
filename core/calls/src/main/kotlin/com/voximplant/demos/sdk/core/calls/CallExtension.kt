@@ -13,6 +13,7 @@ import com.voximplant.demos.sdk.core.model.data.CallState
 
 fun Call.asCallData() = CallApiData(
     id = id,
+    state = state.asInternalModel,
     callDirection = when (callDirection) {
         Incoming -> CallDirection.INCOMING
         Outgoing -> CallDirection.OUTGOING

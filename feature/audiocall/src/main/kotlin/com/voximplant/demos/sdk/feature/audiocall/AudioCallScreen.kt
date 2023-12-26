@@ -75,7 +75,7 @@ fun AudioCallRoute(
     LaunchedEffect(audioCallUiState) {
         if (audioCallUiState is AudioCallUiState.Active) {
             val call = (audioCallUiState as AudioCallUiState.Active).call
-            val state = (audioCallUiState as AudioCallUiState.Active).state
+            val state = (audioCallUiState as AudioCallUiState.Active).call.state
 
             if (call == rememberCall) return@LaunchedEffect
 
