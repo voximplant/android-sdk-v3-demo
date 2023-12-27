@@ -119,6 +119,7 @@ fun AudioCallIncomingRoute(
     )
 
     LaunchedEffect(Unit) {
+        context.intent.action = null
         if (action == Intent.ACTION_ANSWER && microphonePermissionGranted) {
             onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
         }
