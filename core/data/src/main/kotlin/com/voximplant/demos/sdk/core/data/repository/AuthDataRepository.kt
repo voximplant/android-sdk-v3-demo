@@ -46,16 +46,10 @@ class AuthDataRepository @Inject constructor(
         authDataSource.logIn(modifiedUsername, password, node.asExternal()).let { result: Result<NetworkUserData> ->
             result.fold(
                 onSuccess = { networkUser ->
-                    var pushToken: String? = null
-
                     try {
-                        pushToken = pushTokenProvider.getToken()
+                        authDataSource.registerPushToken(pushTokenProvider.getToken())
                     } catch (exception: IOException) {
                         Log.e("Voximplant", "AuthDataRepository::logIn: failed to get pushToken", exception)
-                    }
-
-                    if (pushToken != null) {
-                        authDataSource.registerPushToken(pushToken)
                     }
                     userPreferencesDataSource.updateUser(networkUser.asUserData())
                     userPreferencesDataSource.updateNode(node)
@@ -76,16 +70,10 @@ class AuthDataRepository @Inject constructor(
             val node = getNode().getOrNull() ?: return@let Result.failure(LoginError.InternalError)
             logInWithToken(node).await().fold(
                 onSuccess = { userData ->
-                    var pushToken: String? = null
-
                     try {
-                        pushToken = pushTokenProvider.getToken()
+                        authDataSource.registerPushToken(pushTokenProvider.getToken())
                     } catch (exception: IOException) {
                         Log.e("Voximplant", "AuthDataRepository::silentLogIn: failed to get pushToken", exception)
-                    }
-
-                    if (pushToken != null) {
-                        authDataSource.registerPushToken(pushToken)
                     }
                     userPreferencesDataSource.updateUser(userData)
                     userPreferencesDataSource.updateNode(node)
@@ -150,14 +138,26 @@ class AuthDataRepository @Inject constructor(
     suspend fun logOut() = coroutineScope {
         if (loginState.first() is LoginState.LoggedIn) {
             userPreferencesDataSource.clearUser()
-            authDataSource.unregisterPush(pushTokenProvider.getToken())
+
+            try {
+                authDataSource.unregisterPush(pushTokenProvider.getToken())
+            } catch (exception: IOException) {
+                Log.e("Voximplant", "AuthDataRepository::logOut: failed to get pushToken", exception)
+            }
+
             authDataSource.disconnect()
         } else {
             val node = getNode().getOrNull() ?: return@coroutineScope
             val loginJob = logInWithToken(node)
             userPreferencesDataSource.clearUser()
             loginJob.await().let { loginResult ->
-                if (loginResult.isSuccess) authDataSource.unregisterPush(pushTokenProvider.getToken())
+                if (loginResult.isSuccess) {
+                    try {
+                        authDataSource.unregisterPush(pushTokenProvider.getToken())
+                    } catch (exception: IOException) {
+                        Log.e("Voximplant", "AuthDataRepository::logOut: failed to get pushToken", exception)
+                    }
+                }
                 authDataSource.disconnect()
             }
         }
