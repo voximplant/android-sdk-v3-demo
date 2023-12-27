@@ -127,6 +127,20 @@ class CallDataSource @Inject constructor(
         }
     }
 
+    fun refuseCall() {
+        coroutineScope.launch {
+            if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Created) {
+                Log.d("Voximplant", "CallDataSource::refuseCall")
+                _callApiDataFlow.emit(null)
+                _isMuted.value = false
+                _isOnHold.value = false
+                activeCall = null
+            } else {
+                Log.e("Voximplant", "CallDataSource::refuseCall: Only a recently created call can be refused")
+            }
+        }
+    }
+
     fun startListeningForIncomingCalls() {
         callManager.setIncomingCallListener(incomingCallListener)
     }

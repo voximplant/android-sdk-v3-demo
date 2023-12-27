@@ -120,6 +120,8 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
+    fun refuseCall() = callDataSource.refuseCall()
+
     fun startCall(id: String): Result<Call> {
         callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(

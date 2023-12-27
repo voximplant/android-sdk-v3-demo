@@ -16,6 +16,7 @@ import com.voximplant.demos.sdk.core.domain.GetMuteStateUseCase
 import com.voximplant.demos.sdk.core.domain.HangUpCallUseCase
 import com.voximplant.demos.sdk.core.domain.HoldCallUseCase
 import com.voximplant.demos.sdk.core.domain.MuteCallUseCase
+import com.voximplant.demos.sdk.core.domain.RefuseCallUseCase
 import com.voximplant.demos.sdk.core.domain.SelectAudioDeviceUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
 import com.voximplant.demos.sdk.core.domain.StartCallUseCase
@@ -43,6 +44,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     silentLogIn: SilentLogInUseCase,
     getLoginState: GetLoginStateUseCase,
     getCall: GetCallUseCase,
+    private val refuseCall: RefuseCallUseCase,
     getMuteState: GetMuteStateUseCase,
     getHoldState: GetHoldStateUseCase,
     getAudioDevices: GetAudioDevicesUseCase,
@@ -138,6 +140,11 @@ class AudioCallOngoingViewModel @Inject constructor(
         viewModelScope.launch {
             hangUpCall()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        refuseCall()
     }
 
 }
