@@ -141,7 +141,11 @@ class CallDataSource @Inject constructor(
                 CallDirection.Outgoing -> {
                     return try {
                         call.setCallListener(callListener)
-                        call.start()
+                        try {
+                            call.start()
+                        } catch (exception: CallException) {
+                            Log.e("Voximplant", exception.message, exception)
+                        }
                         Result.success(call.asCallData())
                     } catch (exception: CallException) {
                         Result.failure(exception)
@@ -149,11 +153,13 @@ class CallDataSource @Inject constructor(
                 }
 
                 CallDirection.Incoming -> {
-                    call.let {
-                        it.setCallListener(callListener)
-                        it.answer(CallSettings())
-                        return Result.success(it.asCallData())
+                    call.setCallListener(callListener)
+                    try {
+                        call.answer(CallSettings())
+                    } catch (exception: CallException) {
+                        Log.e("Voximplant", exception.message, exception)
                     }
+                    return Result.success(call.asCallData())
                 }
             }
         } ?: return Result.failure(Throwable("Call not found"))
@@ -185,7 +191,11 @@ class CallDataSource @Inject constructor(
     }
 
     fun reject() {
-        activeCall?.reject(RejectMode.Decline, null)
+        try {
+            activeCall?.reject(RejectMode.Decline, null)
+        } catch (exception: CallException) {
+            Log.e("Voximplant", exception.message, exception)
+        }
     }
 
     private fun startCallTimer(call: Call) {
