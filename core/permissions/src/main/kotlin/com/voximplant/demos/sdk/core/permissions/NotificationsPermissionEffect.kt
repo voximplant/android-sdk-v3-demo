@@ -68,7 +68,13 @@ fun NotificationsPermissionEffect(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                onPermissionGranted(notificationsPermissionState.status.isGranted)
+                notificationsPermissionState.status.isGranted.let { isGranted ->
+                    if (isGranted) {
+                        showRequest = false
+                        showSettings = false
+                    }
+                    onPermissionGranted(isGranted)
+                }
             }
         }
 

@@ -67,7 +67,13 @@ fun MicrophonePermissionEffect(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                onPermissionGranted(microphonePermissionState.status.isGranted)
+                microphonePermissionState.status.isGranted.let { isGranted ->
+                    if (isGranted) {
+                        showRequest = false
+                        showSettings = false
+                    }
+                    onPermissionGranted(isGranted)
+                }
             }
         }
 
