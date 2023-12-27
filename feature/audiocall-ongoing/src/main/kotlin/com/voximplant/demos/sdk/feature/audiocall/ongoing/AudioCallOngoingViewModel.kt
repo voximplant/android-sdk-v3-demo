@@ -71,7 +71,7 @@ class AudioCallOngoingViewModel @Inject constructor(
         audioDeviceFlow = getAudioDevice(),
     ).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
+        started = SharingStarted.Eagerly,
         initialValue = CallOngoingUiState.Inactive(
             displayName = displayName,
             call = getCall().stateIn(viewModelScope, SharingStarted.Eagerly, initialValue = null).value,
@@ -89,6 +89,7 @@ class AudioCallOngoingViewModel @Inject constructor(
             getLoginState().collect { loginState ->
                 when (loginState) {
                     is LoginState.LoggedIn -> {
+                        this@AudioCallOngoingViewModel.loginState.value = LoginState.LoggedIn
                         startCall(ongoingCallArgs.id)
                         cancel()
                     }
@@ -98,6 +99,7 @@ class AudioCallOngoingViewModel @Inject constructor(
                         silentLogIn().onFailure { throwable ->
                             if (throwable is LoginError) {
                                 this@AudioCallOngoingViewModel.loginState.value = LoginState.Failed(throwable)
+                                cancel()
                             }
                         }
                     }
