@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import javax.inject.Inject
 
 class AuthDataRepository @Inject constructor(
@@ -45,7 +46,17 @@ class AuthDataRepository @Inject constructor(
         authDataSource.logIn(modifiedUsername, password, node.asExternal()).let { result: Result<NetworkUserData> ->
             result.fold(
                 onSuccess = { networkUser ->
-                    authDataSource.registerPushToken(pushTokenProvider.getToken())
+                    var pushToken: String? = null
+
+                    try {
+                        pushToken = pushTokenProvider.getToken()
+                    } catch (exception: IOException) {
+                        Log.e("Voximplant", "AuthDataRepository::logIn: failed to get pushToken", exception)
+                    }
+
+                    if (pushToken != null) {
+                        authDataSource.registerPushToken(pushToken)
+                    }
                     userPreferencesDataSource.updateUser(networkUser.asUserData())
                     userPreferencesDataSource.updateNode(node)
                     return Result.success(networkUser.asUserData().user)
@@ -65,7 +76,17 @@ class AuthDataRepository @Inject constructor(
             val node = getNode().getOrNull() ?: return@let Result.failure(LoginError.InternalError)
             logInWithToken(node).await().fold(
                 onSuccess = { userData ->
-                    authDataSource.registerPushToken(pushTokenProvider.getToken())
+                    var pushToken: String? = null
+
+                    try {
+                        pushToken = pushTokenProvider.getToken()
+                    } catch (exception: IOException) {
+                        Log.e("Voximplant", "AuthDataRepository::silentLogIn: failed to get pushToken", exception)
+                    }
+
+                    if (pushToken != null) {
+                        authDataSource.registerPushToken(pushToken)
+                    }
                     userPreferencesDataSource.updateUser(userData)
                     userPreferencesDataSource.updateNode(node)
                     return@fold Result.success(userData.user)
