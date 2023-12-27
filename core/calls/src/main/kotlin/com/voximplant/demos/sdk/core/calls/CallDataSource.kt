@@ -146,7 +146,7 @@ class CallDataSource @Inject constructor(
                 _isMuted.value = false
                 _isOnHold.value = false
                 activeCall = null
-            } else {
+            } else if (activeCall?.state !in listOf(com.voximplant.android.sdk.calls.CallState.Disconnected, com.voximplant.android.sdk.calls.CallState.Failed)) {
                 Log.e("Voximplant", "CallDataSource::refuseCall: Only a recently created call can be refused")
             }
         }
