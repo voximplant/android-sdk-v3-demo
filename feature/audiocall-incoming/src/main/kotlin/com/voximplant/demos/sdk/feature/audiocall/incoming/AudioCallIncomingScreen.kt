@@ -99,6 +99,7 @@ fun AudioCallIncomingRoute(
             audioCallIncomingUiState = audioCallIncomingUiState,
             onRejectClick = {
                 viewModel.reject()
+                onCallEnded()
             },
             onAnswerClick = {
                 if (microphonePermissionGranted) {

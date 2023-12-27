@@ -68,10 +68,19 @@ class CallDataSource @Inject constructor(
             }
         }
 
+        override fun onCallReconnecting(call: Call) {
+            activeCall = call
+        }
+
         override fun onCallReconnected(call: Call) {
-            if (call.state == com.voximplant.android.sdk.calls.CallState.Created) {
-                startCall(call.id)
+            activeCall = call
+
+            when (suspendedAction) {
+                is SuspendedAction.Reject -> reject()
+                is SuspendedAction.Answer -> startCall(call.id)
+                null -> {}
             }
+            suspendedAction = null
         }
     }
 
@@ -108,6 +117,8 @@ class CallDataSource @Inject constructor(
     val isOnHold: Flow<Boolean> = _isOnHold.asStateFlow()
 
     private var callTimer: Timer = Timer("callTimer")
+
+    private var suspendedAction: SuspendedAction? = null
 
     fun createCall(username: String): Result<CallApiData> {
         callManager.call(username, CallSettings()).let { call ->
@@ -178,6 +189,9 @@ class CallDataSource @Inject constructor(
                         call.answer(CallSettings())
                     } catch (exception: CallException) {
                         Log.e("Voximplant", exception.message, exception)
+                        if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
+                            suspendedAction = SuspendedAction.Answer
+                        }
                     }
                     return Result.success(call.asCallData())
                 }
@@ -215,6 +229,9 @@ class CallDataSource @Inject constructor(
             activeCall?.reject(RejectMode.Decline, null)
         } catch (exception: CallException) {
             Log.e("Voximplant", exception.message, exception)
+            if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
+                suspendedAction = SuspendedAction.Reject
+            }
         }
     }
 
@@ -228,3 +245,8 @@ class CallDataSource @Inject constructor(
 }
 
 private const val TIMER_DELAY_MS = 1000L
+
+private sealed interface SuspendedAction {
+    data object Answer : SuspendedAction
+    data object Reject : SuspendedAction
+}

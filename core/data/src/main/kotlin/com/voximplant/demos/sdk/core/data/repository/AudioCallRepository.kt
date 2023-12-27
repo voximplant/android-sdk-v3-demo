@@ -123,6 +123,7 @@ class AudioCallRepository @Inject constructor(
     fun refuseCall() = callDataSource.refuseCall()
 
     fun startCall(id: String): Result<Call> {
+        notifier.cancelCallNotification()
         callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -148,6 +149,7 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun reject() {
+        notifier.cancelCallNotification()
         callDataSource.reject()
     }
 }
