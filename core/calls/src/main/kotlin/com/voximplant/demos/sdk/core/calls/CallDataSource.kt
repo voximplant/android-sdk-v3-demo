@@ -67,6 +67,12 @@ class CallDataSource @Inject constructor(
                 _callApiDataFlow.emit(call.asCallData())
             }
         }
+
+        override fun onCallReconnected(call: Call) {
+            if (call.state == com.voximplant.android.sdk.calls.CallState.Created) {
+                startCall(call.id)
+            }
+        }
     }
 
     private val incomingCallListener = object : IncomingCallListener {
