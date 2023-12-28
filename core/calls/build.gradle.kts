@@ -30,7 +30,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:model"))
 
-    implementation(libs.voximplant.sdk.bom)
+    implementation(platform(libs.voximplant.sdk.bom))
     api(libs.voximplant.sdk.calls)
 
     implementation(libs.androidx.core.ktx)
