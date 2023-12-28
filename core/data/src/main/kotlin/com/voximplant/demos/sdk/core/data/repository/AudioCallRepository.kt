@@ -36,7 +36,7 @@ class AudioCallRepository @Inject constructor(
             Call(
                 id = callApiData.id,
                 state = callApiData.state,
-                direction = callApiData.callDirection,
+                direction = callApiData.direction,
                 duration = duration,
                 remoteDisplayName = callApiData.remoteDisplayName,
                 remoteSipUri = callApiData.remoteSipUri,

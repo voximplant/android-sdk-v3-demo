@@ -11,8 +11,8 @@ import com.voximplant.demos.sdk.core.model.data.CallState
 data class CallApiData(
     val id: String,
     var state: CallState,
-    val callDirection: CallDirection,
-    val callDuration: Long,
+    val direction: CallDirection,
+    val duration: Long,
     val remoteDisplayName: String?,
     val remoteSipUri: String?,
 )
@@ -20,8 +20,8 @@ data class CallApiData(
 fun CallApiData.asCall() = Call(
     id = id,
     state = state,
-    direction = callDirection,
-    duration = callDuration,
+    direction = direction,
+    duration = duration,
     remoteDisplayName = remoteDisplayName,
     remoteSipUri = remoteSipUri,
 )

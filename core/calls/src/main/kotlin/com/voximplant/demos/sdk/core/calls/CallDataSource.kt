@@ -62,7 +62,7 @@ class CallDataSource @Inject constructor(
             }
         }
 
-        override fun onCallRinging(call: Call, headers: Map<String, String>?) {
+        override fun onStartRinging(call: Call, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
             }
@@ -168,7 +168,7 @@ class CallDataSource @Inject constructor(
         activeCall?.let { call ->
             if (call.id != id) return Result.failure(Throwable("Call not found"))
 
-            when (call.callDirection) {
+            when (call.direction) {
                 CallDirection.Outgoing -> {
                     return try {
                         call.setCallListener(callListener)
@@ -238,7 +238,7 @@ class CallDataSource @Inject constructor(
     private fun startCallTimer(call: Call) {
         callTimer = Timer("callTimer").apply {
             scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
-                _duration.value = call.callDuration
+                _duration.value = call.duration
             }
         }
     }
