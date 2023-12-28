@@ -140,7 +140,7 @@ class CallDataSource @Inject constructor(
 
     fun refuseCall() {
         coroutineScope.launch {
-            if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Created) {
+            if (activeCall?.state in listOf(com.voximplant.android.sdk.calls.CallState.Created, com.voximplant.android.sdk.calls.CallState.Disconnecting)) {
                 Log.d("Voximplant", "CallDataSource::refuseCall")
                 _callApiDataFlow.emit(null)
                 _isMuted.value = false
