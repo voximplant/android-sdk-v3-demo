@@ -9,4 +9,6 @@ data class UserData(
     val accessToken: String,
     val refreshToken: String,
     val node: Node?,
+    val shouldHideNotificationPermissionRequest: Boolean,
+    val shouldHideMicrophonePermissionRequest: Boolean,
 )

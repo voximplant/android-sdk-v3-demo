@@ -62,13 +62,7 @@ fun AudioCallIncomingRoute(
     val audioCallIncomingUiState by viewModel.callIncomingUiState.collectAsStateWithLifecycle()
 
     var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
-    var showMicrophoneRationale by rememberSaveable {
-        if (action == Intent.ACTION_ANSWER && !microphonePermissionGranted) {
-            mutableStateOf(true)
-        } else {
-            mutableStateOf(false)
-        }
-    }
+    var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
 
     var callFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
