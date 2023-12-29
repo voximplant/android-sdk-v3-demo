@@ -11,4 +11,7 @@ message UserPreferences {
   string access_token = 2;
   string refresh_token = 3;
   NodeProto node = 4;
+
+  bool should_hide_notification_permission_request = 5;
+  bool should_hide_microphone_permission_request = 6;
 }

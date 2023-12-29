@@ -8,3 +8,5 @@ data class User(
     val username: String,
     val displayName: String,
 )
+
+fun User.isNotEmpty() = username.isNotEmpty()

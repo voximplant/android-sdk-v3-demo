@@ -25,9 +25,7 @@ import javax.inject.Inject
 class UserPreferencesDataSource @Inject constructor(
     private val userPreferencesDataStore: DataStore<UserPreferences>,
 ) {
-    val userData: Flow<UserData?> = userPreferencesDataStore.data.map { userPreferences ->
-        if (!userPreferences.hasUser()) return@map null
-
+    val userData: Flow<UserData> = userPreferencesDataStore.data.map { userPreferences ->
         UserData(
             user = User(
                 username = userPreferences.user.username,
@@ -52,6 +50,8 @@ class UserPreferencesDataSource @Inject constructor(
                 NodeProto.NODE_9 -> Node9
                 NodeProto.NODE_10 -> Node10
             },
+            shouldHideNotificationPermissionRequest = userPreferences.shouldHideNotificationPermissionRequest,
+            shouldHideMicrophonePermissionRequest = userPreferences.shouldHideMicrophonePermissionRequest,
         )
     }
 
@@ -77,13 +77,15 @@ class UserPreferencesDataSource @Inject constructor(
         }
     }
 
-    suspend fun clearUser() {
+    suspend fun clearUserData() {
         userPreferencesDataStore.updateData { userPreferences ->
             userPreferences.copy {
                 clearUser()
                 clearAccessToken()
                 clearRefreshToken()
                 clearNode()
+                clearShouldHideNotificationPermissionRequest()
+                clearShouldHideMicrophonePermissionRequest()
             }
         }
     }
@@ -103,6 +105,22 @@ class UserPreferencesDataSource @Inject constructor(
                     Node9 -> NodeProto.NODE_9
                     Node10 -> NodeProto.NODE_10
                 }
+            }
+        }
+    }
+
+    suspend fun setShouldHideNotificationPermissionRequest(shouldHide: Boolean) {
+        userPreferencesDataStore.updateData { userPreferences ->
+            userPreferences.copy {
+                this.shouldHideNotificationPermissionRequest = shouldHide
+            }
+        }
+    }
+
+    suspend fun setShouldHideMicrophonePermissionRequest(shouldHide: Boolean) {
+        userPreferencesDataStore.updateData { userPreferences ->
+            userPreferences.copy {
+                this.shouldHideMicrophonePermissionRequest = shouldHide
             }
         }
     }

@@ -24,8 +24,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
 
@@ -35,8 +33,6 @@ class AuthDataRepository @Inject constructor(
     private val pushTokenProvider: PushTokenProvider,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
-    val user: Flow<User?> = userPreferencesDataSource.userData.map { userData -> userData?.user }
-
     val loginState: Flow<LoginState>
         get() = authDataSource.loginState
 
@@ -63,35 +59,27 @@ class AuthDataRepository @Inject constructor(
     }
 
     suspend fun silentLogIn(): Result<User> {
-        return userPreferencesDataSource.userData.firstOrNull().let { savedUserData ->
-            if (savedUserData == null) {
-                return@let Result.failure(LoginError.InternalError)
-            }
-            val node = getNode().getOrNull() ?: return@let Result.failure(LoginError.InternalError)
-            logInWithToken(node).await().fold(
-                onSuccess = { userData ->
-                    try {
-                        authDataSource.registerPushToken(pushTokenProvider.getToken())
-                    } catch (exception: IOException) {
-                        Log.e("Voximplant", "AuthDataRepository::silentLogIn: failed to get pushToken", exception)
-                    }
-                    userPreferencesDataSource.updateUser(userData)
-                    userPreferencesDataSource.updateNode(node)
-                    return@fold Result.success(userData.user)
-                },
-                onFailure = { throwable ->
-                    return@fold Result.failure(throwable)
-                },
-            )
-        }
+        val node = getNode().getOrNull() ?: return Result.failure(LoginError.InternalError)
+        return logInWithToken(node).await().fold(
+            onSuccess = { userData ->
+                try {
+                    authDataSource.registerPushToken(pushTokenProvider.getToken())
+                } catch (exception: IOException) {
+                    Log.e("Voximplant", "AuthDataRepository::silentLogIn: failed to get pushToken", exception)
+                }
+                userPreferencesDataSource.updateUser(userData)
+                userPreferencesDataSource.updateNode(node)
+                return@fold Result.success(userData.user)
+            },
+            onFailure = { throwable ->
+                return@fold Result.failure(throwable)
+            },
+        )
     }
 
     private suspend fun logInWithToken(node: Node): Deferred<Result<UserData>> = coroutineScope {
-        userPreferencesDataSource.userData.firstOrNull().let { userData ->
+        userPreferencesDataSource.userData.first().let { userData ->
             return@let scope.async {
-                if (userData == null) {
-                    return@async Result.failure(LoginError.InternalError)
-                }
                 authDataSource.logInWithToken(userData.user.username, userData.accessToken, node.asExternal()).fold(
                     onSuccess = { networkUserData ->
                         return@fold Result.success(networkUserData.asUserData())
@@ -105,8 +93,8 @@ class AuthDataRepository @Inject constructor(
     }
 
     private suspend fun getNode(): Result<Node> {
-        userPreferencesDataSource.userData.firstOrNull().let { userData ->
-            val node = userData?.node
+        userPreferencesDataSource.userData.first().let { userData ->
+            val node = userData.node
             if (node == null) {
                 Log.e("DemoV3", "AuthDataRepository::getNode: node is null")
                 return Result.failure(LoginError.InternalError)
@@ -117,10 +105,7 @@ class AuthDataRepository @Inject constructor(
     }
 
     suspend fun refreshToken(): Result<UserCredentials> {
-        userPreferencesDataSource.userData.firstOrNull().let { userData ->
-            if (userData == null) {
-                return Result.failure(LoginError.NoInfo)
-            }
+        userPreferencesDataSource.userData.first().let { userData ->
             authDataSource.refreshToken(userData.user.username, userData.refreshToken).let { authParamsResult ->
                 authParamsResult.fold(
                     onSuccess = { authParams ->
@@ -137,7 +122,7 @@ class AuthDataRepository @Inject constructor(
 
     suspend fun logOut() = coroutineScope {
         if (loginState.first() is LoginState.LoggedIn) {
-            userPreferencesDataSource.clearUser()
+            userPreferencesDataSource.clearUserData()
 
             try {
                 authDataSource.unregisterPush(pushTokenProvider.getToken())
@@ -149,7 +134,7 @@ class AuthDataRepository @Inject constructor(
         } else {
             val node = getNode().getOrNull() ?: return@coroutineScope
             val loginJob = logInWithToken(node)
-            userPreferencesDataSource.clearUser()
+            userPreferencesDataSource.clearUserData()
             loginJob.await().let { loginResult ->
                 if (loginResult.isSuccess) {
                     try {

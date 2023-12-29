@@ -31,6 +31,7 @@ import com.voximplant.demos.sdk.core.ui.MicrophoneSettingsDialog
 @OptIn(ExperimentalPermissionsApi::class)
 fun MicrophonePermissionEffect(
     showRationale: Boolean,
+    onHideDialog: () -> Unit = {},
     onPermissionGranted: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -48,14 +49,16 @@ fun MicrophonePermissionEffect(
         },
     )
 
-    LaunchedEffect(microphonePermissionState, showRationale, lifecycleOwner) {
-        val status = microphonePermissionState.status
+    LaunchedEffect(showRationale) {
+        if (showRationale) {
+            val status = microphonePermissionState.status
 
-        if (status is PermissionStatus.Denied) {
-            if (!status.shouldShowRationale) {
-                showRequest = true
-            } else if (showRationale) {
-                showSettings = true
+            if (status is PermissionStatus.Denied) {
+                if (!status.shouldShowRationale) {
+                    showRequest = true
+                } else {
+                    showSettings = true
+                }
             }
         }
     }
@@ -86,8 +89,12 @@ fun MicrophonePermissionEffect(
 
     if (showRequest) {
         MicrophonePermissionDialog(
-            onDismiss = { showRequest = false },
+            onDismiss = {
+                onHideDialog()
+                showRequest = false
+            },
             onConfirm = {
+                onHideDialog()
                 showRequest = false
                 microphonePermissionState.launchPermissionRequest()
             },
