@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -12,7 +12,12 @@
     <application>
 
         <service
-            android:name="com.voximplant.demos.sdk.core.notifications.OngoingAudioCallService"
+            android:name="com.voximplant.demos.sdk.core.notifications.AudioCallIncomingService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
+
+        <service
+            android:name="com.voximplant.demos.sdk.core.notifications.AudioCallOngoingService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
     </application>

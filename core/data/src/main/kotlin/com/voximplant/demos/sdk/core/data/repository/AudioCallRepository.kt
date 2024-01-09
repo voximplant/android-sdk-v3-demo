@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.data.repository
@@ -13,8 +13,9 @@ import com.voximplant.demos.sdk.core.common.VoxBroadcastReceiver
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.notifications.AudioCallIncomingService
+import com.voximplant.demos.sdk.core.notifications.AudioCallOngoingService
 import com.voximplant.demos.sdk.core.notifications.Notifier
-import com.voximplant.demos.sdk.core.notifications.OngoingAudioCallService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -69,30 +70,50 @@ class AudioCallRepository @Inject constructor(
     init {
         coroutineScope.launch {
             callFlow.collect { call ->
-                val ongoingAudioCallService = Intent(context, OngoingAudioCallService::class.java)
+                val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
+                val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
 
-                if (call?.state is CallState.Created) {
-                    if (call.direction == CallDirection.INCOMING) {
+                when (call?.state) {
+                    is CallState.Created -> {
+                        if (call.direction == CallDirection.INCOMING) {
+                            br.register(context)
+                            audioCallIncomingService.apply {
+                                putExtra("id", call.id)
+                                putExtra("displayName", call.remoteDisplayName)
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                context.startForegroundService(audioCallIncomingService)
+                            } else {
+                                context.startService(audioCallIncomingService)
+                            }
+                        }
+                    }
+
+                    is CallState.Connected -> {
+                        if (call.duration != 0L) return@collect
+
                         br.register(context)
-                        notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
+                        audioCallOngoingService.apply {
+                            putExtra("id", call.id)
+                            putExtra("displayName", call.remoteDisplayName)
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(audioCallOngoingService)
+                        } else {
+                            context.startService(audioCallOngoingService)
+                        }
                     }
-                } else if (call?.state is CallState.Connected) {
-                    if (call.duration != 0L) return@collect
 
-                    br.register(context)
-                    ongoingAudioCallService.apply {
-                        putExtra("id", call.id)
-                        putExtra("displayName", call.remoteDisplayName)
+                    is CallState.Disconnected,
+                    is CallState.Failed,
+                    null,
+                    -> {
+                        br.unregister(context)
+                        context.stopService(audioCallIncomingService)
+                        context.stopService(audioCallOngoingService)
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(ongoingAudioCallService)
-                    } else {
-                        context.startService(ongoingAudioCallService)
-                    }
-                } else if (call == null || call.state is CallState.Disconnected || call.state is CallState.Failed) {
-                    br.unregister(context)
-                    notifier.cancelCallNotification()
-                    context.stopService(ongoingAudioCallService)
+
+                    else -> {}
                 }
             }
         }

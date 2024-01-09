@@ -1,35 +1,21 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.notifications
 
-import android.Manifest
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
-import androidx.core.content.ContextCompat
 
-class OngoingAudioCallService : Service() {
+class AudioCallIncomingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        // Before starting the service as foreground check that the app has the
-        // appropriate runtime permissions. In this case, verify that the user has
-        // granted the RECORD_AUDIO permission.
-        val recordAudioPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-        if (recordAudioPermission == PackageManager.PERMISSION_DENIED) {
-            // Without microphone permissions the service cannot run in the foreground
-            // Consider informing user or updating your app UI if visible.
-            stopSelf()
-            return START_NOT_STICKY
-        }
 
         val id = intent?.getStringExtra("id")
         val displayName = intent?.getStringExtra("displayName")
@@ -39,7 +25,7 @@ class OngoingAudioCallService : Service() {
             return START_NOT_STICKY
         }
 
-        val notification = SystemTrayNotifier(applicationContext).createOngoingCallNotification(id, displayName)
+        val notification = SystemTrayNotifier(applicationContext).createIncomingCallNotification(id, displayName)
         if (notification == null) {
             stopSelf()
             return START_NOT_STICKY
@@ -50,16 +36,15 @@ class OngoingAudioCallService : Service() {
                 this,
                 1,
                 notification,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                 } else {
                     0
                 },
             )
-
         } catch (exception: Exception) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && exception is ForegroundServiceStartNotAllowedException) {
-                Log.e("DemoV3", "OngoingAudioCallService::exception: $exception")
+                Log.e("DemoV3", "AudioCallIncomingService::exception: $exception")
             }
         }
         return START_NOT_STICKY

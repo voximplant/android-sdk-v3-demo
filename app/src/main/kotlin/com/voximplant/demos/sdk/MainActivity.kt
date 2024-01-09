@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -22,6 +24,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.voximplant.demos.sdk.MainActivityUiState.Loading
 import com.voximplant.demos.sdk.MainActivityUiState.Success
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
+import com.voximplant.demos.sdk.core.model.data.CallDirection
+import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.ui.VoxApp
 import com.voximplant.demos.sdk.ui.VoxAppState
 import com.voximplant.demos.sdk.ui.rememberVoxAppState
@@ -48,6 +52,26 @@ class MainActivity : ComponentActivity() {
                         uiState = it
                     }
                     .collect()
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
+                if (state is Success) {
+                    val ignoreLockScreen = state.call?.direction == CallDirection.INCOMING && state.call.state !is CallState.Disconnected && state.call.state !is CallState.Failed
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                        setShowWhenLocked(ignoreLockScreen)
+                        setTurnScreenOn(ignoreLockScreen)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        if (ignoreLockScreen) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+                        }
+                    }
+                }
             }
         }
 
