@@ -15,7 +15,6 @@ import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.notifications.AudioCallIncomingService
 import com.voximplant.demos.sdk.core.notifications.AudioCallOngoingService
-import com.voximplant.demos.sdk.core.notifications.Notifier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,6 @@ import javax.inject.Inject
 class AudioCallRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val callDataSource: CallDataSource,
-    private val notifier: Notifier,
     coroutineScope: CoroutineScope,
 ) {
     val callFlow: Flow<Call?>
@@ -58,7 +56,6 @@ class AudioCallRepository @Inject constructor(
             reject()
         },
         onAnswerReceived = {
-            notifier.cancelCallNotification()
             coroutineScope.launch {
                 callFlow.firstOrNull()?.id?.let { id ->
                     startCall(id)
@@ -67,11 +64,12 @@ class AudioCallRepository @Inject constructor(
         },
     )
 
+    private val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
+    private val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
+
     init {
         coroutineScope.launch {
             callFlow.collect { call ->
-                val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
-                val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
 
                 when (call?.state) {
                     is CallState.Created -> {
@@ -128,7 +126,6 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun createCall(username: String): Result<Call> {
-        notifier.cancelCallNotification()
         callDataSource.createCall(username).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -144,7 +141,7 @@ class AudioCallRepository @Inject constructor(
     fun refuseCall() = callDataSource.refuseCall()
 
     fun startCall(id: String): Result<Call> {
-        notifier.cancelCallNotification()
+        context.stopService(audioCallIncomingService)
         callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -166,11 +163,12 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun hangUp() {
+        context.stopService(audioCallOngoingService)
         callDataSource.hangUp()
     }
 
     fun reject() {
-        notifier.cancelCallNotification()
+        context.stopService(audioCallIncomingService)
         callDataSource.reject()
     }
 }
