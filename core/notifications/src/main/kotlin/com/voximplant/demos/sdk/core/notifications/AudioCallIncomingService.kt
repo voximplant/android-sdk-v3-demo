@@ -50,6 +50,10 @@ class AudioCallIncomingService : Service() {
         return START_NOT_STICKY
     }
 
+    override fun onTimeout(startId: Int) {
+        stopSelf()
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
