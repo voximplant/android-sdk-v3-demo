@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.calls
@@ -220,11 +220,14 @@ class CallDataSource @Inject constructor(
     fun hangUp() {
         coroutineScope.launch {
             _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Disconnecting))
-            activeCall?.hangup(null)
         }
+        activeCall?.hangup(null)
     }
 
     fun reject() {
+        coroutineScope.launch {
+            _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Disconnecting))
+        }
         try {
             activeCall?.reject(RejectMode.Decline, null)
         } catch (exception: CallException) {
