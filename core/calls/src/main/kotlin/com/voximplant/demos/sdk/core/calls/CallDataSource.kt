@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.calls
@@ -69,11 +69,17 @@ class CallDataSource @Inject constructor(
         }
 
         override fun onCallReconnecting(call: Call) {
-            activeCall = call
+            coroutineScope.launch {
+                _callApiDataFlow.emit(call.asCallData().copy(state = CallState.Connecting))
+                activeCall = call
+            }
         }
 
         override fun onCallReconnected(call: Call) {
-            activeCall = call
+            coroutineScope.launch {
+                _callApiDataFlow.emit(call.asCallData())
+                activeCall = call
+            }
 
             when (suspendedAction) {
                 is SuspendedAction.Reject -> reject()
@@ -233,6 +239,10 @@ class CallDataSource @Inject constructor(
                 suspendedAction = SuspendedAction.Reject
             }
         }
+    }
+
+    fun sendDtmf(value: String) {
+        activeCall?.sendDTMF(tone = value)
     }
 
     private fun startCallTimer(call: Call) {
