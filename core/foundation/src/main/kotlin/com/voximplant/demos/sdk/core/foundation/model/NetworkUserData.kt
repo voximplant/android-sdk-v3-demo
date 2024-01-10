@@ -17,4 +17,6 @@ fun NetworkUserData.asUserData() = UserData(
     accessToken = accessToken,
     refreshToken = refreshToken,
     node = null,
+    shouldHideNotificationPermissionRequest = false,
+    shouldHideMicrophonePermissionRequest = false,
 )
