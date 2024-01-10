@@ -86,7 +86,7 @@ class AudioCallOngoingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (getCall().firstOrNull()?.state != CallState.Created) return@launch
+            if (getCall().firstOrNull()?.state !in listOf(CallState.Created, CallState.Reconnecting)) return@launch
 
             getLoginState().collect { loginState ->
                 when (loginState) {

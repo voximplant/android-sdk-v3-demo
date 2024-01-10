@@ -70,7 +70,7 @@ class CallDataSource @Inject constructor(
 
         override fun onCallReconnecting(call: Call) {
             coroutineScope.launch {
-                _callApiDataFlow.emit(call.asCallData().copy(state = CallState.Connecting))
+                _callApiDataFlow.emit(call.asCallData())
             }
         }
 
