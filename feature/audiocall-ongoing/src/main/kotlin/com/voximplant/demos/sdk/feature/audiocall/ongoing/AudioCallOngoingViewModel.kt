@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.feature.audiocall.ongoing
@@ -18,6 +18,7 @@ import com.voximplant.demos.sdk.core.domain.HoldCallUseCase
 import com.voximplant.demos.sdk.core.domain.MuteCallUseCase
 import com.voximplant.demos.sdk.core.domain.RefuseCallUseCase
 import com.voximplant.demos.sdk.core.domain.SelectAudioDeviceUseCase
+import com.voximplant.demos.sdk.core.domain.SendDtmfUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
 import com.voximplant.demos.sdk.core.domain.StartCallUseCase
 import com.voximplant.demos.sdk.core.model.data.AudioDevice
@@ -54,6 +55,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     private val muteCall: MuteCallUseCase,
     private val holdCall: HoldCallUseCase,
     private val hangUpCall: HangUpCallUseCase,
+    private val sendDtmfUseCase: SendDtmfUseCase,
 ) : ViewModel() {
     private val ongoingCallArgs: OngoingCallArgs = OngoingCallArgs(savedStateHandle)
 
@@ -84,7 +86,7 @@ class AudioCallOngoingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (getCall().firstOrNull()?.state != CallState.Created) return@launch
+            if (getCall().firstOrNull()?.state !in listOf(CallState.Created, CallState.Reconnecting)) return@launch
 
             getLoginState().collect { loginState ->
                 when (loginState) {
@@ -135,6 +137,12 @@ class AudioCallOngoingViewModel @Inject constructor(
     fun selectAudioDevice(audioDevice: AudioDevice) {
         viewModelScope.launch {
             selectAudioDeviceUseCase(audioDevice)
+        }
+    }
+
+    fun sendDTMF(value: String) {
+        viewModelScope.launch {
+            sendDtmfUseCase(value)
         }
     }
 
