@@ -29,6 +29,6 @@ object CallsModule {
         @ApplicationContext context: Context,
         @Dispatcher(Default) defaultDispatcher: CoroutineDispatcher,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): CallDataSource = CallDataSource(callManager = CallManager.getInstance(context), defaultDispatcher, coroutineScope)
+    ): CallDataSource = CallDataSource(callManager = CallManager.getInstance(context), coroutineScope)
 
 }

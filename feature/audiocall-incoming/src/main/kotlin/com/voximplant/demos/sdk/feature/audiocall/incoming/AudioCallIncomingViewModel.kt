@@ -7,9 +7,9 @@ package com.voximplant.demos.sdk.feature.audiocall.incoming
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.voximplant.demos.sdk.core.domain.GetCallStateUseCase
+import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.RejectIncomingCallUseCase
-import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.feature.audiocall.incoming.navigation.IncomingCallArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AudioCallIncomingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    getCallState: GetCallStateUseCase,
+    getCall: GetCallUseCase,
     private val rejectCall: RejectIncomingCallUseCase,
 ) : ViewModel() {
     private val incomingCallArgs: IncomingCallArgs = IncomingCallArgs(savedStateHandle)
@@ -33,13 +33,13 @@ class AudioCallIncomingViewModel @Inject constructor(
 
     val callIncomingUiState: StateFlow<AudioCallIncomingUiState> = audioCallIncomingUiState(
         displayName = displayName,
-        stateFlow = getCallState(),
+        callFlow = getCall(),
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = AudioCallIncomingUiState(
             displayName = displayName,
-            state = CallState.Connecting,
+            call = null,
         ),
     )
 
@@ -53,15 +53,15 @@ class AudioCallIncomingViewModel @Inject constructor(
 
 private fun audioCallIncomingUiState(
     displayName: String?,
-    stateFlow: Flow<CallState?>,
-): Flow<AudioCallIncomingUiState> = combine(stateFlow) {
+    callFlow: Flow<Call?>,
+): Flow<AudioCallIncomingUiState> = combine(callFlow) {
     AudioCallIncomingUiState(
         displayName = displayName,
-        state = it[0],
+        call = it[0],
     )
 }
 
 data class AudioCallIncomingUiState(
     val displayName: String?,
-    val state: CallState?,
+    val call: Call?,
 )

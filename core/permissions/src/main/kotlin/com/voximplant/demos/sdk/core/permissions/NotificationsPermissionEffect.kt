@@ -31,6 +31,7 @@ import com.voximplant.demos.sdk.core.ui.NotificationsSettingsDialog
 @OptIn(ExperimentalPermissionsApi::class)
 fun NotificationsPermissionEffect(
     showRationale: Boolean,
+    onHideDialog: () -> Unit = {},
     onPermissionGranted: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -49,14 +50,16 @@ fun NotificationsPermissionEffect(
         },
     )
 
-    LaunchedEffect(notificationsPermissionState, showRationale, lifecycleOwner) {
-        val status = notificationsPermissionState.status
+    LaunchedEffect(showRationale) {
+        if (showRationale) {
+            val status = notificationsPermissionState.status
 
-        if (status is PermissionStatus.Denied) {
-            if (!status.shouldShowRationale) {
-                showRequest = true
-            } else if (showRationale) {
-                showSettings = true
+            if (status is PermissionStatus.Denied) {
+                if (!status.shouldShowRationale) {
+                    showRequest = true
+                } else {
+                    showSettings = true
+                }
             }
         }
     }
@@ -68,7 +71,13 @@ fun NotificationsPermissionEffect(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                onPermissionGranted(notificationsPermissionState.status.isGranted)
+                notificationsPermissionState.status.isGranted.let { isGranted ->
+                    if (isGranted) {
+                        showRequest = false
+                        showSettings = false
+                    }
+                    onPermissionGranted(isGranted)
+                }
             }
         }
 
@@ -81,8 +90,12 @@ fun NotificationsPermissionEffect(
 
     if (showRequest) {
         NotificationsPermissionDialog(
-            onDismiss = { showRequest = false },
+            onDismiss = {
+                onHideDialog()
+                showRequest = false
+            },
             onConfirm = {
+                onHideDialog()
                 showRequest = false
                 notificationsPermissionState.launchPermissionRequest()
             },

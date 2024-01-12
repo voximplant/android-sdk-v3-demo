@@ -6,6 +6,7 @@ package com.voximplant.demos.sdk.core.model.data
 
 data class Call(
     val id: String,
+    val state: CallState,
     val direction: CallDirection,
     val duration: Long,
     val remoteDisplayName: String?,

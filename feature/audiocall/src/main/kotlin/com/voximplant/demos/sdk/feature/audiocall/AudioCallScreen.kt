@@ -40,12 +40,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
-import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.model.data.isNotEmpty
 import com.voximplant.demos.sdk.core.permissions.MicrophonePermissionEffect
 import com.voximplant.demos.sdk.core.permissions.NotificationsPermissionEffect
 import com.voximplant.demos.sdk.core.resources.R
+import com.voximplant.demos.sdk.core.ui.CallFailedDialog
 import com.voximplant.demos.sdk.core.ui.LoginRequiredDialog
 import com.voximplant.demos.sdk.core.ui.MicrophoneBanner
 import com.voximplant.demos.sdk.core.ui.NotificationsBanner
@@ -71,11 +72,14 @@ fun AudioCallRoute(
     var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
 
     var showLoginRequiredDialog by rememberSaveable { mutableStateOf(false) }
+    var createCallFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
+
+    var createCallInProgress by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(audioCallUiState) {
         if (audioCallUiState is AudioCallUiState.Active) {
             val call = (audioCallUiState as AudioCallUiState.Active).call
-            val state = (audioCallUiState as AudioCallUiState.Active).state
+            val state = (audioCallUiState as AudioCallUiState.Active).call.state
 
             if (call == rememberCall) return@LaunchedEffect
 
@@ -99,6 +103,15 @@ fun AudioCallRoute(
         )
     }
 
+    createCallFailedDescription?.let { description ->
+        CallFailedDialog(
+            onConfirm = {
+                createCallFailedDescription = null
+            },
+            description = description,
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -115,6 +128,7 @@ fun AudioCallRoute(
             modifier = Modifier.padding(paddingValues),
             showNotificationsBanner = !notificationsPermissionGranted,
             showMicrophoneBanner = !microphonePermissionGranted,
+            createCallInProgress = createCallInProgress,
             onNotificationsRequestClick = {
                 showNotificationsRationale = true
             },
@@ -122,29 +136,34 @@ fun AudioCallRoute(
                 showMicrophoneRationale = true
             },
             onCallClick = { username ->
-                if (microphonePermissionGranted) {
-                    scope.launch {
-                        if (viewModel.user.value != null) {
-                            viewModel.createCall(username).let { call: Call? ->
-                                if (call != null) {
+                scope.launch {
+                    if (audioCallUiState.user.isNotEmpty()) {
+                        if (microphonePermissionGranted) {
+                            createCallInProgress = true
+                            viewModel.createCall(username).fold(
+                                onSuccess = { call ->
+                                    createCallInProgress = false
                                     onCallCreated(call.id, username)
-                                } else {
-                                    // TODO (Oleg): show error
-                                }
-                            }
+                                },
+                                onFailure = { throwable ->
+                                    createCallInProgress = false
+                                    createCallFailedDescription = throwable.toString()
+                                },
+                            )
                         } else {
-                            showLoginRequiredDialog = true
+                            showMicrophoneRationale = true
                         }
+                    } else {
+                        showLoginRequiredDialog = true
                     }
-                } else {
-                    showMicrophoneRationale = true
                 }
-            },
+            }
         )
     }
 
     NotificationsPermissionEffect(
-        showRationale = showNotificationsRationale,
+        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowNotificationPermissionRequest ?: false || showNotificationsRationale else false,
+        onHideDialog = viewModel::dismissNotificationPermissionRequest,
         onPermissionGranted = { value ->
             notificationsPermissionGranted = value
             showNotificationsRationale = false
@@ -152,7 +171,8 @@ fun AudioCallRoute(
     )
 
     MicrophonePermissionEffect(
-        showRationale = showMicrophoneRationale,
+        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowMicrophonePermissionRequest ?: false || showMicrophoneRationale else false,
+        onHideDialog = viewModel::dismissMicrophonePermissionRequest,
         onPermissionGranted = { value ->
             microphonePermissionGranted = value
             showMicrophoneRationale = false
@@ -165,6 +185,7 @@ fun AudioCallScreen(
     modifier: Modifier = Modifier,
     showNotificationsBanner: Boolean,
     showMicrophoneBanner: Boolean,
+    createCallInProgress: Boolean,
     onNotificationsRequestClick: () -> Unit,
     onMicrophoneRequestClick: () -> Unit,
     onCallClick: (String) -> Unit,
@@ -232,6 +253,7 @@ fun AudioCallScreen(
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .align(Alignment.End),
+                enabled = !createCallInProgress,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -252,6 +274,7 @@ fun PreviewAudioCallScreen() {
         AudioCallScreen(
             showNotificationsBanner = true,
             showMicrophoneBanner = true,
+            createCallInProgress = false,
             onNotificationsRequestClick = {},
             onMicrophoneRequestClick = {},
             onCallClick = {},

@@ -13,11 +13,12 @@ import com.voximplant.demos.sdk.core.model.data.CallState
 
 fun Call.asCallData() = CallApiData(
     id = id,
-    callDirection = when (callDirection) {
+    state = state.asInternalModel,
+    direction = when (direction) {
         Incoming -> CallDirection.INCOMING
         Outgoing -> CallDirection.OUTGOING
     },
-    callDuration = callDuration,
+    duration = duration,
     remoteDisplayName = remoteDisplayName,
     remoteSipUri = remoteSipUri,
 )

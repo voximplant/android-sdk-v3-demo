@@ -41,6 +41,7 @@ import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import com.voximplant.demos.sdk.core.model.data.User
+import com.voximplant.demos.sdk.core.model.data.isNotEmpty
 import com.voximplant.demos.sdk.core.permissions.NotificationsPermissionEffect
 import com.voximplant.demos.sdk.core.ui.NotificationsBanner
 import com.voximplant.demos.sdk.feature.audiocall.navigation.audioCallRoute
@@ -54,7 +55,6 @@ fun CatalogRoute(
     onModuleClick: (String) -> Unit,
 ) {
     val catalogUiState by viewModel.catalogUiState.collectAsStateWithLifecycle()
-    val user by viewModel.user.collectAsStateWithLifecycle()
 
     var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
@@ -147,14 +147,14 @@ fun CatalogRoute(
         else -> {}
     }
 
-    LaunchedEffect(catalogUiState.call, catalogUiState.callState) {
-        if (catalogUiState.call != null && catalogUiState.callState !is CallState.Disconnected) {
+    LaunchedEffect(catalogUiState.call) {
+        if (catalogUiState.call != null && catalogUiState.call?.state !is CallState.Disconnected && catalogUiState.call?.state !is CallState.Failed) {
             onModuleClick(audioCallRoute)
         }
     }
 
     CatalogScreen(
-        user = user,
+        user = catalogUiState.user,
         onLoginClick = onLoginClick,
         onLogoutClick = viewModel::logout,
         showNotificationsBanner = !notificationsPermissionGranted,
@@ -165,7 +165,8 @@ fun CatalogRoute(
     )
 
     NotificationsPermissionEffect(
-        showRationale = showNotificationsRationale,
+        showRationale = if (catalogUiState.user.isNotEmpty()) catalogUiState.shouldShowNotificationPermissionRequest || showNotificationsRationale else false,
+        onHideDialog = viewModel::dismissNotificationPermissionRequest,
         onPermissionGranted = { value ->
             notificationsPermissionGranted = value
             showNotificationsRationale = false
@@ -175,7 +176,7 @@ fun CatalogRoute(
 
 @Composable
 fun CatalogScreen(
-    user: User?,
+    user: User,
     onLoginClick: () -> Unit,
     onLogoutClick: () -> Unit,
     showNotificationsBanner: Boolean,
@@ -241,7 +242,7 @@ fun CatalogScreen(
 fun PreviewCatalogScreen() {
     VoximplantTheme {
         CatalogScreen(
-            user = null,
+            user = User("", ""),
             onLoginClick = {},
             onLogoutClick = {},
             showNotificationsBanner = true,

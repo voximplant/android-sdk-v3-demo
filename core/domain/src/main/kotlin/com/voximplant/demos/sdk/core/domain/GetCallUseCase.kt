@@ -12,5 +12,5 @@ import javax.inject.Inject
 class GetCallUseCase @Inject constructor(
     private val callRepository: AudioCallRepository,
 ) {
-    operator fun invoke(): Flow<Call?> = callRepository.call
+    operator fun invoke(): Flow<Call?> = callRepository.callFlow
 }

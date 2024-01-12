@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.calls
@@ -14,17 +14,12 @@ import com.voximplant.android.sdk.calls.CallSettings
 import com.voximplant.android.sdk.calls.IncomingCallListener
 import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
-import com.voximplant.demos.sdk.core.common.Dispatcher
-import com.voximplant.demos.sdk.core.common.VoxDispatchers.Default
 import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.model.data.CallState
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.Timer
 import javax.inject.Inject
@@ -32,7 +27,6 @@ import kotlin.concurrent.scheduleAtFixedRate
 
 class CallDataSource @Inject constructor(
     private val callManager: CallManager,
-    @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
     private val coroutineScope: CoroutineScope,
 ) {
     private var activeCall: Call? = null
@@ -42,7 +36,6 @@ class CallDataSource @Inject constructor(
         override fun onCallConnected(call: Call, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state.asInternalModel)
             }
             startCallTimer(call)
         }
@@ -50,7 +43,6 @@ class CallDataSource @Inject constructor(
         override fun onCallDisconnected(call: Call, headers: Map<String, String>?, answeredElsewhere: Boolean) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state.asInternalModel)
                 activeCall?.setCallListener(null)
                 activeCall = null
                 callTimer.cancel()
@@ -61,8 +53,7 @@ class CallDataSource @Inject constructor(
 
         override fun onCallFailed(call: Call, code: Int, description: String, headers: Map<String, String>?) {
             coroutineScope.launch {
-                _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(CallState.Failed(description))
+                _callApiDataFlow.emit(call.asCallData().copy(state = CallState.Failed(description)))
                 activeCall?.setCallListener(null)
                 activeCall = null
                 callTimer.cancel()
@@ -71,11 +62,25 @@ class CallDataSource @Inject constructor(
             }
         }
 
-        override fun onCallRinging(call: Call, headers: Map<String, String>?) {
+        override fun onStartRinging(call: Call, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state.asInternalModel)
             }
+        }
+
+        override fun onCallReconnecting(call: Call) {
+            activeCall = call
+        }
+
+        override fun onCallReconnected(call: Call) {
+            activeCall = call
+
+            when (suspendedAction) {
+                is SuspendedAction.Reject -> reject()
+                is SuspendedAction.Answer -> startCall(call.id)
+                null -> {}
+            }
+            suspendedAction = null
         }
     }
 
@@ -90,19 +95,17 @@ class CallDataSource @Inject constructor(
             call.setCallListener(callListener)
             activeCall = call
             coroutineScope.launch {
+                _callApiDataFlow.emit(null)
+                _isMuted.value = false
+                _isOnHold.value = false
+
                 _callApiDataFlow.emit(call.asCallData())
-                _callState.emit(call.state.asInternalModel)
             }
         }
     }
 
     private val _callApiDataFlow: MutableStateFlow<CallApiData?> = MutableStateFlow(null)
     val callApiDataFlow: Flow<CallApiData?> = _callApiDataFlow.asStateFlow()
-
-    private val _callState: MutableStateFlow<CallState?> = MutableStateFlow(null)
-    val callStateFlow: Flow<CallState?> = _callState.asStateFlow().map { callState ->
-        callState
-    }.flowOn(defaultDispatcher)
 
     private val _duration: MutableStateFlow<Long> = MutableStateFlow(0L)
     val duration: Flow<Long> = _duration.asStateFlow()
@@ -115,22 +118,36 @@ class CallDataSource @Inject constructor(
 
     private var callTimer: Timer = Timer("callTimer")
 
+    private var suspendedAction: SuspendedAction? = null
+
     fun createCall(username: String): Result<CallApiData> {
         callManager.call(username, CallSettings()).let { call ->
             if (call != null) {
                 coroutineScope.launch {
                     _callApiDataFlow.emit(null)
-                    _callState.emit(null)
                     _isMuted.value = false
                     _isOnHold.value = false
 
                     _callApiDataFlow.emit(call.asCallData())
-                    _callState.emit(CallState.Created)
                 }
                 activeCall = call
                 return Result.success(call.asCallData())
             } else {
                 return Result.failure(IllegalStateException())
+            }
+        }
+    }
+
+    fun refuseCall() {
+        coroutineScope.launch {
+            if (activeCall?.state in listOf(com.voximplant.android.sdk.calls.CallState.Created, com.voximplant.android.sdk.calls.CallState.Disconnecting)) {
+                Logger.debug("CallDataSource::refuseCall")
+                _callApiDataFlow.emit(null)
+                _isMuted.value = false
+                _isOnHold.value = false
+                activeCall = null
+            } else if (activeCall?.state !in listOf(com.voximplant.android.sdk.calls.CallState.Disconnected, com.voximplant.android.sdk.calls.CallState.Failed)) {
+                Logger.error("CallDataSource::refuseCall: Only a recently created call can be refused")
             }
         }
     }
@@ -146,16 +163,20 @@ class CallDataSource @Inject constructor(
     fun startCall(id: String): Result<CallApiData> {
         Logger.debug("startCall: $activeCall")
         coroutineScope.launch {
-            _callState.emit(CallState.Connecting)
+            _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Connecting))
         }
         activeCall?.let { call ->
             if (call.id != id) return Result.failure(Throwable("Call not found"))
 
-            when (call.callDirection) {
+            when (call.direction) {
                 CallDirection.Outgoing -> {
                     return try {
                         call.setCallListener(callListener)
-                        call.start()
+                        try {
+                            call.start()
+                        } catch (exception: CallException) {
+                            Logger.error("CallDataSource::startCall: failed to start the call: ${exception.message}", exception)
+                        }
                         Result.success(call.asCallData())
                     } catch (exception: CallException) {
                         Result.failure(exception)
@@ -163,11 +184,16 @@ class CallDataSource @Inject constructor(
                 }
 
                 CallDirection.Incoming -> {
-                    call.let {
-                        it.setCallListener(callListener)
-                        it.answer(CallSettings())
-                        return Result.success(it.asCallData())
+                    call.setCallListener(callListener)
+                    try {
+                        call.answer(CallSettings())
+                    } catch (exception: CallException) {
+                        Logger.error("CallDataSource::startCall: failed to answer the call: ${exception.message}", exception)
+                        if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
+                            suspendedAction = SuspendedAction.Answer
+                        }
                     }
+                    return Result.success(call.asCallData())
                 }
             }
         } ?: return Result.failure(Throwable("Call not found"))
@@ -193,22 +219,34 @@ class CallDataSource @Inject constructor(
 
     fun hangUp() {
         coroutineScope.launch {
-            _callState.emit(CallState.Disconnecting)
+            _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Disconnecting))
+            activeCall?.hangup(null)
         }
-        activeCall?.hangup(null)
     }
 
     fun reject() {
-        activeCall?.reject(RejectMode.Decline, null)
+        try {
+            activeCall?.reject(RejectMode.Decline, null)
+        } catch (exception: CallException) {
+            Logger.error("CallDataSource::reject: failure: ${exception.message}", exception)
+            if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
+                suspendedAction = SuspendedAction.Reject
+            }
+        }
     }
 
     private fun startCallTimer(call: Call) {
         callTimer = Timer("callTimer").apply {
             scheduleAtFixedRate(delay = TIMER_DELAY_MS, TIMER_DELAY_MS) {
-                _duration.value = call.callDuration
+                _duration.value = call.duration
             }
         }
     }
 }
 
 private const val TIMER_DELAY_MS = 1000L
+
+private sealed interface SuspendedAction {
+    data object Answer : SuspendedAction
+    data object Reject : SuspendedAction
+}

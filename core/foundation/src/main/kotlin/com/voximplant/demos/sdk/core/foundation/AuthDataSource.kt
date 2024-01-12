@@ -152,7 +152,7 @@ class AuthDataSource(
                     }
 
                     is ConnectionResult.Failure -> {
-                        Logger.error("AuthDataSource::logIn: failed to connect to the cloud.")
+                        Logger.error("AuthDataSource::logInWithToken: failed to connect to the cloud.")
                         val loginError = when (connectionResult.error) {
                             ConnectionError.InternalError -> com.voximplant.demos.sdk.core.model.data.LoginError.InternalError
                             ConnectionError.Interrupted -> com.voximplant.demos.sdk.core.model.data.LoginError.Interrupted
@@ -170,7 +170,7 @@ class AuthDataSource(
                 val loginResult: LoginResult = suspendCoroutine { continuation ->
                     client.loginWithAccessToken(username, accessToken, object : LoginCallback {
                         override fun onFailure(loginError: LoginError) {
-                            Logger.error("AuthDataSource::logIn:onFailure: $loginError")
+                            Logger.error("AuthDataSource::logInWithToken:onFailure: $loginError")
                             continuation.resume(LoginResult.Failure(loginError))
                         }
 
@@ -191,6 +191,7 @@ class AuthDataSource(
                         }
                     })
                 }
+
                 return when (loginResult) {
                     is LoginResult.Success -> {
                         _loginState.emit(LoginState.LoggedIn)
@@ -217,7 +218,7 @@ class AuthDataSource(
             }
 
             else -> {
-                Logger.warning("AuthDataSource::logIn: client is in ${client.clientState}")
+                Logger.warning("AuthDataSource::logInWithToken: client is in ${client.clientState}")
                 return Result.failure(com.voximplant.demos.sdk.core.model.data.LoginError.InternalError)
             }
         }
