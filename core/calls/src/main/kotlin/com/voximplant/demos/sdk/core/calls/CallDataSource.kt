@@ -4,7 +4,6 @@
 
 package com.voximplant.demos.sdk.core.calls
 
-import android.util.Log
 import com.voximplant.android.sdk.calls.Call
 import com.voximplant.android.sdk.calls.CallCallback
 import com.voximplant.android.sdk.calls.CallDirection
@@ -15,6 +14,7 @@ import com.voximplant.android.sdk.calls.CallSettings
 import com.voximplant.android.sdk.calls.IncomingCallListener
 import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
+import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.model.data.CallState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -145,13 +145,13 @@ class CallDataSource @Inject constructor(
     fun refuseCall() {
         coroutineScope.launch {
             if (activeCall?.state in listOf(com.voximplant.android.sdk.calls.CallState.Created, com.voximplant.android.sdk.calls.CallState.Disconnecting)) {
-                Log.d("Voximplant", "CallDataSource::refuseCall")
+                Logger.debug("CallDataSource::refuseCall")
                 _callApiDataFlow.emit(null)
                 _isMuted.value = false
                 _isOnHold.value = false
                 activeCall = null
             } else if (activeCall?.state !in listOf(com.voximplant.android.sdk.calls.CallState.Disconnected, com.voximplant.android.sdk.calls.CallState.Failed)) {
-                Log.e("Voximplant", "CallDataSource::refuseCall: Only a recently created call can be refused")
+                Logger.error("CallDataSource::refuseCall: Only a recently created call can be refused")
             }
         }
     }
@@ -165,7 +165,7 @@ class CallDataSource @Inject constructor(
     }
 
     fun startCall(id: String): Result<CallApiData> {
-        Log.d("DemoV3", "startCall: $activeCall")
+        Logger.debug("startCall: $activeCall")
         coroutineScope.launch {
             _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Connecting))
         }
@@ -179,7 +179,7 @@ class CallDataSource @Inject constructor(
                         try {
                             call.start()
                         } catch (exception: CallException) {
-                            Log.e("Voximplant", exception.message, exception)
+                            Logger.error("CallDataSource::startCall: failed to start the call: ${exception.message}", exception)
                         }
                         Result.success(call.asCallData())
                     } catch (exception: CallException) {
@@ -192,7 +192,7 @@ class CallDataSource @Inject constructor(
                     try {
                         call.answer(CallSettings())
                     } catch (exception: CallException) {
-                        Log.e("Voximplant", exception.message, exception)
+                        Logger.error("CallDataSource::startCall: failed to answer the call: ${exception.message}", exception)
                         if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
                             suspendedAction = SuspendedAction.Answer
                         }
@@ -211,7 +211,7 @@ class CallDataSource @Inject constructor(
     fun hold(value: Boolean) {
         activeCall?.hold(value, object : CallCallback {
             override fun onFailure(exception: CallException) {
-                Log.e("DemoV3", "CallDataSource::hold failed")
+                Logger.error("CallDataSource::hold failed")
             }
 
             override fun onSuccess() {
@@ -235,7 +235,7 @@ class CallDataSource @Inject constructor(
         try {
             activeCall?.reject(RejectMode.Decline, null)
         } catch (exception: CallException) {
-            Log.e("Voximplant", exception.message, exception)
+            Logger.error("CallDataSource::reject: failure: ${exception.message}", exception)
             if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
                 suspendedAction = SuspendedAction.Reject
             }

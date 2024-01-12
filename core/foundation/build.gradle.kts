@@ -28,6 +28,7 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:logger"))
     implementation(project(":core:model"))
 
     implementation(platform(libs.voximplant.sdk.bom))
