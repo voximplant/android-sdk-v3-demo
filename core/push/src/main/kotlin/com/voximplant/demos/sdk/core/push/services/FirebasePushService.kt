@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.push.services
@@ -27,9 +27,11 @@ class FirebasePushService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         val push = message.data
+        val highPriority = message.priority == RemoteMessage.PRIORITY_HIGH
+
         if (push.containsKey("voximplant")) {
             coroutineScope.launch {
-                pushManager.onMessageReceived(push)
+                pushManager.onMessageReceived(push, highPriority)
             }
         }
     }

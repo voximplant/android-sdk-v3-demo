@@ -16,9 +16,9 @@ class FirebasePushManager @Inject constructor(
     private val callDataRepository: AudioCallRepository,
 ) : PushManager {
 
-    override suspend fun onMessageReceived(push: MutableMap<String, String>) {
+    override suspend fun onMessageReceived(push: MutableMap<String, String>, highPriority: Boolean) {
         authDataRepository.handlePush(push)
-        callDataRepository.handlePush()
+        if (highPriority) callDataRepository.handlePush()
         callDataRepository.startListeningForIncomingCalls()
     }
 
