@@ -8,6 +8,7 @@ import android.content.Context
 import com.voximplant.demos.sdk.core.calls.CallDataSource
 import com.voximplant.demos.sdk.core.common.di.ApplicationScope
 import com.voximplant.demos.sdk.core.data.repository.AudioCallRepository
+import com.voximplant.demos.sdk.core.notifications.Notifier
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,7 +26,8 @@ object DataModule {
     fun providesAudioCallRepository(
         @ApplicationContext context: Context,
         callDataSource: CallDataSource,
+        notifier: Notifier,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): AudioCallRepository = AudioCallRepository(context, callDataSource, coroutineScope)
+    ): AudioCallRepository = AudioCallRepository(context, callDataSource, notifier, coroutineScope)
 
 }

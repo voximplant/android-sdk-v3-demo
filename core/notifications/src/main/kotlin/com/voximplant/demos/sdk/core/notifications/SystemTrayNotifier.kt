@@ -47,6 +47,15 @@ class SystemTrayNotifier @Inject constructor(
         return@with createIncomingCallNotification(id, displayName)
     }
 
+    override fun postIncomingCallNotification(id: String, displayName: String?) = with(context) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+
+        val notificationManager = NotificationManagerCompat.from(this)
+        val incomingCallNotification = createIncomingCallNotification(id, displayName)
+
+        notificationManager.notify(CALL_NOTIFICATION_ID, incomingCallNotification)
+    }
+
     override fun cancelCallNotification() = with(context) {
         val notificationManager = NotificationManagerCompat.from(this)
         notificationManager.cancel(CALL_NOTIFICATION_ID)
