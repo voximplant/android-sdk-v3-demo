@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.push.util
@@ -16,9 +16,10 @@ class FirebasePushManager @Inject constructor(
     private val callDataRepository: AudioCallRepository,
 ) : PushManager {
 
-    override suspend fun onMessageReceived(push: MutableMap<String, String>) {
-        callDataRepository.startListeningForIncomingCalls()
+    override suspend fun onMessageReceived(push: MutableMap<String, String>, highPriority: Boolean) {
         authDataRepository.handlePush(push)
+        if (highPriority) callDataRepository.handlePush()
+        callDataRepository.startListeningForIncomingCalls()
     }
 
     override suspend fun onTokenUpdated(token: String) {

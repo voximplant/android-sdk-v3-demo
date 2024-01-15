@@ -13,8 +13,9 @@ import com.voximplant.demos.sdk.core.common.VoxBroadcastReceiver
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.notifications.AudioCallIncomingService
+import com.voximplant.demos.sdk.core.notifications.AudioCallOngoingService
 import com.voximplant.demos.sdk.core.notifications.Notifier
-import com.voximplant.demos.sdk.core.notifications.OngoingAudioCallService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ class AudioCallRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val callDataSource: CallDataSource,
     private val notifier: Notifier,
-    coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
 ) {
     val callFlow: Flow<Call?>
         get() = combine(callDataSource.callApiDataFlow, callDataSource.duration) { callApiData, duration ->
@@ -57,7 +58,6 @@ class AudioCallRepository @Inject constructor(
             reject()
         },
         onAnswerReceived = {
-            notifier.cancelCallNotification()
             coroutineScope.launch {
                 callFlow.firstOrNull()?.id?.let { id ->
                     startCall(id)
@@ -66,33 +66,67 @@ class AudioCallRepository @Inject constructor(
         },
     )
 
+    private val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
+    private val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
+
+    private var pushHandled: Boolean = false
+
+    private fun startIncomingCallService(call: Call) {
+        pushHandled = false
+        audioCallIncomingService.apply {
+            putExtra("id", call.id)
+            putExtra("displayName", call.remoteDisplayName)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(audioCallIncomingService)
+        } else {
+            context.startService(audioCallIncomingService)
+        }
+    }
+
     init {
         coroutineScope.launch {
             callFlow.collect { call ->
-                val ongoingAudioCallService = Intent(context, OngoingAudioCallService::class.java)
 
-                if (call?.state is CallState.Created) {
-                    if (call.direction == CallDirection.INCOMING) {
+                when (call?.state) {
+                    is CallState.Created -> {
+                        if (call.direction == CallDirection.INCOMING) {
+                            br.register(context)
+                            if (pushHandled) {
+                                startIncomingCallService(call)
+                            } else {
+                                notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
+                            }
+                        }
+                    }
+
+                    is CallState.Connected -> {
+                        if (call.duration != 0L) return@collect
+
                         br.register(context)
-                        notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
+                        audioCallOngoingService.apply {
+                            putExtra("id", call.id)
+                            putExtra("displayName", call.remoteDisplayName)
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(audioCallOngoingService)
+                        } else {
+                            context.startService(audioCallOngoingService)
+                        }
                     }
-                } else if (call?.state is CallState.Connected) {
-                    if (call.duration != 0L) return@collect
 
-                    br.register(context)
-                    ongoingAudioCallService.apply {
-                        putExtra("id", call.id)
-                        putExtra("displayName", call.remoteDisplayName)
+                    is CallState.Disconnected,
+                    is CallState.Failed,
+                    null,
+                    -> {
+                        br.unregister(context)
+                        notifier.cancelCallNotification()
+                        context.stopService(audioCallIncomingService)
+                        context.stopService(audioCallOngoingService)
+                        pushHandled = false
                     }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(ongoingAudioCallService)
-                    } else {
-                        context.startService(ongoingAudioCallService)
-                    }
-                } else if (call == null || call.state is CallState.Disconnected || call.state is CallState.Failed) {
-                    br.unregister(context)
-                    notifier.cancelCallNotification()
-                    context.stopService(ongoingAudioCallService)
+
+                    else -> {}
                 }
             }
         }
@@ -107,7 +141,6 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun createCall(username: String): Result<Call> {
-        notifier.cancelCallNotification()
         callDataSource.createCall(username).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -124,6 +157,8 @@ class AudioCallRepository @Inject constructor(
 
     fun startCall(id: String): Result<Call> {
         notifier.cancelCallNotification()
+        context.stopService(audioCallIncomingService)
+        pushHandled = false
         callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -136,6 +171,20 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
+    fun handlePush() {
+        pushHandled = true
+
+        coroutineScope.launch {
+            callFlow.firstOrNull()?.let { call ->
+                if (call.state is CallState.Created) {
+                    if (call.direction == CallDirection.INCOMING) {
+                        startIncomingCallService(call)
+                    }
+                }
+            }
+        }
+    }
+
     fun mute(value: Boolean) {
         callDataSource.mute(value)
     }
@@ -145,12 +194,15 @@ class AudioCallRepository @Inject constructor(
     }
 
     fun hangUp() {
+        context.stopService(audioCallOngoingService)
         callDataSource.hangUp()
     }
 
     fun reject() {
         notifier.cancelCallNotification()
+        context.stopService(audioCallIncomingService)
         callDataSource.reject()
+        pushHandled = false
     }
 
     fun sendDtmf(value: String) = callDataSource.sendDtmf(value)

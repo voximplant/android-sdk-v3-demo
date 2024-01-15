@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.notifications
@@ -39,6 +39,12 @@ class SystemTrayNotifier @Inject constructor(
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return null
 
         return@with createOngoingCallNotification(id, displayName)
+    }
+
+    override fun createIncomingCallNotification(id: String, displayName: String?): Notification? = with(context) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return null
+
+        return@with createIncomingCallNotification(id, displayName)
     }
 
     override fun postIncomingCallNotification(id: String, displayName: String?) = with(context) {
@@ -110,7 +116,7 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
         setFullScreenIntent(incomingCallPendingIntent, true)
         setContentIntent(incomingCallPendingIntent)
         setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
-        priority = NotificationCompat.PRIORITY_MAX
+        priority = NotificationCompat.PRIORITY_HIGH
         setCategory(NotificationCompat.CATEGORY_CALL)
         setShowWhen(false)
         setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, rejectPendingIntent, answerPendingIntent ?: incomingCallPendingIntent))
@@ -155,7 +161,7 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
 private fun Context.createIncomingCallNotificationChannel() {
     val channel = NotificationChannelCompat.Builder(
         INCOMING_CALL_NOTIFICATION_CHANNEL_ID,
-        NotificationManagerCompat.IMPORTANCE_MAX,
+        NotificationManagerCompat.IMPORTANCE_HIGH,
     ).apply {
         setName(getString(R.string.incoming_call_notification_channel_name))
         setVibrationEnabled(true)

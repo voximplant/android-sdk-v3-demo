@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.notifications
@@ -16,7 +16,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.voximplant.demos.sdk.core.logger.Logger
 
-class OngoingAudioCallService : Service() {
+class AudioCallOngoingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -59,7 +59,7 @@ class OngoingAudioCallService : Service() {
 
         } catch (exception: Exception) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && exception is ForegroundServiceStartNotAllowedException) {
-                Logger.error("OngoingAudioCallService::exception", exception)
+                Logger.error("AudioCallOngoingService::exception", exception)
             }
         }
         return START_NOT_STICKY
