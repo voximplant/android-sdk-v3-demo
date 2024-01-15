@@ -26,11 +26,12 @@ import com.voximplant.demos.sdk.core.designsystem.theme.Gray10
 import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
 import com.voximplant.demos.sdk.core.model.data.User
+import com.voximplant.demos.sdk.core.model.data.isNotEmpty
 import com.voximplant.demos.sdk.feature.catalog.R
 
 @Composable
 fun UserBanner(
-    user: User?,
+    user: User,
     modifier: Modifier = Modifier,
     onLogoutClick: () -> Unit,
     onLoginClick: () -> Unit,
@@ -53,7 +54,7 @@ fun UserBanner(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
-                if (user != null) {
+                if (user.isNotEmpty()) {
                     Text(
                         text = user.displayName,
                         color = Gray10,
@@ -66,7 +67,7 @@ fun UserBanner(
                     )
                 }
             }
-            if (user != null) {
+            if (user.isNotEmpty()) {
                 Button(onClick = onLogoutClick) {
                     Text(text = stringResource(R.string.log_out))
                 }
@@ -96,7 +97,7 @@ fun LoggedUserBannerPreview() {
 fun UserBannerPreview() {
     VoximplantTheme {
         UserBanner(
-            user = null,
+            user = User("", ""),
             onLogoutClick = {},
             onLoginClick = {},
         )

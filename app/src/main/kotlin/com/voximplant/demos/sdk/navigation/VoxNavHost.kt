@@ -6,6 +6,7 @@ package com.voximplant.demos.sdk.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import com.voximplant.demos.sdk.feature.audiocall.incoming.navigation.audioCallIncomingScreen
 import com.voximplant.demos.sdk.feature.audiocall.incoming.navigation.navigateToAudioCallIncoming
@@ -49,7 +50,9 @@ fun VoxNavHost(
         )
         audioCallScreen(
             onBackClick = {
-                navController.popBackStack()
+                if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                    navController.popBackStack()
+                }
             },
             onLoginClick = {
                 navController.navigateToLogin()

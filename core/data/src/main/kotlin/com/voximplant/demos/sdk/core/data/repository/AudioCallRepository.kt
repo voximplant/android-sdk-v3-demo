@@ -204,4 +204,6 @@ class AudioCallRepository @Inject constructor(
         callDataSource.reject()
         pushHandled = false
     }
+
+    fun sendDtmf(value: String) = callDataSource.sendDtmf(value)
 }

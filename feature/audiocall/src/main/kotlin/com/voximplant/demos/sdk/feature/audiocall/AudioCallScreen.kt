@@ -42,6 +42,7 @@ import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.model.data.isNotEmpty
 import com.voximplant.demos.sdk.core.permissions.MicrophonePermissionEffect
 import com.voximplant.demos.sdk.core.permissions.NotificationsPermissionEffect
 import com.voximplant.demos.sdk.core.resources.R
@@ -135,9 +136,9 @@ fun AudioCallRoute(
                 showMicrophoneRationale = true
             },
             onCallClick = { username ->
-                if (microphonePermissionGranted) {
-                    scope.launch {
-                        if (viewModel.user.value != null) {
+                scope.launch {
+                    if (audioCallUiState.user.isNotEmpty()) {
+                        if (microphonePermissionGranted) {
                             createCallInProgress = true
                             viewModel.createCall(username).fold(
                                 onSuccess = { call ->
@@ -150,18 +151,19 @@ fun AudioCallRoute(
                                 },
                             )
                         } else {
-                            showLoginRequiredDialog = true
+                            showMicrophoneRationale = true
                         }
+                    } else {
+                        showLoginRequiredDialog = true
                     }
-                } else {
-                    showMicrophoneRationale = true
                 }
-            },
+            }
         )
     }
 
     NotificationsPermissionEffect(
-        showRationale = showNotificationsRationale,
+        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowNotificationPermissionRequest ?: false || showNotificationsRationale else false,
+        onHideDialog = viewModel::dismissNotificationPermissionRequest,
         onPermissionGranted = { value ->
             notificationsPermissionGranted = value
             showNotificationsRationale = false
@@ -169,7 +171,8 @@ fun AudioCallRoute(
     )
 
     MicrophonePermissionEffect(
-        showRationale = showMicrophoneRationale,
+        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowMicrophonePermissionRequest ?: false || showMicrophoneRationale else false,
+        onHideDialog = viewModel::dismissMicrophonePermissionRequest,
         onPermissionGranted = { value ->
             microphonePermissionGranted = value
             showMicrophoneRationale = false

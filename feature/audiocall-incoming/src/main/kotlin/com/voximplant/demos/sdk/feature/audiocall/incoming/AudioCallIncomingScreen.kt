@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.feature.audiocall.incoming
@@ -62,20 +62,14 @@ fun AudioCallIncomingRoute(
     val audioCallIncomingUiState by viewModel.callIncomingUiState.collectAsStateWithLifecycle()
 
     var microphonePermissionGranted by rememberSaveable { mutableStateOf(false) }
-    var showMicrophoneRationale by rememberSaveable {
-        if (action == Intent.ACTION_ANSWER && !microphonePermissionGranted) {
-            mutableStateOf(true)
-        } else {
-            mutableStateOf(false)
-        }
-    }
+    var showMicrophoneRationale by rememberSaveable { mutableStateOf(false) }
 
     var callFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
     LaunchedEffect(audioCallIncomingUiState) {
         when (val state = audioCallIncomingUiState.call?.state) {
-            is CallState.Connected -> onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
-            is CallState.Disconnected -> onCallEnded()
+            is CallState.Connecting, is CallState.Connected -> onCallAnswered(viewModel.id, audioCallIncomingUiState.displayName)
+            is CallState.Disconnecting, is CallState.Disconnected -> onCallEnded()
             is CallState.Failed -> callFailedDescription = state.description
             else -> {}
         }

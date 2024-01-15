@@ -15,5 +15,4 @@ sealed class LoginError : Throwable() {
     data object Interrupted : LoginError()
     data object MauAccessDenied : LoginError()
     data object TokenExpired : LoginError()
-    data object NoInfo : LoginError()
 }
