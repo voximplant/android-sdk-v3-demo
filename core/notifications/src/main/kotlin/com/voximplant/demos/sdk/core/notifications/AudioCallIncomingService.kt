@@ -10,8 +10,8 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.ServiceCompat
+import com.voximplant.demos.sdk.core.logger.Logger
 
 class AudioCallIncomingService : Service() {
 
@@ -44,7 +44,7 @@ class AudioCallIncomingService : Service() {
             )
         } catch (exception: Exception) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && exception is ForegroundServiceStartNotAllowedException) {
-                Log.e("DemoV3", "AudioCallIncomingService::exception: $exception")
+                Logger.error("AudioCallIncomingService::exception: $exception")
             }
         }
         return START_NOT_STICKY
