@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -19,7 +23,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTask"
             android:theme="@style/Theme.Voximplant.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
