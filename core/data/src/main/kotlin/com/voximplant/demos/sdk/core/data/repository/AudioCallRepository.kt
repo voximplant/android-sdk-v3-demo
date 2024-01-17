@@ -153,7 +153,7 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
-    fun refuseCall() = callDataSource.refuseCall()
+    fun refuseCall(call: Call) = callDataSource.refuseCall(call)
 
     fun startCall(id: String): Result<Call> {
         notifier.cancelCallNotification()

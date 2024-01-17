@@ -142,16 +142,20 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    fun refuseCall() {
+    /**
+     * Refuse a recently created, but not started or canceled call.
+     */
+    fun refuseCall(call: com.voximplant.demos.sdk.core.model.data.Call) {
         coroutineScope.launch {
-            if (activeCall?.state in listOf(com.voximplant.android.sdk.calls.CallState.Created, com.voximplant.android.sdk.calls.CallState.Disconnecting)) {
+            if (call.id == activeCall?.id) return@launch
+            if (call.state is CallState.Created || call.state is CallState.Disconnected || call.state is CallState.Failed) {
                 Logger.debug("CallDataSource::refuseCall")
                 _callApiDataFlow.emit(null)
                 _isMuted.value = false
                 _isOnHold.value = false
                 activeCall = null
-            } else if (activeCall?.state !in listOf(com.voximplant.android.sdk.calls.CallState.Disconnected, com.voximplant.android.sdk.calls.CallState.Failed)) {
-                Logger.error("CallDataSource::refuseCall: Only a recently created call can be refused")
+            } else {
+                Logger.error("CallDataSource::refuseCall: Only a recently created or canceled call can be refused.")
             }
         }
     }

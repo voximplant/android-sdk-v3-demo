@@ -154,7 +154,11 @@ class AudioCallOngoingViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        refuseCall()
+        callOngoingUiState.value.call?.let { call ->
+            if (call.state is CallState.Created || call.state is CallState.Disconnected || call.state is CallState.Failed) {
+                refuseCall(call)
+            }
+        }
     }
 
 }
