@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.feature.catalog
@@ -50,7 +50,7 @@ class CatalogViewModel @Inject constructor(
         shouldShowNotificationPermissionRequestFlow = shouldShowNotificationPermissionRequest,
     ).stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
+        started = SharingStarted.Eagerly,
         initialValue = CatalogUiState(
             user = User("", ""),
             shouldShowNotificationPermissionRequest = false,
