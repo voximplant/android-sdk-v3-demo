@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.feature.audiocall
@@ -83,7 +83,7 @@ fun AudioCallRoute(
 
             if (call == rememberCall) return@LaunchedEffect
 
-            if (call.direction == CallDirection.INCOMING && state is CallState.Created) {
+            if (call.direction == CallDirection.INCOMING && (state is CallState.Created || state is CallState.Reconnecting) && call.duration == 0L) {
                 onIncomingCall(call.id, call.remoteDisplayName)
             } else if (state is CallState.Connected) {
                 onCallCreated(call.id, call.remoteDisplayName)
