@@ -7,6 +7,7 @@ package com.voximplant.demos.sdk.feature.audiocall.ongoing
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voximplant.demos.sdk.core.domain.ClearCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetAudioDeviceUseCase
 import com.voximplant.demos.sdk.core.domain.GetAudioDevicesUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
@@ -16,7 +17,6 @@ import com.voximplant.demos.sdk.core.domain.GetMuteStateUseCase
 import com.voximplant.demos.sdk.core.domain.HangUpCallUseCase
 import com.voximplant.demos.sdk.core.domain.HoldCallUseCase
 import com.voximplant.demos.sdk.core.domain.MuteCallUseCase
-import com.voximplant.demos.sdk.core.domain.RefuseCallUseCase
 import com.voximplant.demos.sdk.core.domain.SelectAudioDeviceUseCase
 import com.voximplant.demos.sdk.core.domain.SendDtmfUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
@@ -45,7 +45,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     silentLogIn: SilentLogInUseCase,
     getLoginState: GetLoginStateUseCase,
     getCall: GetCallUseCase,
-    private val refuseCall: RefuseCallUseCase,
+    private val clearCall: ClearCallUseCase,
     getMuteState: GetMuteStateUseCase,
     getHoldState: GetHoldStateUseCase,
     getAudioDevices: GetAudioDevicesUseCase,
@@ -156,7 +156,7 @@ class AudioCallOngoingViewModel @Inject constructor(
         super.onCleared()
         callOngoingUiState.value.call?.let { call ->
             if (call.state is CallState.Created || call.state is CallState.Disconnected || call.state is CallState.Failed) {
-                refuseCall(call)
+                clearCall(call)
             }
         }
     }

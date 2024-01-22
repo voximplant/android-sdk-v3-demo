@@ -142,20 +142,17 @@ class CallDataSource @Inject constructor(
         }
     }
 
-    /**
-     * Refuse a recently created, but not started or canceled call.
-     */
-    fun refuseCall(call: com.voximplant.demos.sdk.core.model.data.Call) {
+    fun clearCall(call: com.voximplant.demos.sdk.core.model.data.Call) {
         coroutineScope.launch {
             if (call.id == activeCall?.id) return@launch
             if (call.state is CallState.Created || call.state is CallState.Disconnected || call.state is CallState.Failed) {
-                Logger.debug("CallDataSource::refuseCall")
+                Logger.debug("CallDataSource::clearCall")
                 _callApiDataFlow.emit(null)
                 _isMuted.value = false
                 _isOnHold.value = false
                 activeCall = null
             } else {
-                Logger.error("CallDataSource::refuseCall: Only a recently created or canceled call can be refused.")
+                Logger.error("CallDataSource::clearCall: Only a recently created, canceled or failed call can be cleared.")
             }
         }
     }

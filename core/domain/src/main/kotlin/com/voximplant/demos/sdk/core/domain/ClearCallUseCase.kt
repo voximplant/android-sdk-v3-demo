@@ -8,9 +8,9 @@ import com.voximplant.demos.sdk.core.data.repository.AudioCallRepository
 import com.voximplant.demos.sdk.core.model.data.Call
 import javax.inject.Inject
 
-class RefuseCallUseCase @Inject constructor(
+class ClearCallUseCase @Inject constructor(
     private val audioCallRepository: AudioCallRepository,
 ) {
 
-    operator fun invoke(call: Call) = audioCallRepository.refuseCall(call)
+    operator fun invoke(call: Call) = audioCallRepository.clearCall(call)
 }

@@ -7,8 +7,8 @@ package com.voximplant.demos.sdk.feature.audiocall.incoming
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voximplant.demos.sdk.core.domain.ClearCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetCallUseCase
-import com.voximplant.demos.sdk.core.domain.RefuseCallUseCase
 import com.voximplant.demos.sdk.core.domain.RejectIncomingCallUseCase
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
@@ -28,7 +28,7 @@ class AudioCallIncomingViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getCall: GetCallUseCase,
     private val rejectCall: RejectIncomingCallUseCase,
-    private val refuseCall: RefuseCallUseCase,
+    private val clearCall: ClearCallUseCase,
 ) : ViewModel() {
     private val incomingCallArgs: IncomingCallArgs = IncomingCallArgs(savedStateHandle)
 
@@ -57,7 +57,7 @@ class AudioCallIncomingViewModel @Inject constructor(
         super.onCleared()
         callIncomingUiState.value.call?.let { call ->
             if (call.direction == CallDirection.INCOMING && (call.state is CallState.Created || call.state is CallState.Disconnected || call.state is CallState.Failed)) {
-                refuseCall(call)
+                clearCall(call)
             }
         }
     }
