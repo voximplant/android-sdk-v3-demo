@@ -11,4 +11,5 @@ data class UserData(
     val node: Node?,
     val shouldHideNotificationPermissionRequest: Boolean,
     val shouldHideMicrophonePermissionRequest: Boolean,
+    val shouldHideCameraPermissionRequest: Boolean,
 )

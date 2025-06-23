@@ -23,10 +23,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -40,8 +38,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
-import com.voximplant.demos.sdk.core.model.data.CallDirection
-import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.isNotEmpty
 import com.voximplant.demos.sdk.core.permissions.MicrophonePermissionEffect
 import com.voximplant.demos.sdk.core.permissions.NotificationsPermissionEffect
@@ -58,13 +54,11 @@ fun AudioCallRoute(
     viewModel: AudioCallViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
     onLoginClick: () -> Unit,
-    onIncomingCall: (String, String?) -> Unit,
     onCallCreated: (String, String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
     val audioCallUiState by viewModel.audioCallUiState.collectAsStateWithLifecycle()
-    val rememberCall = remember { (audioCallUiState as? AudioCallUiState.Active)?.call }
 
     var notificationsPermissionGranted by rememberSaveable { mutableStateOf(true) }
     var showNotificationsRationale by rememberSaveable { mutableStateOf(false) }
@@ -75,21 +69,6 @@ fun AudioCallRoute(
     var createCallFailedDescription: String? by rememberSaveable { mutableStateOf(null) }
 
     var createCallInProgress by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(audioCallUiState) {
-        if (audioCallUiState is AudioCallUiState.Active) {
-            val call = (audioCallUiState as AudioCallUiState.Active).call
-            val state = (audioCallUiState as AudioCallUiState.Active).call.state
-
-            if (call == rememberCall) return@LaunchedEffect
-
-            if (call.direction == CallDirection.INCOMING && (state is CallState.Created || state is CallState.Reconnecting) && call.duration == 0L) {
-                onIncomingCall(call.id, call.remoteDisplayName)
-            } else if (state is CallState.Connected) {
-                onCallCreated(call.id, call.remoteDisplayName)
-            }
-        }
-    }
 
     if (showLoginRequiredDialog) {
         LoginRequiredDialog(
@@ -162,8 +141,11 @@ fun AudioCallRoute(
     }
 
     NotificationsPermissionEffect(
-        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowNotificationPermissionRequest ?: false || showNotificationsRationale else false,
-        onHideDialog = viewModel::dismissNotificationPermissionRequest,
+        showRationale = showNotificationsRationale || (audioCallUiState.user.isNotEmpty() && ((audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowNotificationPermissionRequest == true)),
+        onHideDialog = {
+            viewModel.dismissNotificationPermissionRequest()
+            showNotificationsRationale = false
+        },
         onPermissionGranted = { value ->
             notificationsPermissionGranted = value
             showNotificationsRationale = false
@@ -171,8 +153,11 @@ fun AudioCallRoute(
     )
 
     MicrophonePermissionEffect(
-        showRationale = if (audioCallUiState.user.isNotEmpty()) (audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowMicrophonePermissionRequest ?: false || showMicrophoneRationale else false,
-        onHideDialog = viewModel::dismissMicrophonePermissionRequest,
+        showRationale = showMicrophoneRationale || (audioCallUiState.user.isNotEmpty() && ((audioCallUiState as? AudioCallUiState.Inactive)?.shouldShowMicrophonePermissionRequest == true)),
+        onHideDialog = {
+            viewModel.dismissMicrophonePermissionRequest()
+            showMicrophoneRationale = false
+        },
         onPermissionGranted = { value ->
             microphonePermissionGranted = value
             showMicrophoneRationale = false
@@ -200,23 +185,19 @@ fun AudioCallScreen(
 
     Surface(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.padding(vertical = 16.dp),
+            modifier = Modifier.padding(start = 12.dp, end = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AnimatedVisibility(visible = showNotificationsBanner) {
                 NotificationsBanner(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, top = 16.dp, end = 12.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     onRequestClick = onNotificationsRequestClick,
                 )
             }
 
             AnimatedVisibility(visible = showMicrophoneBanner) {
                 MicrophoneBanner(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, top = 16.dp, end = 12.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     onRequestClick = onMicrophoneRequestClick,
                 )
             }
@@ -227,9 +208,7 @@ fun AudioCallScreen(
                     username = it
                     isError = false
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 label = { Text(text = stringResource(id = R.string.call_to_user)) },
                 supportingText = {
                     if (isError) {

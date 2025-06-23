@@ -14,4 +14,5 @@ message UserPreferences {
 
   bool should_hide_notification_permission_request = 5;
   bool should_hide_microphone_permission_request = 6;
+  bool should_hide_camera_permission_request = 7;
 }

@@ -19,4 +19,5 @@ fun NetworkUserData.asUserData() = UserData(
     node = null,
     shouldHideNotificationPermissionRequest = false,
     shouldHideMicrophonePermissionRequest = false,
+    shouldHideCameraPermissionRequest = false
 )

@@ -10,5 +10,5 @@ import javax.inject.Inject
 class MuteCallUseCase @Inject constructor(
     private val callRepository: AudioCallRepository,
 ) {
-    operator fun invoke(value: Boolean) = callRepository.mute(value)
+    operator fun invoke() = callRepository.toggleMute()
 }

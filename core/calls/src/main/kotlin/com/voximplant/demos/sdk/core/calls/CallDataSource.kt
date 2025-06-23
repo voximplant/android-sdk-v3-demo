@@ -12,13 +12,17 @@ import com.voximplant.android.sdk.calls.CallListener
 import com.voximplant.android.sdk.calls.CallManager
 import com.voximplant.android.sdk.calls.CallSettings
 import com.voximplant.android.sdk.calls.IncomingCallListener
+import com.voximplant.android.sdk.calls.LocalVideoStream
 import com.voximplant.android.sdk.calls.RejectMode
+import com.voximplant.android.sdk.calls.RemoteVideoStream
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
+import com.voximplant.demos.sdk.core.calls.model.CallTypeApi
 import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.model.data.CallState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Timer
@@ -30,6 +34,9 @@ class CallDataSource @Inject constructor(
     private val coroutineScope: CoroutineScope,
 ) {
     private var activeCall: Call? = null
+
+    private val _remoteVideoStreamFlow: MutableStateFlow<RemoteVideoStream?> = MutableStateFlow(null)
+    val remoteVideoStreamFlow: StateFlow<RemoteVideoStream?> = _remoteVideoStreamFlow.asStateFlow()
 
     private val callListener = object : CallListener {
 
@@ -48,6 +55,7 @@ class CallDataSource @Inject constructor(
                 callTimer.cancel()
                 callTimer.purge()
                 _duration.value = 0L
+                _remoteVideoStreamFlow.value = null
             }
         }
 
@@ -59,6 +67,7 @@ class CallDataSource @Inject constructor(
                 callTimer.cancel()
                 callTimer.purge()
                 _duration.value = 0L
+                _remoteVideoStreamFlow.value = null
             }
         }
 
@@ -86,6 +95,14 @@ class CallDataSource @Inject constructor(
             }
             suspendedAction = null
         }
+
+        override fun onRemoteVideoStreamAdded(call: Call, videoStream: RemoteVideoStream) {
+            _remoteVideoStreamFlow.value = videoStream
+        }
+
+        override fun onRemoteVideoStreamRemoved(call: Call, videoStream: RemoteVideoStream) {
+            _remoteVideoStreamFlow.value = null
+        }
     }
 
     private val incomingCallListener = object : IncomingCallListener {
@@ -103,7 +120,9 @@ class CallDataSource @Inject constructor(
                 _isMuted.value = false
                 _isOnHold.value = false
 
-                _callApiDataFlow.emit(call.asCallData())
+                _callApiDataFlow.emit(call.asCallData().apply {
+                    type = if (hasIncomingVideo) CallTypeApi.VideoCall else CallTypeApi.AudioCall
+                })
             }
         }
     }
@@ -124,8 +143,11 @@ class CallDataSource @Inject constructor(
 
     private var suspendedAction: SuspendedAction? = null
 
-    fun createCall(username: String): Result<CallApiData> {
-        callManager.call(username, CallSettings()).let { call ->
+    fun createCall(username: String, stream: LocalVideoStream? = null): Result<CallApiData> {
+        callManager.call(username, CallSettings().apply {
+            localVideoStream = stream
+            receiveVideo = stream != null
+        }).let { call ->
             if (call != null) {
                 coroutineScope.launch {
                     _callApiDataFlow.emit(null)
@@ -165,25 +187,32 @@ class CallDataSource @Inject constructor(
         callManager.setIncomingCallListener(null)
     }
 
-    fun startCall(id: String): Result<CallApiData> {
+    fun startCall(id: String, stream: LocalVideoStream? = null): Result<CallApiData> {
         Logger.debug("startCall: $activeCall")
         coroutineScope.launch {
             _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Connecting))
         }
         activeCall?.let { call ->
-            if (call.id != id) return Result.failure(Throwable("Call not found"))
+            if (call.id != id) {
+                coroutineScope.launch {
+                    _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Failed("Call not found")))
+                }
+                activeCall = null
+                return Result.failure(Throwable("Call not found"))
+            }
 
             when (call.direction) {
                 CallDirection.Outgoing -> {
                     return try {
                         call.setCallListener(callListener)
-                        try {
-                            call.start()
-                        } catch (exception: CallException) {
-                            Logger.error("CallDataSource::startCall: failed to start the call: ${exception.message}", exception)
-                        }
+                        call.start()
                         Result.success(call.asCallData())
                     } catch (exception: CallException) {
+                        Logger.error("CallDataSource::startCall: failed to start the call: ${exception.message}", exception)
+                        coroutineScope.launch {
+                            _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Failed(exception.toString())))
+                        }
+                        activeCall = null
                         Result.failure(exception)
                     }
                 }
@@ -191,7 +220,10 @@ class CallDataSource @Inject constructor(
                 CallDirection.Incoming -> {
                     call.setCallListener(callListener)
                     try {
-                        call.answer(CallSettings())
+                        call.answer(CallSettings().apply {
+                            localVideoStream = stream
+                            receiveVideo = stream != null
+                        })
                     } catch (exception: CallException) {
                         Logger.error("CallDataSource::startCall: failed to answer the call: ${exception.message}", exception)
                         if (activeCall?.state == com.voximplant.android.sdk.calls.CallState.Reconnecting) {
@@ -201,12 +233,44 @@ class CallDataSource @Inject constructor(
                     return Result.success(call.asCallData())
                 }
             }
-        } ?: return Result.failure(Throwable("Call not found"))
+        } ?: run {
+            coroutineScope.launch {
+                _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Failed("Call not found")))
+            }
+            activeCall = null
+            return Result.failure(Throwable("Call not found"))
+        }
     }
 
-    fun mute(value: Boolean) {
-        _isMuted.value = value
-        activeCall?.muteAudio(value)
+    fun toggleMute() {
+        activeCall?.muteAudio(!_isMuted.value)
+        _isMuted.value = !_isMuted.value
+    }
+
+    fun startSendingLocalVideo(videoStream: LocalVideoStream, callBack: (Boolean) -> Unit) {
+        activeCall?.startSendingVideo(videoStream, object : CallCallback {
+            override fun onFailure(exception: CallException) {
+                Logger.error("CallDataSource::startSendingLocalVideo failed")
+                callBack(false)
+            }
+
+            override fun onSuccess() {
+                callBack(true)
+            }
+        })
+    }
+
+    fun stopSendingLocalVideo(callBack: (Boolean) -> Unit) {
+        activeCall?.stopSendingVideo(object : CallCallback {
+            override fun onFailure(exception: CallException) {
+                Logger.error("CallDataSource::stopSendingLocalVideo failed")
+                callBack(false)
+            }
+
+            override fun onSuccess() {
+                callBack(true)
+            }
+        })
     }
 
     fun hold(value: Boolean) {
@@ -223,6 +287,7 @@ class CallDataSource @Inject constructor(
     }
 
     fun hangUp() {
+        _remoteVideoStreamFlow.value = null
         coroutineScope.launch {
             _callApiDataFlow.emit(_callApiDataFlow.value?.copy(state = CallState.Disconnecting))
         }

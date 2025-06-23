@@ -8,6 +8,7 @@ import com.voximplant.android.sdk.calls.Call
 import com.voximplant.android.sdk.calls.CallDirection.Incoming
 import com.voximplant.android.sdk.calls.CallDirection.Outgoing
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
+import com.voximplant.demos.sdk.core.calls.model.CallTypeApi
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
 
@@ -21,6 +22,7 @@ fun Call.asCallData() = CallApiData(
     duration = duration,
     remoteDisplayName = remoteDisplayName,
     remoteSipUri = remoteSipUri,
+    type = if (this.isVideoEnabled) CallTypeApi.VideoCall else CallTypeApi.AudioCall
 )
 
 val com.voximplant.android.sdk.calls.CallState.asInternalModel

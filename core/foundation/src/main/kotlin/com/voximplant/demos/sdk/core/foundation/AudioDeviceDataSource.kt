@@ -7,6 +7,7 @@ package com.voximplant.demos.sdk.core.foundation
 import com.voximplant.android.sdk.core.audio.AudioDevice
 import com.voximplant.android.sdk.core.audio.AudioDeviceEventsListener
 import com.voximplant.android.sdk.core.audio.AudioDeviceManager
+import com.voximplant.android.sdk.core.audio.AudioDeviceType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,5 +46,9 @@ class AudioDeviceDataSource(
         audioDeviceManager.audioDevices.find { audioDevice -> audioDevice.asExternalModel() == value }?.run {
             audioDeviceManager.selectAudioDevice(this)
         }
+    }
+
+    fun setDefaultAudioDeviceType(audioDeviceType: AudioDeviceType) {
+        audioDeviceManager.setDefaultAudioDeviceType(audioDeviceType)
     }
 }

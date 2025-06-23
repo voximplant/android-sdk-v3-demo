@@ -4,6 +4,7 @@
 
 package com.voximplant.demos.sdk.core.data.repository
 
+import com.voximplant.android.sdk.core.audio.AudioDeviceType
 import com.voximplant.demos.sdk.core.foundation.AudioDeviceDataSource
 import com.voximplant.demos.sdk.core.model.data.AudioDevice
 import kotlinx.coroutines.flow.Flow
@@ -19,4 +20,6 @@ class AudioDeviceRepository @Inject constructor(
         get() = audioDeviceDataSource.selectedAudioDevice
 
     fun selectAudioDevice(value: AudioDevice) = audioDeviceDataSource.selectAudioDevice(value)
+
+    fun setDefaultAudioDeviceType(audioDeviceType: AudioDeviceType) = audioDeviceDataSource.setDefaultAudioDeviceType(audioDeviceType)
 }

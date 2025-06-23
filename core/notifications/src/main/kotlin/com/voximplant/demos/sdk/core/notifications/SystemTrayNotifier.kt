@@ -30,28 +30,35 @@ private const val CALL_NOTIFICATION_ID = 1
 private const val ONGOING_CALL_NOTIFICATION_CHANNEL_ID = "ONGOING_CALL_NOTIFICATIONS"
 private const val INCOMING_CALL_NOTIFICATION_CHANNEL_ID = "INCOMING_CALL_NOTIFICATIONS"
 
+const val ACTION_NAVIGATE_TO_INCOMING_CALL = "ACTION_NAVIGATE_TO_INCOMING_CALL"
+
 @Singleton
 class SystemTrayNotifier @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : Notifier {
 
-    override fun createOngoingCallNotification(id: String, displayName: String?): Notification? = with(context) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return null
-
-        return@with createOngoingCallNotification(id, displayName)
+    override fun createOngoingCallNotification(id: String, displayName: String?, isOngoing: Boolean): Notification = with(context) {
+        return@with createOngoingCallNotification(id, displayName, isOngoing)
     }
 
-    override fun createIncomingCallNotification(id: String, displayName: String?): Notification? = with(context) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return null
-
-        return@with createIncomingCallNotification(id, displayName)
+    override fun createIncomingAudioCallNotification(id: String, displayName: String?): Notification = with(context) {
+        return@with createIncomingAudioCallNotification(id, displayName)
     }
 
-    override fun postIncomingCallNotification(id: String, displayName: String?) = with(context) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
+    override fun createIncomingVideoCallNotification(id: String, displayName: String?): Notification = with(context) {
+        return@with createIncomingVideoCallNotification(id, displayName)
+    }
 
+    override fun postIncomingAudioCallNotification(id: String, displayName: String?) = with(context) {
         val notificationManager = NotificationManagerCompat.from(this)
-        val incomingCallNotification = createIncomingCallNotification(id, displayName)
+        val incomingCallNotification = createIncomingAudioCallNotification(id, displayName)
+
+        notificationManager.notify(CALL_NOTIFICATION_ID, incomingCallNotification)
+    }
+
+    override fun postIncomingVideoCallNotification(id: String, displayName: String?) = with(context) {
+        val notificationManager = NotificationManagerCompat.from(this)
+        val incomingCallNotification = createIncomingVideoCallNotification(id, displayName)
 
         notificationManager.notify(CALL_NOTIFICATION_ID, incomingCallNotification)
     }
@@ -62,13 +69,14 @@ class SystemTrayNotifier @Inject constructor(
     }
 }
 
-private fun Context.createIncomingCallNotification(id: String, displayName: String?): Notification {
+private fun Context.createIncomingAudioCallNotification(id: String, displayName: String?): Notification {
     createIncomingCallNotificationChannel()
 
     val incomingCallPendingIntent = PendingIntent.getActivity(
         this,
         INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
         packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            action = ACTION_NAVIGATE_TO_INCOMING_CALL
             putExtra("id", id)
             putExtra("displayName", displayName)
         },
@@ -123,7 +131,55 @@ private fun Context.createIncomingCallNotification(id: String, displayName: Stri
     }.build()
 }
 
-private fun Context.createOngoingCallNotification(id: String, displayName: String?): Notification {
+private fun Context.createIncomingVideoCallNotification(id: String, displayName: String?): Notification {
+    createIncomingCallNotificationChannel()
+
+    val incomingCallPendingIntent = PendingIntent.getActivity(
+        this,
+        INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+        packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            action = ACTION_NAVIGATE_TO_INCOMING_CALL
+            putExtra("id", id)
+            putExtra("displayName", displayName)
+        },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+
+    val rejectIntent = Intent(VoxBroadcastReceiver.ACTION_REJECT_CALL)
+
+    val rejectPendingIntent = PendingIntent.getBroadcast(
+        this,
+        INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+        rejectIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+
+    val answerPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+        addNextIntent(packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            action = Intent.ACTION_ANSWER
+            putExtra("id", id)
+            putExtra("displayName", displayName)
+        } ?: return@run null)
+        getPendingIntent(
+            INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.demos.sdk.core.resources.R.string.unknown_user)).setImportant(false).build()
+
+    return NotificationCompat.Builder(this, INCOMING_CALL_NOTIFICATION_CHANNEL_ID).apply {
+        setFullScreenIntent(incomingCallPendingIntent, true)
+        setContentIntent(incomingCallPendingIntent)
+        setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
+        priority = NotificationCompat.PRIORITY_HIGH
+        setCategory(NotificationCompat.CATEGORY_CALL)
+        setShowWhen(false)
+        setStyle(NotificationCompat.CallStyle.forIncomingCall(caller, rejectPendingIntent, answerPendingIntent ?: incomingCallPendingIntent).setIsVideo(true))
+    }.build()
+}
+
+private fun Context.createOngoingCallNotification(id: String, displayName: String?, isOngoing: Boolean): Notification {
     createOngoingCallNotificationChannel()
 
     val ongoingCallIntent = PendingIntent.getActivity(
@@ -131,7 +187,7 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
         ONGOING_CALL_NOTIFICATION_REQUEST_CODE,
         packageManager.getLaunchIntentForPackage(packageName)?.apply {
             putExtra("id", id)
-            putExtra("displayName", displayName)
+            putExtra("userName", displayName)
         },
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -149,7 +205,7 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
 
     return NotificationCompat.Builder(this, ONGOING_CALL_NOTIFICATION_CHANNEL_ID).apply {
         setOngoing(true)
-        setUsesChronometer(true)
+        if (isOngoing) setUsesChronometer(true)
         setFullScreenIntent(ongoingCallIntent, false)
         setContentIntent(ongoingCallIntent)
         setShowWhen(false)

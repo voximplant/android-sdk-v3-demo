@@ -117,14 +117,17 @@ private fun audioCallUiState(
             shouldShowMicrophonePermissionRequest = shouldShowMicrophonePermissionRequest,
         )
     } else {
-        AudioCallUiState.Active(user = user, call = call)
+        AudioCallUiState.Active(user = user)
     }
 }
 
 sealed class AudioCallUiState(
     open val user: User,
 ) {
-    data class Active(override val user: User, val call: Call) : AudioCallUiState(user)
+    data class Active(
+        override val user: User
+    ) : AudioCallUiState(user)
+
     data class Inactive(
         override val user: User,
         val shouldShowNotificationPermissionRequest: Boolean,

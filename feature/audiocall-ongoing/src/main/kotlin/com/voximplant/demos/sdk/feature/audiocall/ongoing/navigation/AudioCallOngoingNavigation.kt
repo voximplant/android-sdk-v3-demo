@@ -6,6 +6,7 @@ package com.voximplant.demos.sdk.feature.audiocall.ongoing.navigation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -26,7 +27,16 @@ internal class OngoingCallArgs(val id: String, val displayName: String?) {
 }
 
 fun NavController.navigateToAudioCallOngoing(id: String, displayName: String?) {
+    var isContainsOngoing = false
+    this.currentBackStackEntry?.destination?.hierarchy?.forEach {
+        if (it.route != null) {
+            isContainsOngoing = it.route?.contains("ongoing_route") == true
+        }
+    }
     this.navigate("$audioCallOngoingRoute/$id?displayName=$displayName") {
+        if (isContainsOngoing) {
+            popUpTo(graph.startDestinationId)
+        }
         launchSingleTop = true
     }
 }

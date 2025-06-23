@@ -11,4 +11,9 @@ data class Call(
     val duration: Long,
     val remoteDisplayName: String?,
     val remoteSipUri: String?,
+    val type: CallType,
 )
+
+enum class CallType {
+    AudioCall, VideoCall,
+}

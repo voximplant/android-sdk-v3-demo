@@ -16,19 +16,23 @@
     <string name="confirm">Confirm</string>
     <string name="go_to_settings">Go to settings</string>
     <string name="audio_call">Audio call</string>
+    <string name="video_call">Video call</string>
     <string name="audio_call_description">Make and receive an audio call</string>
+    <string name="video_call_description">Make and receive a video call</string>
     <string name="call_to_user">Username</string>
     <string name="empty_username_error">The username must be filled in</string>
     <string name="make_call">Call</string>
     <string name="audio_devices">Audio devices</string>
     <string name="call_state_connected">Connected</string>
-    <string name="call_state_connecting">Connecting</string>
+    <string name="call_state_connecting">Connecting…</string>
     <string name="call_state_disconnected">Disconnected</string>
-    <string name="call_state_disconnecting">Disconnecting</string>
+    <string name="call_state_disconnecting">Disconnecting…</string>
     <string name="call_state_failed">Failed</string>
-    <string name="call_state_reconnecting">Reconnecting</string>
+    <string name="call_state_reconnecting">Reconnecting…</string>
     <string name="reject">Reject</string>
     <string name="answer">Answer</string>
     <string name="unknown_user">Unknown user</string>
     <string name="incoming_call">Incoming call</string>
+    <string name="incoming_video_call">Incoming video call</string>
+    <string name="you">You</string>
 </resources>

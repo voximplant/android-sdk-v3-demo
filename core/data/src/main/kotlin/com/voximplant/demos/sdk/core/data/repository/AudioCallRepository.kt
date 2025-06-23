@@ -7,14 +7,18 @@ package com.voximplant.demos.sdk.core.data.repository
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.voximplant.android.sdk.core.audio.AudioDeviceType
 import com.voximplant.demos.sdk.core.calls.CallDataSource
+import com.voximplant.demos.sdk.core.calls.model.CallTypeApi
 import com.voximplant.demos.sdk.core.calls.model.asCall
+import com.voximplant.demos.sdk.core.calls.model.callTypeMap
 import com.voximplant.demos.sdk.core.common.VoxBroadcastReceiver
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
-import com.voximplant.demos.sdk.core.notifications.AudioCallIncomingService
-import com.voximplant.demos.sdk.core.notifications.AudioCallOngoingService
+import com.voximplant.demos.sdk.core.data.services.AudioCallIncomingService
+import com.voximplant.demos.sdk.core.data.services.AudioCallOngoingService
+import com.voximplant.demos.sdk.core.model.data.CallType
 import com.voximplant.demos.sdk.core.notifications.Notifier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -29,11 +33,15 @@ class AudioCallRepository @Inject constructor(
     private val callDataSource: CallDataSource,
     private val notifier: Notifier,
     private val coroutineScope: CoroutineScope,
+    private val audioDeviceRepository: AudioDeviceRepository,
 ) {
     val callFlow: Flow<Call?>
-        get() = combine(callDataSource.callApiDataFlow, callDataSource.duration) { callApiData, duration ->
+        get() = combine(
+            callDataSource.callApiDataFlow,
+            callDataSource.duration
+        ) { callApiData, duration ->
             if (callApiData == null) return@combine null
-
+            if (callApiData.type != CallTypeApi.AudioCall) return@combine null
             Call(
                 id = callApiData.id,
                 state = callApiData.state,
@@ -41,6 +49,7 @@ class AudioCallRepository @Inject constructor(
                 duration = duration,
                 remoteDisplayName = callApiData.remoteDisplayName,
                 remoteSipUri = callApiData.remoteSipUri,
+                type = callTypeMap(callApiData.type)
             )
         }
 
@@ -59,11 +68,13 @@ class AudioCallRepository @Inject constructor(
         },
         onAnswerReceived = {
             coroutineScope.launch {
-                callFlow.firstOrNull()?.id?.let { id ->
-                    startCall(id)
+                callFlow.firstOrNull()?.let { call ->
+                    startCall(call.id, call.remoteDisplayName ?: "unknown user")
                 }
             }
         },
+        onToggleMuteReceived = {},
+        onToggleCameraReceived = {},
     )
 
     private val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
@@ -95,7 +106,7 @@ class AudioCallRepository @Inject constructor(
                             if (pushHandled) {
                                 startIncomingCallService(call)
                             } else {
-                                notifier.postIncomingCallNotification(call.id, call.remoteDisplayName)
+                                notifier.postIncomingAudioCallNotification(call.id, call.remoteDisplayName)
                             }
                         }
                     }
@@ -107,6 +118,7 @@ class AudioCallRepository @Inject constructor(
                         audioCallOngoingService.apply {
                             putExtra("id", call.id)
                             putExtra("displayName", call.remoteDisplayName)
+                            putExtra("isOngoing", true)
                         }
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             context.startForegroundService(audioCallOngoingService)
@@ -132,14 +144,6 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
-    fun startListeningForIncomingCalls() {
-        callDataSource.startListeningForIncomingCalls()
-    }
-
-    fun stopListeningForIncomingCalls() {
-        callDataSource.stopListeningForIncomingCalls()
-    }
-
     fun createCall(username: String): Result<Call> {
         callDataSource.createCall(username).let { callDataResult ->
             callDataResult.fold(
@@ -155,10 +159,22 @@ class AudioCallRepository @Inject constructor(
 
     fun clearCall(call: Call) = callDataSource.clearCall(call)
 
-    fun startCall(id: String): Result<Call> {
+    fun startCall(id: String, displayName: String): Result<Call> {
+        audioDeviceRepository.setDefaultAudioDeviceType(AudioDeviceType.Earpiece)
         notifier.cancelCallNotification()
         context.stopService(audioCallIncomingService)
         pushHandled = false
+        br.register(context)
+        audioCallOngoingService.apply {
+            putExtra("id", id)
+            putExtra("displayName", displayName)
+            putExtra("isOngoing", false)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(audioCallOngoingService)
+        } else {
+            context.startService(audioCallOngoingService)
+        }
         callDataSource.startCall(id).let { callDataResult ->
             callDataResult.fold(
                 onSuccess = { callData ->
@@ -176,17 +192,15 @@ class AudioCallRepository @Inject constructor(
 
         coroutineScope.launch {
             callFlow.firstOrNull()?.let { call ->
-                if (call.state is CallState.Created) {
-                    if (call.direction == CallDirection.INCOMING) {
-                        startIncomingCallService(call)
-                    }
+                if (call.type == CallType.AudioCall && call.state is CallState.Created && call.direction == CallDirection.INCOMING) {
+                    startIncomingCallService(call)
                 }
             }
         }
     }
 
-    fun mute(value: Boolean) {
-        callDataSource.mute(value)
+    fun toggleMute() {
+        callDataSource.toggleMute()
     }
 
     fun hold(value: Boolean) {

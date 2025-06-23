@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 plugins {
@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.voximplant.demos.sdk.core.calls"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
     }
@@ -31,7 +31,7 @@ dependencies {
     implementation(project(":core:logger"))
     implementation(project(":core:model"))
 
-    implementation(platform(libs.voximplant.sdk.bom))
+    api(platform(libs.voximplant.sdk.bom))
     api(libs.voximplant.sdk.calls)
 
     implementation(libs.androidx.core.ktx)

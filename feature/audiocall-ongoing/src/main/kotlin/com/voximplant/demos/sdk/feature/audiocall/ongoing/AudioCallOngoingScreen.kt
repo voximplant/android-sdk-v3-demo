@@ -13,27 +13,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Dialpad
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -65,12 +55,14 @@ import com.voximplant.demos.sdk.core.model.data.AudioDevice
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.model.data.CallType
 import com.voximplant.demos.sdk.core.resources.R
+import com.voximplant.demos.sdk.core.ui.AudioDevicesDialog
 import com.voximplant.demos.sdk.core.ui.CallActionButton
 import com.voximplant.demos.sdk.core.ui.CallFailedDialog
 import com.voximplant.demos.sdk.core.ui.Dialpad
+import com.voximplant.demos.sdk.core.ui.util.formatDuration
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudioCallOngoingRoute(
     viewModel: AudioCallOngoingViewModel = hiltViewModel(),
@@ -103,47 +95,17 @@ fun AudioCallOngoingRoute(
     }
 
     if (showAudioDevices) {
-        AlertDialog(onDismissRequest = { showAudioDevices = false }) {
-            Card {
-                Column {
-                    Box(Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 16.dp)) {
-                        Text(text = stringResource(R.string.audio_devices))
-                    }
-                    LazyColumn(
-                        Modifier.weight(1f, fill = false), contentPadding = PaddingValues(bottom = 24.dp)
-                    ) {
-                        items(callOngoingUiState.audioDevices) { audioDevice ->
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = audioDevice.name)
-                                },
-                                modifier = Modifier.clickable {
-                                    showAudioDevices = false
-                                    viewModel.selectAudioDevice(audioDevice)
-                                },
-                                leadingContent = {
-                                    val icon = when (audioDevice.type) {
-                                        AudioDevice.Type.EARPIECE -> Icons.Earpiece
-                                        AudioDevice.Type.SPEAKER -> Icons.Speaker
-                                        AudioDevice.Type.WIRED_HEADSET -> Icons.WiredHeadset
-                                        AudioDevice.Type.BLUETOOTH -> Icons.Bluetooth
-                                        AudioDevice.Type.USB -> Icons.Usb
-                                        AudioDevice.Type.UNKNOWN -> Icons.AudioOff
-                                    }
-                                    Icon(painter = painterResource(id = icon), contentDescription = null)
-                                },
-                                trailingContent = {
-                                    if (callOngoingUiState.audioDevice == audioDevice) {
-                                        Icon(painter = painterResource(id = Icons.Check), contentDescription = null)
-                                    }
-                                },
-                                colors = ListItemDefaults.colors(MaterialTheme.colorScheme.surfaceVariant),
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        AudioDevicesDialog(
+            audioDevices = callOngoingUiState.audioDevices,
+            selectedAudioDevice = callOngoingUiState.audioDevice,
+            onDismissRequest = {
+                showAudioDevices = false
+            },
+            onAudioDeviceClick = { audioDevice ->
+                showAudioDevices = false
+                viewModel.selectAudioDevice(audioDevice)
+            },
+        )
     }
 
     Scaffold { paddingValues ->
@@ -358,18 +320,12 @@ fun AudioCallOngoingScreen(
     }
 }
 
-private fun formatDuration(durationInMillis: Long): String {
-    val minutes = (durationInMillis / 1000) / 60
-    val seconds = (durationInMillis / 1000) % 60
-    return String.format("%02d:%02d", minutes, seconds)
-}
-
 @Preview
 @Composable
 fun PreviewAudioCallScreen() {
     var isMuted by remember { mutableStateOf(false) }
 
-    val call = Call("", CallState.Connected, direction = CallDirection.OUTGOING, duration = 0L, remoteDisplayName = null, remoteSipUri = null)
+    val call = Call("", CallState.Connected, direction = CallDirection.OUTGOING, duration = 0L, remoteDisplayName = null, remoteSipUri = null, CallType.AudioCall)
 
     val callOngoingUiState by remember(isMuted) {
         mutableStateOf(

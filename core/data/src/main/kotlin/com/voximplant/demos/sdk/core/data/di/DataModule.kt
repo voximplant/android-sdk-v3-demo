@@ -6,8 +6,12 @@ package com.voximplant.demos.sdk.core.data.di
 
 import android.content.Context
 import com.voximplant.demos.sdk.core.calls.CallDataSource
+import com.voximplant.demos.sdk.core.camera.manager.CameraDeviceManager
+import com.voximplant.demos.sdk.core.video.manager.LocalVideoManager
 import com.voximplant.demos.sdk.core.common.di.ApplicationScope
 import com.voximplant.demos.sdk.core.data.repository.AudioCallRepository
+import com.voximplant.demos.sdk.core.data.repository.AudioDeviceRepository
+import com.voximplant.demos.sdk.core.data.repository.VideoCallRepository
 import com.voximplant.demos.sdk.core.notifications.Notifier
 import dagger.Module
 import dagger.Provides
@@ -28,6 +32,32 @@ object DataModule {
         callDataSource: CallDataSource,
         notifier: Notifier,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): AudioCallRepository = AudioCallRepository(context, callDataSource, notifier, coroutineScope)
+        audioDeviceRepository: AudioDeviceRepository,
+    ): AudioCallRepository = AudioCallRepository(
+        context,
+        callDataSource,
+        notifier,
+        coroutineScope,
+        audioDeviceRepository
+    )
 
+    @Provides
+    @Singleton
+    fun provideVideoCallRepository(
+        @ApplicationContext context: Context,
+        localVideoManager: LocalVideoManager,
+        cameraDeviceManager: CameraDeviceManager,
+        notifier: Notifier,
+        callDataSource: CallDataSource,
+        @ApplicationScope coroutineScope: CoroutineScope,
+        audioDeviceRepository: AudioDeviceRepository,
+    ): VideoCallRepository = VideoCallRepository(
+        context,
+        localVideoManager,
+        cameraDeviceManager,
+        notifier,
+        callDataSource,
+        coroutineScope,
+        audioDeviceRepository
+    )
 }
