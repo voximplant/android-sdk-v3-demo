@@ -12,6 +12,8 @@ The application is currently in development.
 
 - **Audio calls**: Demonstration of the capabilities of Voximplant Android SDK for making audio
   calls.
+- **Video calls**: Demonstration of the capabilities of Voximplant Android SDK for making video
+  calls with PiP functionality.
 - **Jetpack Compose UI**: The application's user interface is built using Jetpack Compose for more
   convenient and
   declarative UI development.
@@ -79,7 +81,7 @@ configuration. [Set up](https://voximplant.com/docs/howtos/sdks/push_notificatio
 Voximplant Android SDK is available on `mavenCentral()`.
 
 ```
-implementation(platform("com.voximplant:android-sdk-bom:3.0.0-beta1"))
+implementation(platform("com.voximplant:android-sdk-bom:3.0.0-beta2"))
 implementation("com.voximplant:android-sdk-core")
 implementation("com.voximplant:android-sdk-calls")
 ```
