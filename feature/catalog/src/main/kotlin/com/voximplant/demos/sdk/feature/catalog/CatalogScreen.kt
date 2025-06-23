@@ -21,7 +21,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,10 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.Gray70
 import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
-import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import com.voximplant.demos.sdk.core.model.data.User
@@ -47,6 +46,7 @@ import com.voximplant.demos.sdk.core.ui.NotificationsBanner
 import com.voximplant.demos.sdk.feature.audiocall.navigation.audioCallRoute
 import com.voximplant.demos.sdk.feature.catalog.component.CatalogItem
 import com.voximplant.demos.sdk.feature.catalog.component.UserBanner
+import com.voximplant.demos.sdk.feature.videocall.navigation.videoCallRoute
 
 @Composable
 fun CatalogRoute(
@@ -147,12 +147,6 @@ fun CatalogRoute(
         else -> {}
     }
 
-    LaunchedEffect(catalogUiState.call) {
-        if (catalogUiState.call != null && catalogUiState.call?.state !is CallState.Disconnected && catalogUiState.call?.state !is CallState.Failed) {
-            onModuleClick(audioCallRoute)
-        }
-    }
-
     CatalogScreen(
         user = catalogUiState.user,
         onLoginClick = onLoginClick,
@@ -165,8 +159,11 @@ fun CatalogRoute(
     )
 
     NotificationsPermissionEffect(
-        showRationale = if (catalogUiState.user.isNotEmpty()) catalogUiState.shouldShowNotificationPermissionRequest || showNotificationsRationale else false,
-        onHideDialog = viewModel::dismissNotificationPermissionRequest,
+        showRationale = showNotificationsRationale || (catalogUiState.user.isNotEmpty() && catalogUiState.shouldShowNotificationPermissionRequest),
+        onHideDialog = {
+            viewModel.dismissNotificationPermissionRequest()
+            showNotificationsRationale = false
+        },
         onPermissionGranted = { value ->
             notificationsPermissionGranted = value
             showNotificationsRationale = false
@@ -217,7 +214,15 @@ fun CatalogScreen(
                         title = stringResource(id = com.voximplant.demos.sdk.core.resources.R.string.audio_call),
                         description = stringResource(id = com.voximplant.demos.sdk.core.resources.R.string.audio_call_description),
                         onClick = { onModuleClick(audioCallRoute) },
-                        image = painterResource(id = R.drawable.ic_phone_call_circle),
+                        image = painterResource(id = Icons.Call),
+                    )
+                }
+                item {
+                    CatalogItem(
+                        title = stringResource(id = com.voximplant.demos.sdk.core.resources.R.string.video_call),
+                        description = stringResource(id = com.voximplant.demos.sdk.core.resources.R.string.video_call_description),
+                        onClick = { onModuleClick(videoCallRoute) },
+                        image = painterResource(id = Icons.Camera),
                     )
                 }
             }

@@ -16,6 +16,8 @@ class VoxBroadcastReceiver(
     val onHangUpReceived: () -> Unit,
     val onRejectReceived: () -> Unit,
     val onAnswerReceived: () -> Unit,
+    val onToggleMuteReceived: () -> Unit,
+    val onToggleCameraReceived: () -> Unit,
 ) : BroadcastReceiver() {
     private var registered = false
 
@@ -27,6 +29,14 @@ class VoxBroadcastReceiver(
 
             ACTION_REJECT_CALL -> {
                 onRejectReceived()
+            }
+
+            ACTION_TOGGLE_MUTE -> {
+                onToggleMuteReceived()
+            }
+
+            ACTION_TOGGLE_CAMERA -> {
+                onToggleCameraReceived()
             }
 
             Intent.ACTION_ANSWER -> {
@@ -45,6 +55,8 @@ class VoxBroadcastReceiver(
             val filter = IntentFilter().apply {
                 addAction(ACTION_HANG_UP_CALL)
                 addAction(ACTION_REJECT_CALL)
+                addAction(ACTION_TOGGLE_MUTE)
+                addAction(ACTION_TOGGLE_CAMERA)
                 addAction(Intent.ACTION_ANSWER)
             }
             ContextCompat.registerReceiver(context, this, filter, ContextCompat.RECEIVER_EXPORTED)
@@ -62,5 +74,7 @@ class VoxBroadcastReceiver(
     companion object {
         const val ACTION_HANG_UP_CALL = "com.voximplant.demos.sdk.ACTION_HANG_UP_CALL"
         const val ACTION_REJECT_CALL = "com.voximplant.demos.sdk.ACTION_REJECT_CALL"
+        const val ACTION_TOGGLE_MUTE = "com.voximplant.demos.sdk.ACTION_TOGGLE_MUTE"
+        const val ACTION_TOGGLE_CAMERA = "com.voximplant.demos.sdk.ACTION_TOGGLE_CAMERA"
     }
 }

@@ -17,9 +17,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
@@ -104,7 +104,10 @@ fun NotificationsPermissionEffect(
 
     if (showSettings) {
         NotificationsSettingsDialog(
-            onDismiss = { showSettings = false },
+            onDismiss = {
+                onHideDialog()
+                showSettings = false
+            },
             onConfirm = {
                 showSettings = false
                 context.startActivity(

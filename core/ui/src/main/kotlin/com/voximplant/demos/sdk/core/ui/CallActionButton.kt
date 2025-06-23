@@ -37,12 +37,54 @@ import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
 
 @Composable
+fun CallActionButtonSmall(
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    text: @Composable() (() -> Unit)? = null,
+    enabled: Boolean = true,
+    color: Color = Color(0xFFDADAE6),
+    onClick: () -> Unit,
+) {
+    CallActionButtonDefault(
+        icon = icon,
+        modifier = modifier,
+        text = text,
+        enabled = enabled,
+        color = color,
+        buttonSize = 40,
+        iconSize = 24,
+        onClick = onClick
+    )
+}
+
+@Composable
 fun CallActionButton(
     icon: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     text: @Composable() (() -> Unit)? = null,
     enabled: Boolean = true,
     color: Color = Color(0xFFDADAE6),
+    onClick: () -> Unit,
+) {
+    CallActionButtonDefault(
+        icon = icon,
+        modifier = modifier,
+        text = text,
+        enabled = enabled,
+        color = color,
+        onClick = onClick
+    )
+}
+
+@Composable
+private fun CallActionButtonDefault(
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    text: @Composable() (() -> Unit)? = null,
+    enabled: Boolean = true,
+    color: Color = Color(0xFFDADAE6),
+    buttonSize: Int = 64,
+    iconSize: Int = 32,
     onClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -62,14 +104,14 @@ fun CallActionButton(
             onClick = onClick,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .size(64.dp),
+                .size(buttonSize.dp),
             enabled = enabled,
             colors = IconButtonDefaults.filledIconButtonColors(containerColor = color),
             interactionSource = interactionSource,
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp),
+                    .size(iconSize.dp),
                 propagateMinConstraints = true,
             ) {
                 icon()
@@ -141,6 +183,68 @@ private fun CallActionButtonWithoutTextPreview() {
     VoximplantTheme {
         Surface {
             CallActionButton(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = Icons.Hangup),
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                },
+                color = Color(0xFFF5222D),
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CallActionButtonSmallPreview() {
+    var enabled by remember { mutableStateOf(false) }
+
+    VoximplantTheme {
+        Surface {
+            CallActionButtonSmall(
+                icon = {
+                    Icon(painter = painterResource(id = Icons.Microphone), contentDescription = null)
+                },
+                text = {
+                    Text(text = "Mute")
+                },
+                onClick = { enabled = !enabled },
+                color = if (enabled) Color(0xFF1F1C28) else Color(0xFFDADAE6)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CallActionButtonSmallWithLongTextPreview() {
+    var enabled by remember { mutableStateOf(false) }
+
+    VoximplantTheme {
+        Surface {
+            CallActionButtonSmall(
+                icon = {
+                    Icon(painter = painterResource(id = Icons.Bluetooth), contentDescription = null, tint = if (enabled) Color(0xFFDADAE6) else Color(0xFF1F1C28))
+                },
+                text = {
+                    Text(text = "Google Pixel Buds Pro")
+                },
+                onClick = { enabled = !enabled },
+                color = if (enabled) Color(0xFF1F1C28) else Color(0xFFDADAE6)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CallActionButtonWithoutTextSmallPreview() {
+    VoximplantTheme {
+        Surface {
+            CallActionButtonSmall(
                 icon = {
                     Icon(
                         painter = painterResource(id = Icons.Hangup),

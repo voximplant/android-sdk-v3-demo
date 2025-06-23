@@ -37,7 +37,7 @@ class UserPreferencesDataSource @Inject constructor(
                 null,
                 NodeProto.UNRECOGNIZED,
                 NodeProto.UNASSIGNED,
-                -> null
+                    -> null
 
                 NodeProto.NODE_1 -> Node1
                 NodeProto.NODE_2 -> Node2
@@ -52,6 +52,7 @@ class UserPreferencesDataSource @Inject constructor(
             },
             shouldHideNotificationPermissionRequest = userPreferences.shouldHideNotificationPermissionRequest,
             shouldHideMicrophonePermissionRequest = userPreferences.shouldHideMicrophonePermissionRequest,
+            shouldHideCameraPermissionRequest = userPreferences.shouldHideCameraPermissionRequest,
         )
     }
 
@@ -121,6 +122,14 @@ class UserPreferencesDataSource @Inject constructor(
         userPreferencesDataStore.updateData { userPreferences ->
             userPreferences.copy {
                 this.shouldHideMicrophonePermissionRequest = shouldHide
+            }
+        }
+    }
+
+    suspend fun setShouldHideCameraPermissionRequest(shouldHide: Boolean) {
+        userPreferencesDataStore.updateData { userPreferences ->
+            userPreferences.copy {
+                this.shouldHideCameraPermissionRequest = shouldHide
             }
         }
     }

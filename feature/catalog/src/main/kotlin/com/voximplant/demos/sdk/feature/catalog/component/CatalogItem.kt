@@ -21,10 +21,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voximplant.demos.sdk.core.designsystem.icon.Icons
 import com.voximplant.demos.sdk.core.designsystem.theme.Gray10
 import com.voximplant.demos.sdk.core.designsystem.theme.Typography
 import com.voximplant.demos.sdk.core.designsystem.theme.VoximplantTheme
-import com.voximplant.demos.sdk.feature.catalog.R
 
 @Composable
 fun CatalogItem(
@@ -78,7 +78,7 @@ private fun CatalogItemPreview() {
             title = "Title",
             description = "Description",
             onClick = {},
-            image = painterResource(id = R.drawable.ic_phone_call_circle)
+            image = painterResource(id = Icons.Call)
         )
     }
 }
@@ -91,7 +91,7 @@ private fun CatalogItemTitlePreview() {
             title = "Title",
             description = null,
             onClick = {},
-            image = painterResource(id = R.drawable.ic_phone_call_circle)
+            image = painterResource(id = Icons.Call)
         )
     }
 }
@@ -104,7 +104,7 @@ private fun CatalogItemLongTitlePreview() {
             title = "Very very very very very very very very very long title",
             description = "Description",
             onClick = {},
-            image = painterResource(id = R.drawable.ic_phone_call_circle)
+            image = painterResource(id = Icons.Call)
         )
     }
 }
@@ -117,7 +117,7 @@ private fun CatalogItemLongDescriptionPreview() {
             title = "Title",
             description = "Very very very very very very very very very long description",
             onClick = {},
-            image = painterResource(id = R.drawable.ic_phone_call_circle)
+            image = painterResource(id = Icons.Call)
         )
     }
 }

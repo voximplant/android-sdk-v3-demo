@@ -2,7 +2,7 @@
  * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
-package com.voximplant.demos.sdk.core.notifications
+package com.voximplant.demos.sdk.core.data.services
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Service
@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import com.voximplant.demos.sdk.core.logger.Logger
+import com.voximplant.demos.sdk.core.notifications.SystemTrayNotifier
 
 class AudioCallIncomingService : Service() {
 
@@ -25,11 +26,7 @@ class AudioCallIncomingService : Service() {
             return START_NOT_STICKY
         }
 
-        val notification = SystemTrayNotifier(applicationContext).createIncomingCallNotification(id, displayName)
-        if (notification == null) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
+        val notification = SystemTrayNotifier(applicationContext).createIncomingAudioCallNotification(id, displayName)
 
         try {
             ServiceCompat.startForeground(

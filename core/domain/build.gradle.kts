@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.voximplant.demos.sdk.core.domain"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
     }

@@ -9,18 +9,19 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.gms)
     alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.voximplant.demos.sdk"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.voximplant.demos.sdk"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
-        versionName = "0.1.1"
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -41,9 +42,7 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
-    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -57,10 +56,14 @@ dependencies {
     implementation(project(":feature:audiocall"))
     implementation(project(":feature:audiocall-incoming"))
     implementation(project(":feature:audiocall-ongoing"))
+    implementation(project(":feature:videocall"))
+    implementation(project(":feature:videocall-incoming"))
+    implementation(project(":feature:videocall-ongoing"))
 
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
+    implementation(project(":core:notifications"))
     implementation(project(":core:push"))
 
     implementation(libs.androidx.core.ktx)

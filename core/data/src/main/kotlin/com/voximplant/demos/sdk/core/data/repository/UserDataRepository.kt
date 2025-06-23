@@ -22,4 +22,7 @@ class UserDataRepository @Inject constructor(
         userPreferencesDataSource.setShouldHideMicrophonePermissionRequest(shouldHide)
     }
 
+    suspend fun setShouldHideCameraPermissionRequest(shouldHide: Boolean) {
+        userPreferencesDataSource.setShouldHideCameraPermissionRequest(shouldHide)
+    }
 }

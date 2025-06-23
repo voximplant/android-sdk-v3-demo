@@ -7,12 +7,10 @@ package com.voximplant.demos.sdk.feature.catalog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voximplant.demos.sdk.core.data.repository.UserDataRepository
-import com.voximplant.demos.sdk.core.domain.GetCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetLoginStateUseCase
 import com.voximplant.demos.sdk.core.domain.GetUserUseCase
 import com.voximplant.demos.sdk.core.domain.LogOutUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
-import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.LoginError
 import com.voximplant.demos.sdk.core.model.data.LoginState
 import com.voximplant.demos.sdk.core.model.data.User
@@ -33,7 +31,6 @@ import javax.inject.Inject
 class CatalogViewModel @Inject constructor(
     getLoginState: GetLoginStateUseCase,
     getUserUseCase: GetUserUseCase,
-    getCall: GetCallUseCase,
     private val silentLogInUseCase: SilentLogInUseCase,
     private val logOutUseCase: LogOutUseCase,
     private val userDataRepository: UserDataRepository,
@@ -46,7 +43,6 @@ class CatalogViewModel @Inject constructor(
     val catalogUiState: StateFlow<CatalogUiState> = catalogUiState(
         userFlow = getUserUseCase(),
         loginStateFlow = loginState,
-        callFlow = getCall(),
         shouldShowNotificationPermissionRequestFlow = shouldShowNotificationPermissionRequest,
     ).stateIn(
         scope = viewModelScope,
@@ -92,18 +88,15 @@ class CatalogViewModel @Inject constructor(
 private fun catalogUiState(
     userFlow: Flow<User>,
     loginStateFlow: Flow<LoginState>,
-    callFlow: Flow<Call?>,
     shouldShowNotificationPermissionRequestFlow: Flow<Boolean>,
 ): Flow<CatalogUiState> = combine(
     userFlow,
     loginStateFlow,
-    callFlow,
     shouldShowNotificationPermissionRequestFlow,
-) { user, loginState, call, shouldShowNotificationPermissionRequest ->
+) { user, loginState, shouldShowNotificationPermissionRequest ->
     CatalogUiState(
         user = user,
         loginState = loginState,
-        call = call,
         shouldShowNotificationPermissionRequest = shouldShowNotificationPermissionRequest,
     )
 }
@@ -111,6 +104,5 @@ private fun catalogUiState(
 data class CatalogUiState(
     val user: User,
     val loginState: LoginState = LoginState.LoggedOut,
-    val call: Call? = null,
     val shouldShowNotificationPermissionRequest: Boolean,
 )

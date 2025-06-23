@@ -1,28 +1,27 @@
 [versions]
-accompanist = "0.32.0"
-androidGradlePlugin = "8.5.2"
-androidxActivity = "1.8.2"
-androidxComposeBom = "2023.10.01"
-androidxComposeCompiler = "1.5.8"
-androidxEspresso = "3.5.1"
-androidxCore = "1.12.0"
+accompanist = "0.37.0"
+androidGradlePlugin = "8.7.2"
+androidxActivity = "1.9.3"
+androidxComposeBom = "2024.11.00"
+androidxEspresso = "3.6.1"
+androidxCore = "1.15.0"
 androidxCoreSplashscreen = "1.0.1"
-androidxDataStore = "1.0.0"
-androidxHiltNavigationCompose = "1.1.0"
-androidxLifecycle = "2.6.2"
-androidxNavigation = "2.7.6"
-androidxTestExt = "1.1.5"
-firebaseBom = "32.7.0"
-firebaseCrashlyticsPlugin = "2.9.9"
-gmsPlugin = "4.4.0"
+androidxDataStore = "1.1.1"
+androidxHiltNavigationCompose = "1.2.0"
+androidxLifecycle = "2.8.7"
+androidxNavigation = "2.8.4"
+androidxTestExt = "1.2.1"
+firebaseBom = "33.6.0"
+firebaseCrashlyticsPlugin = "3.0.2"
+gmsPlugin = "4.4.2"
 hilt = "2.50"
 junit = "4.13.2"
-kotlin = "1.9.22"
-kotlinxCoroutines = "1.7.3"
-ksp = "1.9.22-1.0.16"
+kotlin = "2.0.21"
+kotlinxCoroutines = "1.9.0"
+ksp = "2.0.21-1.0.25"
 protobuf = "3.25.1"
 protobufPlugin = "0.9.4"
-voximplantSdk = "3.0.0-beta1"
+voximplantSdk = "3.0.0-beta2-alpha3"
 
 [libraries]
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
@@ -57,10 +56,12 @@ protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref 
 voximplant-sdk-bom = { group = "com.voximplant", name = "android-sdk-bom", version.ref = "voximplantSdk" }
 voximplant-sdk-calls = { group = "com.voximplant", name = "android-sdk-calls" }
 voximplant-sdk-core = { group = "com.voximplant", name = "android-sdk-core" }
+voximplant-sdk-render-compose = { group = "com.voximplant", name = "android-sdk-renderer-compose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 androidLibrary = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
 gms = { id = "com.google.gms.google-services", version.ref = "gmsPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

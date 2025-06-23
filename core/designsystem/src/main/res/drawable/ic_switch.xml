@@ -1,0 +1,13 @@
+<!--
+  ~ Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+  <path
+      android:pathData="M2,10C2,7.67 3.02,5.58 4.62,4.12L7,6.5V0.5H1L3.2,2.7C1.24,4.52 0,7.11 0,10C0,15.19 3.95,19.45 9,19.95V17.93C5.06,17.44 2,14.07 2,10ZM20,10C20,4.81 16.05,0.55 11,0.05V2.07C14.94,2.56 18,5.93 18,10C18,12.33 16.98,14.42 15.38,15.88L13,13.5V19.5H19L16.8,17.3C18.76,15.48 20,12.89 20,10Z"
+      android:fillColor="#ffffff"/>
+</vector>

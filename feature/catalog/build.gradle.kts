@@ -7,11 +7,12 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.voximplant.demos.sdk.feature.catalog"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
         buildConfigField("String", "VOXIMPLANT_SDK_VERSION", "\"${libs.voximplant.sdk.bom.get().version}\"")
@@ -30,14 +31,11 @@ android {
         compose = true
         buildConfig = true
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
-    }
 }
 
 dependencies {
     implementation(project(":feature:audiocall"))
+    implementation(project(":feature:videocall"))
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))

@@ -7,6 +7,7 @@ package com.voximplant.demos.sdk.core.calls.model
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
+import com.voximplant.demos.sdk.core.model.data.CallType
 
 data class CallApiData(
     val id: String,
@@ -15,7 +16,12 @@ data class CallApiData(
     val duration: Long,
     val remoteDisplayName: String?,
     val remoteSipUri: String?,
+    var type: CallTypeApi,
 )
+
+enum class CallTypeApi {
+    AudioCall, VideoCall,
+}
 
 fun CallApiData.asCall() = Call(
     id = id,
@@ -24,4 +30,13 @@ fun CallApiData.asCall() = Call(
     duration = duration,
     remoteDisplayName = remoteDisplayName,
     remoteSipUri = remoteSipUri,
+    type = callTypeMap(type),
 )
+
+fun callTypeMap(callTypeApi: CallTypeApi): CallType {
+    return when (callTypeApi) {
+        CallTypeApi.AudioCall -> CallType.AudioCall
+        CallTypeApi.VideoCall -> CallType.VideoCall
+    }
+}
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.designsystem.icon
@@ -10,6 +10,8 @@ object Icons {
     val ArrowBack = R.drawable.ic_arrow_left
     val AudioOff = R.drawable.ic_audio_off
     val Bluetooth = R.drawable.ic_bluetooth
+    val Camera = R.drawable.ic_camera
+    val CameraOff = R.drawable.ic_camera_off
     val Call = R.drawable.ic_phone_call
     val Check = R.drawable.ic_check
     val Earpiece = R.drawable.ic_earpiece
@@ -20,6 +22,7 @@ object Icons {
     val Notification = R.drawable.ic_bell
     val Person = R.drawable.ic_person
     val Speaker = R.drawable.ic_volume_full
+    val Switch = R.drawable.ic_switch
     val Usb = R.drawable.ic_usb
     val WiredHeadset = R.drawable.ic_headphones
 }

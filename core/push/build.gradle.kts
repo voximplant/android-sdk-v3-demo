@@ -7,11 +7,12 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.voximplant.demos.sdk.core.push"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
     }
@@ -28,17 +29,13 @@ android {
     buildFeatures {
         compose = true
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.androidxComposeCompiler.get()
-    }
 }
 
 dependencies {
-    api(project(":core:common"))
-    api(project(":core:data"))
-    api(project(":core:notifications"))
-    api(project(":core:resources"))
+    implementation(project(":core:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:notifications"))
+    implementation(project(":core:resources"))
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

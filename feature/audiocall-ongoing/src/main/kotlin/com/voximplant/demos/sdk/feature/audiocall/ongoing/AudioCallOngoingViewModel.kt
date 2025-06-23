@@ -7,6 +7,7 @@ package com.voximplant.demos.sdk.feature.audiocall.ongoing
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.voximplant.demos.sdk.core.data.repository.AudioCallRepository
 import com.voximplant.demos.sdk.core.domain.ClearCallUseCase
 import com.voximplant.demos.sdk.core.domain.GetAudioDeviceUseCase
 import com.voximplant.demos.sdk.core.domain.GetAudioDevicesUseCase
@@ -20,7 +21,6 @@ import com.voximplant.demos.sdk.core.domain.MuteCallUseCase
 import com.voximplant.demos.sdk.core.domain.SelectAudioDeviceUseCase
 import com.voximplant.demos.sdk.core.domain.SendDtmfUseCase
 import com.voximplant.demos.sdk.core.domain.SilentLogInUseCase
-import com.voximplant.demos.sdk.core.domain.StartCallUseCase
 import com.voximplant.demos.sdk.core.model.data.AudioDevice
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallState
@@ -41,6 +41,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AudioCallOngoingViewModel @Inject constructor(
+    audioCallRepository: AudioCallRepository,
     savedStateHandle: SavedStateHandle,
     silentLogIn: SilentLogInUseCase,
     getLoginState: GetLoginStateUseCase,
@@ -51,7 +52,6 @@ class AudioCallOngoingViewModel @Inject constructor(
     getAudioDevices: GetAudioDevicesUseCase,
     getAudioDevice: GetAudioDeviceUseCase,
     private val selectAudioDeviceUseCase: SelectAudioDeviceUseCase,
-    startCall: StartCallUseCase,
     private val muteCall: MuteCallUseCase,
     private val holdCall: HoldCallUseCase,
     private val hangUpCall: HangUpCallUseCase,
@@ -92,7 +92,7 @@ class AudioCallOngoingViewModel @Inject constructor(
                 when (loginState) {
                     is LoginState.LoggedIn -> {
                         this@AudioCallOngoingViewModel.loginState.value = LoginState.LoggedIn
-                        startCall(ongoingCallArgs.id)
+                        audioCallRepository.startCall(ongoingCallArgs.id, displayName ?: "unknown user")
                         cancel()
                     }
 
@@ -123,9 +123,7 @@ class AudioCallOngoingViewModel @Inject constructor(
     }
 
     fun toggleMute() {
-        viewModelScope.launch {
-            muteCall(!callOngoingUiState.value.isMuted)
-        }
+        muteCall()
     }
 
     fun toggleHold() {
@@ -203,7 +201,7 @@ private fun callUiState(
     audioDeviceFlow,
 ) { loginState, call, isMuted, isOnHold, audioDevices, audioDevice ->
     if (call == null) {
-        CallOngoingUiState.Failed(reason = "Call not found", displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
+        CallOngoingUiState.Inactive(displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = null)
     } else if (loginState is LoginState.LoggingIn) {
         CallOngoingUiState.Connecting(displayName = displayName, isMuted = isMuted, isOnHold = isOnHold, audioDevices = audioDevices, audioDevice = audioDevice, call = call)
     } else if (loginState is LoginState.Failed) {

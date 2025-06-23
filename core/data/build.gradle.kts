@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.voximplant.demos.sdk.core.data"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
     }
@@ -27,13 +27,15 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:calls"))
+    api(project(":core:calls"))
+    implementation(project(":core:camera-manager"))
     implementation(project(":core:common"))
     implementation(project(":core:datastore"))
     implementation(project(":core:foundation"))
     implementation(project(":core:logger"))
     implementation(project(":core:model"))
     implementation(project(":core:notifications"))
+    implementation(project(":core:video-manager"))
 
     implementation(libs.hilt.android)
     implementation(libs.kotlinx.coroutines.android)
