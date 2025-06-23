@@ -25,10 +25,10 @@ The project is divided into several modules:
 - **:app**: The main application module containing screen navigation and user interface.
 - **:feature:audiocall**: Audio call main screen.
 - **:feature:audiocall-incoming**: Module responsible for incoming audio calls.
-- **:feature:audiocall-ongoing**: Module responsible for managing an ongoing call.
+- **:feature:audiocall-ongoing**: Module responsible for managing an ongoing audio call.
 - **:feature:videocall**: Video call main screen.
 - **:feature:videocall-incoming**: Module responsible for incoming video calls.
-- **:feature:videocall-ongoing**: Module responsible for managing an ongoing call.
+- **:feature:videocall-ongoing**: Module responsible for managing an ongoing video call.
 - **:feature:catalog**: Module responsible for switching between functional features of the
   Voximplant Android SDK.
 - **:feature:login**: Module responsible for authorization in the demo application.
