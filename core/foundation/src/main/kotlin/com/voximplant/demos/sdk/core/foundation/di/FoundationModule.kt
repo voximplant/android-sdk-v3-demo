@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.foundation.di
@@ -27,12 +27,12 @@ object FoundationModule {
     fun providesUserDataSource(
         @ApplicationContext context: Context,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): AuthDataSource = AuthDataSource(context, coroutineScope, client = Client.getInstance(context))
+    ): AuthDataSource = AuthDataSource(context, coroutineScope, client = Client)
 
     @Provides
     @Singleton
     fun providesAudioDeviceDataSource(
         @ApplicationContext context: Context,
-    ): AudioDeviceDataSource = AudioDeviceDataSource(audioDeviceManager = AudioDeviceManager.getInstance(context))
+    ): AudioDeviceDataSource = AudioDeviceDataSource(audioDeviceManager = AudioDeviceManager)
 
 }

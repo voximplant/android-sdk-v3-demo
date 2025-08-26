@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.foundation
 
 import com.voximplant.android.sdk.core.audio.AudioDevice
-import com.voximplant.android.sdk.core.audio.AudioDeviceEventsListener
+import com.voximplant.android.sdk.core.audio.AudioDeviceListener
 import com.voximplant.android.sdk.core.audio.AudioDeviceManager
 import com.voximplant.android.sdk.core.audio.AudioDeviceType
 import kotlinx.coroutines.flow.Flow
@@ -29,8 +29,8 @@ class AudioDeviceDataSource(
     }
 
     init {
-        audioDeviceManager.addAudioDeviceEventsListener(
-            object : AudioDeviceEventsListener {
+        audioDeviceManager.addAudioDeviceListener(
+            object : AudioDeviceListener {
                 override fun onAudioDeviceChanged(audioDevice: AudioDevice) {
                     _selectedAudioDevice.value = audioDevice
                 }

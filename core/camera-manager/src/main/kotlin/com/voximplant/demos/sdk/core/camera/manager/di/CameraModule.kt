@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.camera.manager.di
@@ -21,5 +21,5 @@ object CameraModule {
     @Singleton
     fun provideCameraDeviceManager(
         @ApplicationContext context: Context,
-    ): CameraDeviceManager = CameraDeviceManager(cameraManager = CameraManager.getInstance(context))
+    ): CameraDeviceManager = CameraDeviceManager(cameraManager = CameraManager)
 }

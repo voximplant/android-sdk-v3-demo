@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 plugins {
@@ -51,6 +51,9 @@ android {
 }
 
 dependencies {
+    implementation(platform(libs.voximplant.sdk.bom))
+    implementation(libs.voximplant.sdk.core)
+
     implementation(project(":feature:catalog"))
     implementation(project(":feature:login"))
     implementation(project(":feature:audiocall"))
