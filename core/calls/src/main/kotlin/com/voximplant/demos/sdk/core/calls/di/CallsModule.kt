@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.calls.di
@@ -29,6 +29,6 @@ object CallsModule {
         @ApplicationContext context: Context,
         @Dispatcher(Default) defaultDispatcher: CoroutineDispatcher,
         @ApplicationScope coroutineScope: CoroutineScope,
-    ): CallDataSource = CallDataSource(callManager = CallManager.getInstance(context), coroutineScope)
+    ): CallDataSource = CallDataSource(callManager = CallManager, coroutineScope)
 
 }
