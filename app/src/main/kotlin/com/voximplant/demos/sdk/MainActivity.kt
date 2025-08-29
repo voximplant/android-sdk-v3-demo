@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk
@@ -233,6 +233,18 @@ class MainActivity : ComponentActivity() {
                                                 requestMicrophoneAndCameraPermission.launch(arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA))
                                             }
                                             null -> {}
+                                        }
+                                    }
+                                }
+
+                                if (state.call?.type == CallType.AudioCall) {
+                                    if (state.call.direction == CallDirection.INCOMING && (state.call.state is CallState.Connecting || state.call.state is CallState.Connected)) {
+                                        if (voxAppState.navController.currentDestination?.route?.contains(audioCallOngoingRoute) == false) {
+                                            voxAppState.navController.navigateToAudioCallOngoing(
+                                                state.call.id,
+                                                state.call.remoteDisplayName
+                                            )
+                                            intent.action = null
                                         }
                                     }
                                 }

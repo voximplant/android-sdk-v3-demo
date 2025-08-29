@@ -4,13 +4,16 @@
 
 package com.voximplant.demos.sdk.core.notifications
 
+import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -89,16 +92,30 @@ private fun Context.createIncomingAudioCallNotification(id: String, displayName:
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val answerPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-        addNextIntent(packageManager.getLaunchIntentForPackage(packageName)?.apply {
-            action = Intent.ACTION_ANSWER
-            putExtra("id", id)
-            putExtra("displayName", displayName)
-        } ?: return@run null)
-        getPendingIntent(
+    val answerIntent = Intent(Intent.ACTION_ANSWER).apply {
+        putExtra("id", id)
+        putExtra("displayName", displayName)
+    }
+
+    val answerPendingIntent: PendingIntent? = if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+        PendingIntent.getBroadcast(
+            this,
             INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            answerIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+    } else {
+        TaskStackBuilder.create(this).run {
+            addNextIntent(packageManager.getLaunchIntentForPackage(packageName)?.apply {
+                action = Intent.ACTION_ANSWER
+                putExtra("id", id)
+                putExtra("displayName", displayName)
+            } ?: return@run null)
+            getPendingIntent(
+                INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
     }
 
     val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.demos.sdk.core.resources.R.string.unknown_user)).setImportant(false).build()
