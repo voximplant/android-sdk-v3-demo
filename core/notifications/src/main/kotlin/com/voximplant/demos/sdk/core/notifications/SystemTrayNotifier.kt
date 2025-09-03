@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.notifications
