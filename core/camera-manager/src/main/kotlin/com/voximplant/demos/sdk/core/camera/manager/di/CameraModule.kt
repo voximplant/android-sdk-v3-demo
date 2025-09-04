@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.camera.manager.di
 
+import com.voximplant.android.sdk.calls.video.CameraVideoSource
 import com.voximplant.demos.sdk.core.camera.manager.CameraDeviceManager
 import dagger.Module
 import dagger.Provides
@@ -16,5 +17,5 @@ import javax.inject.Singleton
 object CameraModule {
     @Provides
     @Singleton
-    fun provideCameraDeviceManager(): CameraDeviceManager = CameraDeviceManager()
+    fun provideCameraDeviceManager(): CameraDeviceManager = CameraDeviceManager(cameraVideoSource = CameraVideoSource)
 }

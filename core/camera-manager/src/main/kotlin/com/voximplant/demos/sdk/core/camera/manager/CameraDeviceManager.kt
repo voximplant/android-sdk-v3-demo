@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.camera.manager
@@ -13,8 +13,9 @@ import com.voximplant.android.sdk.calls.video.VideoSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class CameraDeviceManager() {
-    val cameraVideoSource: VideoSource = CameraVideoSource
+class CameraDeviceManager(
+    val cameraVideoSource: VideoSource
+) {
 
     private val cameraDevices: List<CameraDevice>
         get() = CameraVideoSource.cameraDevices
