@@ -12,8 +12,9 @@ import com.voximplant.android.sdk.calls.video.CameraVideoSource
 import com.voximplant.android.sdk.calls.video.VideoSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-class CameraDeviceManager(
+class CameraDeviceManager @Inject constructor(
     val cameraVideoSource: VideoSource
 ) {
 
