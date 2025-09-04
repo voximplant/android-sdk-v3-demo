@@ -4,13 +4,10 @@
 
 package com.voximplant.demos.sdk.core.video.manager.di
 
-import android.content.Context
-import com.voximplant.android.sdk.calls.CallManager
 import com.voximplant.demos.sdk.core.video.manager.LocalVideoManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -20,7 +17,5 @@ object VideoModule {
 
     @Provides
     @Singleton
-    fun providesLocalVideoManager(
-        @ApplicationContext context: Context,
-    ): LocalVideoManager = LocalVideoManager(callManager = CallManager)
+    fun providesLocalVideoManager(): LocalVideoManager = LocalVideoManager()
 }

@@ -7,14 +7,15 @@ package com.voximplant.demos.sdk.core.calls
 import com.voximplant.android.sdk.calls.Call
 import com.voximplant.android.sdk.calls.CallCallback
 import com.voximplant.android.sdk.calls.CallDirection
+import com.voximplant.android.sdk.calls.CallDisconnectReason
 import com.voximplant.android.sdk.calls.CallException
 import com.voximplant.android.sdk.calls.CallListener
-import com.voximplant.android.sdk.calls.CallManager
 import com.voximplant.android.sdk.calls.CallSettings
 import com.voximplant.android.sdk.calls.IncomingCallListener
 import com.voximplant.android.sdk.calls.LocalVideoStream
 import com.voximplant.android.sdk.calls.RejectMode
 import com.voximplant.android.sdk.calls.RemoteVideoStream
+import com.voximplant.android.sdk.calls.VICalls
 import com.voximplant.demos.sdk.core.calls.model.CallApiData
 import com.voximplant.demos.sdk.core.calls.model.CallTypeApi
 import com.voximplant.demos.sdk.core.logger.Logger
@@ -30,7 +31,7 @@ import javax.inject.Inject
 import kotlin.concurrent.scheduleAtFixedRate
 
 class CallDataSource @Inject constructor(
-    private val callManager: CallManager,
+    private val callManager: VICalls,
     private val coroutineScope: CoroutineScope,
 ) {
     private var activeCall: Call? = null
@@ -47,7 +48,7 @@ class CallDataSource @Inject constructor(
             startCallTimer(call)
         }
 
-        override fun onCallDisconnected(call: Call, headers: Map<String, String>?, answeredElsewhere: Boolean) {
+        override fun onCallDisconnected(call: Call, headers: Map<String, String>?, disconnectReason: CallDisconnectReason) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
                 activeCall?.setCallListener(null)
@@ -144,7 +145,7 @@ class CallDataSource @Inject constructor(
     private var suspendedAction: SuspendedAction? = null
 
     fun createCall(username: String, stream: LocalVideoStream? = null): Result<CallApiData> {
-        callManager.call(username, CallSettings().apply {
+        callManager.createCall(username, CallSettings().apply {
             localVideoStream = stream
             receiveVideo = stream != null
         }).let { call ->
