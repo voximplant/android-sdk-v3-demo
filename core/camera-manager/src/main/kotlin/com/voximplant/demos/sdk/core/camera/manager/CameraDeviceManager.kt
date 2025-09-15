@@ -1,40 +1,38 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.camera.manager
 
-import com.voximplant.android.sdk.calls.VideoSource
-import com.voximplant.android.sdk.calls.camera.CameraDevice
-import com.voximplant.android.sdk.calls.camera.CameraDeviceType
-import com.voximplant.android.sdk.calls.camera.CameraManager
-import com.voximplant.android.sdk.calls.camera.CameraOrientation
-import com.voximplant.android.sdk.calls.camera.CameraResolution
+import com.voximplant.android.sdk.calls.video.CameraDevice
+import com.voximplant.android.sdk.calls.video.CameraDeviceType
+import com.voximplant.android.sdk.calls.video.CameraOrientation
+import com.voximplant.android.sdk.calls.video.CameraResolution
+import com.voximplant.android.sdk.calls.video.CameraVideoSource
+import com.voximplant.android.sdk.calls.video.VideoSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 class CameraDeviceManager @Inject constructor(
-    private val cameraManager: CameraManager,
-) {
     val cameraVideoSource: VideoSource
-        get() = cameraManager
+) {
 
     private val cameraDevices: List<CameraDevice>
-        get() = cameraManager.cameraDevices
+        get() = CameraVideoSource.cameraDevices
 
-    private val _selectedCameraDevice = MutableStateFlow(cameraManager.currentCameraDevice)
+    private val _selectedCameraDevice: MutableStateFlow<CameraDevice?> = MutableStateFlow(CameraVideoSource.currentCameraDevice)
 
     val selectedCameraDevice = _selectedCameraDevice.asStateFlow()
     private val resolution: CameraResolution = CameraResolution.Medium
 
     init {
-        cameraManager.cameraOrientation = CameraOrientation.Screen
-        cameraManager.setPreferredResolution(resolution)
+        CameraVideoSource.cameraOrientation = CameraOrientation.Screen
+        CameraVideoSource.setPreferredResolution(resolution)
         cameraDevices.first { cameraDevice -> cameraDevice.type == CameraDeviceType.Front }
             .let { cameraDevice ->
                 _selectedCameraDevice.value = cameraDevice
-                cameraManager.selectCameraDevice(cameraDevice)
+                CameraVideoSource.selectCameraDevice(cameraDevice)
             }
     }
 
@@ -46,7 +44,7 @@ class CameraDeviceManager @Inject constructor(
 
                 return@let
             }
-            cameraManager.selectCameraDevice(cameraDevice)
+            CameraVideoSource.selectCameraDevice(cameraDevice)
             _selectedCameraDevice.value = cameraDevice
         }
     }
