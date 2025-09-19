@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.foundation
@@ -16,7 +16,7 @@ import com.voximplant.demos.sdk.core.model.data.AudioDevice.Type
 fun AudioDevice.asExternalModel() = com.voximplant.demos.sdk.core.model.data.AudioDevice(
     hasMic = hasMic,
     id = id,
-    name = name,
+    name = getAudioDeviceName(type) ?: name,
     type = type.asExternalModel,
 )
 
@@ -28,3 +28,13 @@ val AudioDeviceType.asExternalModel
         Bluetooth -> Type.BLUETOOTH
         Usb -> Type.USB
     }
+
+private fun getAudioDeviceName(audioDeviceType: AudioDeviceType): String? {
+    return when (audioDeviceType) {
+        Earpiece -> "Earpiece"
+        Speaker -> "Speaker"
+        WiredHeadset -> "WiredHeadset"
+        Bluetooth, Usb -> null
+    }
+
+}
