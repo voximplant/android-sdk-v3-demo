@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.notifications
@@ -121,6 +121,7 @@ private fun Context.createIncomingAudioCallNotification(id: String, displayName:
     val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.demos.sdk.core.resources.R.string.unknown_user)).setImportant(false).build()
 
     return NotificationCompat.Builder(this, INCOMING_CALL_NOTIFICATION_CHANNEL_ID).apply {
+        setOngoing(true)
         setFullScreenIntent(incomingCallPendingIntent, true)
         setContentIntent(incomingCallPendingIntent)
         setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
@@ -169,6 +170,7 @@ private fun Context.createIncomingVideoCallNotification(id: String, displayName:
     val caller = Person.Builder().setName(displayName ?: getString(com.voximplant.demos.sdk.core.resources.R.string.unknown_user)).setImportant(false).build()
 
     return NotificationCompat.Builder(this, INCOMING_CALL_NOTIFICATION_CHANNEL_ID).apply {
+        setOngoing(true)
         setFullScreenIntent(incomingCallPendingIntent, true)
         setContentIntent(incomingCallPendingIntent)
         setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
