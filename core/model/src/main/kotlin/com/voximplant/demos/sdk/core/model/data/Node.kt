@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.model.data
@@ -15,3 +15,5 @@ data object Node7 : Node
 data object Node8 : Node
 data object Node9 : Node
 data object Node10 : Node
+data object Node11 : Node
+data object Node12 : Node

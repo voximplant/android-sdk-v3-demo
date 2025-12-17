@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.data.model
@@ -7,6 +7,8 @@ package com.voximplant.demos.sdk.core.data.model
 import com.voximplant.demos.sdk.core.model.data.Node
 import com.voximplant.demos.sdk.core.model.data.Node1
 import com.voximplant.demos.sdk.core.model.data.Node10
+import com.voximplant.demos.sdk.core.model.data.Node11
+import com.voximplant.demos.sdk.core.model.data.Node12
 import com.voximplant.demos.sdk.core.model.data.Node2
 import com.voximplant.demos.sdk.core.model.data.Node3
 import com.voximplant.demos.sdk.core.model.data.Node4
@@ -27,4 +29,6 @@ fun Node.asExternal(): com.voximplant.android.sdk.core.Node = when (this) {
     Node8 -> com.voximplant.android.sdk.core.Node.Node8
     Node9 -> com.voximplant.android.sdk.core.Node.Node9
     Node10 -> com.voximplant.android.sdk.core.Node.Node10
+    Node11 -> com.voximplant.android.sdk.core.Node.Node11
+    Node12 -> com.voximplant.android.sdk.core.Node.Node11 //TODO (Rodion) change to "Node12"
 }

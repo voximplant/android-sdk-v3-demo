@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2025, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.datastore
@@ -8,6 +8,8 @@ import androidx.datastore.core.DataStore
 import com.voximplant.demos.sdk.core.model.data.Node
 import com.voximplant.demos.sdk.core.model.data.Node1
 import com.voximplant.demos.sdk.core.model.data.Node10
+import com.voximplant.demos.sdk.core.model.data.Node11
+import com.voximplant.demos.sdk.core.model.data.Node12
 import com.voximplant.demos.sdk.core.model.data.Node2
 import com.voximplant.demos.sdk.core.model.data.Node3
 import com.voximplant.demos.sdk.core.model.data.Node4
@@ -49,6 +51,8 @@ class UserPreferencesDataSource @Inject constructor(
                 NodeProto.NODE_8 -> Node8
                 NodeProto.NODE_9 -> Node9
                 NodeProto.NODE_10 -> Node10
+                NodeProto.NODE_11 -> Node11
+                NodeProto.NODE_12 -> Node12
             },
             shouldHideNotificationPermissionRequest = userPreferences.shouldHideNotificationPermissionRequest,
             shouldHideMicrophonePermissionRequest = userPreferences.shouldHideMicrophonePermissionRequest,
@@ -105,6 +109,8 @@ class UserPreferencesDataSource @Inject constructor(
                     Node8 -> NodeProto.NODE_8
                     Node9 -> NodeProto.NODE_9
                     Node10 -> NodeProto.NODE_10
+                    Node11 -> NodeProto.NODE_11
+                    Node12 -> NodeProto.NODE_12
                 }
             }
         }
