@@ -30,5 +30,5 @@ fun Node.asExternal(): com.voximplant.android.sdk.core.Node = when (this) {
     Node9 -> com.voximplant.android.sdk.core.Node.Node9
     Node10 -> com.voximplant.android.sdk.core.Node.Node10
     Node11 -> com.voximplant.android.sdk.core.Node.Node11
-    Node12 -> com.voximplant.android.sdk.core.Node.Node11 //TODO (Rodion) change to "Node12"
+    Node12 -> com.voximplant.android.sdk.core.Node.Node12
 }
