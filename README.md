@@ -1,4 +1,4 @@
-# Voximplant Android SDK v3 Demo (beta)
+# Voximplant Android SDK v3 Demo
 
 This repository contains a sample Android application demonstrating the integration and use of the
 Voximplant Android SDK 3.x.
