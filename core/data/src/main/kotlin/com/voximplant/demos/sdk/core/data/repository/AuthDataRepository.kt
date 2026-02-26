@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2024, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.data.repository
@@ -148,7 +148,7 @@ class AuthDataRepository @Inject constructor(
         }
     }
 
-    suspend fun handlePush(push: MutableMap<String, String>) {
+    suspend fun handlePush(push: Map<String, String>) {
         if (loginState.first() is LoginState.LoggedIn) {
             authDataSource.handlePush(push)
         } else {

@@ -29,6 +29,7 @@ private const val INCOMING_CALL_NOTIFICATION_REQUEST_CODE = 1
 private const val CALL_NOTIFICATION_ID = 1
 private const val ONGOING_CALL_NOTIFICATION_CHANNEL_ID = "ONGOING_CALL_NOTIFICATIONS"
 private const val INCOMING_CALL_NOTIFICATION_CHANNEL_ID = "INCOMING_CALL_NOTIFICATIONS"
+private const val BACKGROUND_SERVICE_NOTIFICATION_CHANNEL_ID = "BACKGROUND_SERVICE_NOTIFICATION_CHANNEL_ID"
 
 const val ACTION_NAVIGATE_TO_INCOMING_CALL = "ACTION_NAVIGATE_TO_INCOMING_CALL"
 
@@ -47,6 +48,10 @@ class SystemTrayNotifier @Inject constructor(
 
     override fun createIncomingVideoCallNotification(id: String, displayName: String?): Notification = with(context) {
         return@with createIncomingVideoCallNotification(id, displayName)
+    }
+
+    fun createBackgroundPushNotification(): Notification = with(context) {
+        return@with createBackgroundPushNotification()
     }
 
     override fun postIncomingAudioCallNotification(id: String, displayName: String?) = with(context) {
@@ -216,6 +221,25 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
     }.build()
 }
 
+private fun Context.createBackgroundPushNotification(): Notification {
+    createBackgroundPushNotificationChannel()
+    val incomingCallPendingIntent = PendingIntent.getActivity(
+        this,
+        INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
+        packageManager.getLaunchIntentForPackage(packageName),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+
+    return NotificationCompat.Builder(this, BACKGROUND_SERVICE_NOTIFICATION_CHANNEL_ID).apply {
+        setContentIntent(incomingCallPendingIntent)
+        setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
+        priority = NotificationCompat.PRIORITY_LOW
+        setCategory(NotificationCompat.CATEGORY_SERVICE)
+        setShowWhen(false)
+        setContentText(getString(R.string.running_checks_for_incoming_calls))
+    }.build()
+}
+
 private fun Context.createIncomingCallNotificationChannel() {
     val channel = NotificationChannelCompat.Builder(
         INCOMING_CALL_NOTIFICATION_CHANNEL_ID,
@@ -237,6 +261,18 @@ private fun Context.createOngoingCallNotificationChannel() {
         NotificationManagerCompat.IMPORTANCE_DEFAULT,
     ).apply {
         setName(getString(R.string.ongoing_call_notification_channel_name))
+        setVibrationEnabled(false)
+        setSound(null, null)
+    }.build()
+    NotificationManagerCompat.from(this).createNotificationChannel(channel)
+}
+
+private fun Context.createBackgroundPushNotificationChannel() {
+    val channel = NotificationChannelCompat.Builder(
+        BACKGROUND_SERVICE_NOTIFICATION_CHANNEL_ID,
+        NotificationManagerCompat.IMPORTANCE_MIN,
+    ).apply {
+        setName(getString(R.string.background_push_notification_channel_name))
         setVibrationEnabled(false)
         setSound(null, null)
     }.build()
