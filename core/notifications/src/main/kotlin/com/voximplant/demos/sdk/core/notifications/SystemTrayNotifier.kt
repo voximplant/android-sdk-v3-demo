@@ -223,7 +223,7 @@ private fun Context.createOngoingCallNotification(id: String, displayName: Strin
 
 private fun Context.createBackgroundPushNotification(): Notification {
     createBackgroundPushNotificationChannel()
-    val incomingCallPendingIntent = PendingIntent.getActivity(
+    val backgroundCallPendingIntent = PendingIntent.getActivity(
         this,
         INCOMING_CALL_NOTIFICATION_REQUEST_CODE,
         packageManager.getLaunchIntentForPackage(packageName),
@@ -231,7 +231,7 @@ private fun Context.createBackgroundPushNotification(): Notification {
     )
 
     return NotificationCompat.Builder(this, BACKGROUND_SERVICE_NOTIFICATION_CHANNEL_ID).apply {
-        setContentIntent(incomingCallPendingIntent)
+        setContentIntent(backgroundCallPendingIntent)
         setSmallIcon(com.voximplant.demos.sdk.core.common.R.drawable.ic_notification)
         priority = NotificationCompat.PRIORITY_LOW
         setCategory(NotificationCompat.CATEGORY_SERVICE)
