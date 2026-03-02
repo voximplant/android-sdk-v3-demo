@@ -50,7 +50,7 @@ class SystemTrayNotifier @Inject constructor(
         return@with createIncomingVideoCallNotification(id, displayName)
     }
 
-    fun createBackgroundPushNotification(): Notification = with(context) {
+    override fun createBackgroundPushNotification(): Notification = with(context) {
         return@with createBackgroundPushNotification()
     }
 
