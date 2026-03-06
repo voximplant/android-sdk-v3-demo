@@ -4,6 +4,7 @@
 
 package com.voximplant.demos.sdk.core.foundation
 
+import android.os.Build
 import com.voximplant.android.sdk.core.audio.AudioDevice
 import com.voximplant.android.sdk.core.audio.AudioDeviceType
 import com.voximplant.android.sdk.core.audio.AudioDeviceType.Bluetooth
@@ -30,11 +31,14 @@ val AudioDeviceType.asExternalModel
     }
 
 private fun getAudioDeviceName(audioDeviceType: AudioDeviceType): String? {
-    return when (audioDeviceType) {
-        Earpiece -> "Earpiece"
-        Speaker -> "Speaker"
-        WiredHeadset -> "WiredHeadset"
-        Bluetooth, Usb -> null
+    return when {
+        audioDeviceType.name != Build.MODEL -> audioDeviceType.name
+        else -> when (audioDeviceType) {
+            Earpiece -> "Earpiece"
+            Speaker -> "Speaker"
+            WiredHeadset -> "WiredHeadset"
+            Bluetooth -> "Bluetooth"
+            Usb -> "USB"
+        }
     }
-
 }
