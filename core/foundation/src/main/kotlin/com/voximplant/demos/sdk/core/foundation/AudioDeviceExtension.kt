@@ -17,7 +17,7 @@ import com.voximplant.demos.sdk.core.model.data.AudioDevice.Type
 fun AudioDevice.asExternalModel() = com.voximplant.demos.sdk.core.model.data.AudioDevice(
     hasMic = hasMic,
     id = id,
-    name = getAudioDeviceName(type) ?: name,
+    name = getAudioDeviceName(audioDevice = this),
     type = type.asExternalModel,
 )
 
@@ -30,10 +30,10 @@ val AudioDeviceType.asExternalModel
         Usb -> Type.USB
     }
 
-private fun getAudioDeviceName(audioDeviceType: AudioDeviceType): String? {
+private fun getAudioDeviceName(audioDevice: AudioDevice): String {
     return when {
-        audioDeviceType.name != Build.MODEL -> audioDeviceType.name
-        else -> when (audioDeviceType) {
+        audioDevice.name != Build.MODEL -> audioDevice.name
+        else -> when (audioDevice.type) {
             Earpiece -> "Earpiece"
             Speaker -> "Speaker"
             WiredHeadset -> "WiredHeadset"
