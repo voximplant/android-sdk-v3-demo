@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.foundation
@@ -297,7 +297,7 @@ class AuthDataSource(
         )
     }
 
-    fun handlePush(push: MutableMap<String, String>) {
+    fun handlePush(push: Map<String, String>) {
         client.handlePushNotification(push)
     }
 

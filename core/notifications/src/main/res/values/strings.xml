@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
+  -->
+
 <resources>
     <string name="ongoing_call_notification_channel_name">Ongoing call</string>
     <string name="incoming_call_notification_channel_name">Incoming call</string>
+    <string name="background_push_notification_channel_name">Background push</string>
+    <string name="running_checks_for_incoming_calls">Running checks for incoming calls</string>
 </resources>

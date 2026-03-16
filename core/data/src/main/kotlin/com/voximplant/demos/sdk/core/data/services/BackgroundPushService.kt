@@ -11,22 +11,42 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
+import com.voximplant.demos.sdk.core.common.di.ApplicationScope
+import com.voximplant.demos.sdk.core.data.repository.AuthDataRepository
 import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.notifications.SystemTrayNotifier
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
-class AudioCallIncomingService : Service() {
+@AndroidEntryPoint
+class BackgroundPushService : Service() {
+
+    @Inject
+    lateinit var authDataRepository: AuthDataRepository
+
+    @Inject
+    @ApplicationScope
+    lateinit var scope: CoroutineScope
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        val id = intent?.getStringExtra("id")
-        val displayName = intent?.getStringExtra("displayName")
+        val notification = SystemTrayNotifier(applicationContext).createBackgroundPushNotification()
 
-        if (id == null) {
-            stopSelf()
-            return START_NOT_STICKY
+        val restoredMap = mutableMapOf<String, String>()
+        val data = intent?.getBundleExtra("push")
+
+        if (data != null) {
+            val keys = data.keySet()
+
+            for (key in keys) {
+                val value = data.getString(key)
+                if (value != null) {
+                    restoredMap[key] = value
+                }
+            }
         }
-
-        val notification = SystemTrayNotifier(applicationContext).createIncomingAudioCallNotification(id, displayName)
 
         try {
             ServiceCompat.startForeground(
@@ -40,12 +60,16 @@ class AudioCallIncomingService : Service() {
                 },
             )
         } catch (exception: Exception) {
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && exception is ForegroundServiceStartNotAllowedException) {
-                Logger.error("AudioCallIncomingService::exception: $exception")
+                Logger.error("BackgroundPushService::exception: $exception")
             }
         }
 
-        stopService(Intent(this, BackgroundPushService::class.java))
+        runBlocking {
+            authDataRepository.handlePush(restoredMap.toMap())
+        }
+
         return START_NOT_STICKY
     }
 
