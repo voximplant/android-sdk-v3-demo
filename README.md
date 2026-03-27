@@ -81,7 +81,7 @@ configuration. [Set up](https://voximplant.com/docs/howtos/sdks/push_notificatio
 Voximplant Android SDK is available on `mavenCentral()`.
 
 ```
-implementation(platform("com.voximplant:android-sdk-bom:3.1.0"))
+implementation(platform("com.voximplant:android-sdk-bom:3.1.1"))
 implementation("com.voximplant:android-sdk-core")
 implementation("com.voximplant:android-sdk-calls")
 ```
