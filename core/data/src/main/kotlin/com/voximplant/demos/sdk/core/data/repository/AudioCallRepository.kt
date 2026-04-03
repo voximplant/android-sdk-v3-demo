@@ -18,7 +18,7 @@ import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.data.services.AudioCallIncomingService
 import com.voximplant.demos.sdk.core.data.services.AudioCallOngoingService
-import com.voximplant.demos.sdk.core.model.data.CallType
+import com.voximplant.demos.sdk.core.data.services.BackgroundPushService
 import com.voximplant.demos.sdk.core.notifications.Notifier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -80,10 +80,11 @@ class AudioCallRepository @Inject constructor(
     private val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
     private val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
 
-    private var pushHandled: Boolean = false
+    var isIncomingCallServiceStart: Boolean = false
+        private set
 
     private fun startIncomingCallService(call: Call) {
-        pushHandled = false
+        isIncomingCallServiceStart = true
         audioCallIncomingService.apply {
             putExtra("id", call.id)
             putExtra("displayName", call.remoteDisplayName)
@@ -103,11 +104,7 @@ class AudioCallRepository @Inject constructor(
                     is CallState.Created -> {
                         if (call.direction == CallDirection.INCOMING) {
                             br.register(context)
-                            if (pushHandled) {
-                                startIncomingCallService(call)
-                            } else {
-                                notifier.postIncomingAudioCallNotification(call.id, call.remoteDisplayName)
-                            }
+                            startIncomingCallService(call)
                         }
                     }
 
@@ -131,11 +128,14 @@ class AudioCallRepository @Inject constructor(
                     is CallState.Failed,
                     null,
                     -> {
+                        if (call?.state is CallState.Disconnected || call?.state is CallState.Failed) {
+                            context.stopService(Intent(context, BackgroundPushService::class.java))
+                            isIncomingCallServiceStart = false
+                        }
                         br.unregister(context)
                         notifier.cancelCallNotification()
                         context.stopService(audioCallIncomingService)
                         context.stopService(audioCallOngoingService)
-                        pushHandled = false
                     }
 
                     else -> {}
@@ -163,7 +163,6 @@ class AudioCallRepository @Inject constructor(
         audioDeviceRepository.setDefaultAudioDeviceType(AudioDeviceType.Earpiece)
         notifier.cancelCallNotification()
         context.stopService(audioCallIncomingService)
-        pushHandled = false
         br.register(context)
         audioCallOngoingService.apply {
             putExtra("id", id)
@@ -187,18 +186,6 @@ class AudioCallRepository @Inject constructor(
         }
     }
 
-    fun handlePush() {
-        pushHandled = true
-
-        coroutineScope.launch {
-            callFlow.firstOrNull()?.let { call ->
-                if (call.type == CallType.AudioCall && call.state is CallState.Created && call.direction == CallDirection.INCOMING) {
-                    startIncomingCallService(call)
-                }
-            }
-        }
-    }
-
     fun toggleMute() {
         callDataSource.toggleMute()
     }
@@ -216,7 +203,6 @@ class AudioCallRepository @Inject constructor(
         notifier.cancelCallNotification()
         context.stopService(audioCallIncomingService)
         callDataSource.reject()
-        pushHandled = false
     }
 
     fun sendDtmf(value: String) = callDataSource.sendDtmf(value)

@@ -17,13 +17,13 @@ import com.voximplant.demos.sdk.core.video.manager.LocalVideoManager
 import com.voximplant.demos.sdk.core.calls.model.asCall
 import com.voximplant.demos.sdk.core.calls.model.callTypeMap
 import com.voximplant.demos.sdk.core.common.VoxBroadcastReceiver
+import com.voximplant.demos.sdk.core.data.services.BackgroundPushService
 import com.voximplant.demos.sdk.core.model.data.Call
 import com.voximplant.demos.sdk.core.model.data.CallDirection
 import com.voximplant.demos.sdk.core.model.data.CallState
 import com.voximplant.demos.sdk.core.data.services.VideoCallIncomingService
 import com.voximplant.demos.sdk.core.notifications.Notifier
 import com.voximplant.demos.sdk.core.data.services.VideoCallOngoingService
-import com.voximplant.demos.sdk.core.model.data.CallType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -101,10 +101,11 @@ class VideoCallRepository @Inject constructor(
     private val videoCallIncomingService = Intent(context, VideoCallIncomingService::class.java)
     private val videoCallOngoingService = Intent(context, VideoCallOngoingService::class.java)
 
-    private var pushHandled: Boolean = false
+    var isIncomingVideoCallServiceStart: Boolean = false
+        private set
 
     private fun startIncomingCallService(call: Call) {
-        pushHandled = false
+        isIncomingVideoCallServiceStart = true
         videoCallIncomingService.apply {
             putExtra("id", call.id)
             putExtra("displayName", call.remoteDisplayName)
@@ -123,14 +124,7 @@ class VideoCallRepository @Inject constructor(
                     is CallState.Created -> {
                         if (call.direction == CallDirection.INCOMING) {
                             br.register(context)
-                            if (pushHandled) {
-                                startIncomingCallService(call)
-                            } else {
-                                notifier.postIncomingVideoCallNotification(
-                                    call.id,
-                                    call.remoteDisplayName
-                                )
-                            }
+                            startIncomingCallService(call)
                         }
                     }
 
@@ -154,6 +148,10 @@ class VideoCallRepository @Inject constructor(
                     is CallState.Failed,
                     null,
                         -> {
+                        if (call?.state is CallState.Disconnected || call?.state is CallState.Failed) {
+                            context.stopService(Intent(context, BackgroundPushService::class.java))
+                            isIncomingVideoCallServiceStart = false
+                        }
                         coroutineScope.launch {
                             releaseLocalVideo()
                         }
@@ -161,7 +159,6 @@ class VideoCallRepository @Inject constructor(
                         notifier.cancelCallNotification()
                         context.stopService(videoCallIncomingService)
                         context.stopService(videoCallOngoingService)
-                        pushHandled = false
                     }
 
                     else -> {}
@@ -189,7 +186,6 @@ class VideoCallRepository @Inject constructor(
         audioDeviceRepository.setDefaultAudioDeviceType(AudioDeviceType.Speaker)
         notifier.cancelCallNotification()
         context.stopService(videoCallIncomingService)
-        pushHandled = false
         br.register(context)
         videoCallOngoingService.apply {
             putExtra("id", id)
@@ -214,18 +210,6 @@ class VideoCallRepository @Inject constructor(
         }
     }
 
-    fun handlePush() {
-        pushHandled = true
-
-        coroutineScope.launch {
-            callFlow.firstOrNull()?.let { call ->
-                if (call.type == CallType.VideoCall && call.state is CallState.Created && call.direction == CallDirection.INCOMING) {
-                    startIncomingCallService(call)
-                }
-            }
-        }
-    }
-
     fun clearCall(call: Call) {
         callDataSource.clearCall(call)
         coroutineScope.launch {
@@ -242,7 +226,6 @@ class VideoCallRepository @Inject constructor(
         notifier.cancelCallNotification()
         context.stopService(videoCallIncomingService)
         callDataSource.reject()
-        pushHandled = false
     }
 
     fun toggleMute() {

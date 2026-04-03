@@ -17,7 +17,7 @@ import com.voximplant.demos.sdk.core.logger.Logger
 import com.voximplant.demos.sdk.core.notifications.SystemTrayNotifier
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,7 +51,7 @@ class BackgroundPushService : Service() {
         try {
             ServiceCompat.startForeground(
                 this,
-                1,
+                2,
                 notification,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
@@ -66,7 +66,7 @@ class BackgroundPushService : Service() {
             }
         }
 
-        runBlocking {
+        scope.launch {
             authDataRepository.handlePush(restoredMap.toMap())
         }
 

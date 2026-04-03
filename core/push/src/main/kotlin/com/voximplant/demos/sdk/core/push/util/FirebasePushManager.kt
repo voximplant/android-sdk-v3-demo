@@ -28,23 +28,23 @@ class FirebasePushManager @Inject constructor(
 ) : PushManager {
 
     override suspend fun onMessageReceived(push: Map<String, String>, highPriority: Boolean) {
-        val intent = Intent(context, BackgroundPushService::class.java).apply {
-            putExtra("push", Bundle().apply {
-                for ((key, value) in push) {
-                    putString(key, value)
-                }
-            })
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
+        if (audioCallDataRepository.isIncomingCallServiceStart || videoCallDataRepository.isIncomingVideoCallServiceStart) {
+            authDataRepository.handlePush(push)
         } else {
-            context.startService(intent)
+            val intent = Intent(context, BackgroundPushService::class.java).apply {
+                putExtra("push", Bundle().apply {
+                    for ((key, value) in push) {
+                        putString(key, value)
+                    }
+                })
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
 
-        if (highPriority) {
-            audioCallDataRepository.handlePush()
-            videoCallDataRepository.handlePush()
-        }
         callDataSource.startListeningForIncomingCalls()
     }
 
