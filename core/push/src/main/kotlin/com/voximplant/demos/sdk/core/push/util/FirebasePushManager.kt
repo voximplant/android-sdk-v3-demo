@@ -28,7 +28,7 @@ class FirebasePushManager @Inject constructor(
 ) : PushManager {
 
     override suspend fun onMessageReceived(push: Map<String, String>, highPriority: Boolean) {
-        if (callDataSource.hasCall) {
+        if (audioCallDataRepository.hasCall || videoCallDataRepository.hasCall) {
             authDataRepository.handlePush(push)
         } else {
             val intent = Intent(context, BackgroundPushService::class.java).apply {

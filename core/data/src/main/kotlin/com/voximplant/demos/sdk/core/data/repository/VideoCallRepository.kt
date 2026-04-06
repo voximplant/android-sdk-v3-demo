@@ -45,6 +45,10 @@ class VideoCallRepository @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val audioDeviceRepository: AudioDeviceRepository,
 ) {
+
+    val hasCall: Boolean
+        get() = callDataSource.hasCall
+
     val localVideoStream: StateFlow<LocalVideoStream?> = localVideoManager.localVideoStream
     val remoteVideoStream: StateFlow<RemoteVideoStream?> = callDataSource.remoteVideoStreamFlow
     val isCameraEnabled: StateFlow<Boolean> = localVideoStream

@@ -35,6 +35,10 @@ class AudioCallRepository @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val audioDeviceRepository: AudioDeviceRepository,
 ) {
+
+    val hasCall: Boolean
+        get() = callDataSource.hasCall
+
     val callFlow: Flow<Call?>
         get() = combine(
             callDataSource.callApiDataFlow,
