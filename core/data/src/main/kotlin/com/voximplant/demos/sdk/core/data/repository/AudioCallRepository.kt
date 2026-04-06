@@ -80,11 +80,7 @@ class AudioCallRepository @Inject constructor(
     private val audioCallIncomingService = Intent(context, AudioCallIncomingService::class.java)
     private val audioCallOngoingService = Intent(context, AudioCallOngoingService::class.java)
 
-    var isIncomingCallServiceStart: Boolean = false
-        private set
-
     private fun startIncomingCallService(call: Call) {
-        isIncomingCallServiceStart = true
         audioCallIncomingService.apply {
             putExtra("id", call.id)
             putExtra("displayName", call.remoteDisplayName)
@@ -130,7 +126,6 @@ class AudioCallRepository @Inject constructor(
                     -> {
                         if (call?.state is CallState.Disconnected || call?.state is CallState.Failed) {
                             context.stopService(Intent(context, BackgroundPushService::class.java))
-                            isIncomingCallServiceStart = false
                         }
                         br.unregister(context)
                         notifier.cancelCallNotification()

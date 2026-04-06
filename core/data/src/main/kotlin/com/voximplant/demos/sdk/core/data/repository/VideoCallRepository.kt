@@ -101,11 +101,7 @@ class VideoCallRepository @Inject constructor(
     private val videoCallIncomingService = Intent(context, VideoCallIncomingService::class.java)
     private val videoCallOngoingService = Intent(context, VideoCallOngoingService::class.java)
 
-    var isIncomingVideoCallServiceStart: Boolean = false
-        private set
-
     private fun startIncomingCallService(call: Call) {
-        isIncomingVideoCallServiceStart = true
         videoCallIncomingService.apply {
             putExtra("id", call.id)
             putExtra("displayName", call.remoteDisplayName)
@@ -150,7 +146,6 @@ class VideoCallRepository @Inject constructor(
                         -> {
                         if (call?.state is CallState.Disconnected || call?.state is CallState.Failed) {
                             context.stopService(Intent(context, BackgroundPushService::class.java))
-                            isIncomingVideoCallServiceStart = false
                         }
                         coroutineScope.launch {
                             releaseLocalVideo()
