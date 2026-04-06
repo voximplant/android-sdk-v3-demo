@@ -26,7 +26,7 @@ import javax.inject.Singleton
 
 private const val ONGOING_CALL_NOTIFICATION_REQUEST_CODE = 0
 private const val INCOMING_CALL_NOTIFICATION_REQUEST_CODE = 1
-private const val BACKGROUND_PUSH_CODE = 2
+private const val BACKGROUND_PUSH_REQUEST_CODE = 2
 private const val CALL_NOTIFICATION_ID = 1
 private const val ONGOING_CALL_NOTIFICATION_CHANNEL_ID = "ONGOING_CALL_NOTIFICATIONS"
 private const val INCOMING_CALL_NOTIFICATION_CHANNEL_ID = "INCOMING_CALL_NOTIFICATIONS"
@@ -226,7 +226,7 @@ private fun Context.createBackgroundPushNotification(): Notification {
     createBackgroundPushNotificationChannel()
     val backgroundCallPendingIntent = PendingIntent.getActivity(
         this,
-        BACKGROUND_PUSH_CODE,
+        BACKGROUND_PUSH_REQUEST_CODE,
         packageManager.getLaunchIntentForPackage(packageName),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
