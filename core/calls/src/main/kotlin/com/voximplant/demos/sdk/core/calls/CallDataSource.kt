@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 - 2025, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
  */
 
 package com.voximplant.demos.sdk.core.calls
@@ -35,6 +35,9 @@ class CallDataSource @Inject constructor(
     private val coroutineScope: CoroutineScope,
 ) {
     private var activeCall: Call? = null
+
+    val hasCall: Boolean
+        get() = activeCall != null
 
     private val _remoteVideoStreamFlow: MutableStateFlow<RemoteVideoStream?> = MutableStateFlow(null)
     val remoteVideoStreamFlow: StateFlow<RemoteVideoStream?> = _remoteVideoStreamFlow.asStateFlow()
