@@ -17,4 +17,5 @@ enum NodeProto {
   NODE_10 = 10;
   NODE_11 = 11;
   NODE_12 = 12;
+  NODE_13 = 13;
 }

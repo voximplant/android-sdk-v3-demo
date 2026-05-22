@@ -10,6 +10,7 @@ import com.voximplant.demos.sdk.core.model.data.Node1
 import com.voximplant.demos.sdk.core.model.data.Node10
 import com.voximplant.demos.sdk.core.model.data.Node11
 import com.voximplant.demos.sdk.core.model.data.Node12
+import com.voximplant.demos.sdk.core.model.data.Node13
 import com.voximplant.demos.sdk.core.model.data.Node2
 import com.voximplant.demos.sdk.core.model.data.Node3
 import com.voximplant.demos.sdk.core.model.data.Node4
@@ -53,6 +54,7 @@ class UserPreferencesDataSource @Inject constructor(
                 NodeProto.NODE_10 -> Node10
                 NodeProto.NODE_11 -> Node11
                 NodeProto.NODE_12 -> Node12
+                NodeProto.NODE_13 -> Node13
             },
             shouldHideNotificationPermissionRequest = userPreferences.shouldHideNotificationPermissionRequest,
             shouldHideMicrophonePermissionRequest = userPreferences.shouldHideMicrophonePermissionRequest,
@@ -111,6 +113,7 @@ class UserPreferencesDataSource @Inject constructor(
                     Node10 -> NodeProto.NODE_10
                     Node11 -> NodeProto.NODE_11
                     Node12 -> NodeProto.NODE_12
+                    Node13 -> NodeProto.NODE_13
                 }
             }
         }

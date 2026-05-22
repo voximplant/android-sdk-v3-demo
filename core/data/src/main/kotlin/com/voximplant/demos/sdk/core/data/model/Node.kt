@@ -9,6 +9,7 @@ import com.voximplant.demos.sdk.core.model.data.Node1
 import com.voximplant.demos.sdk.core.model.data.Node10
 import com.voximplant.demos.sdk.core.model.data.Node11
 import com.voximplant.demos.sdk.core.model.data.Node12
+import com.voximplant.demos.sdk.core.model.data.Node13
 import com.voximplant.demos.sdk.core.model.data.Node2
 import com.voximplant.demos.sdk.core.model.data.Node3
 import com.voximplant.demos.sdk.core.model.data.Node4
@@ -31,4 +32,5 @@ fun Node.asExternal(): com.voximplant.android.sdk.core.Node = when (this) {
     Node10 -> com.voximplant.android.sdk.core.Node.Node10
     Node11 -> com.voximplant.android.sdk.core.Node.Node11
     Node12 -> com.voximplant.android.sdk.core.Node.Node12
+    Node13 -> com.voximplant.android.sdk.core.Node.Node13
 }
