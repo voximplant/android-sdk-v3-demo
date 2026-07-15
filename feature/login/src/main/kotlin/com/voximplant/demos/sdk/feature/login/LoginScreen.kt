@@ -52,6 +52,7 @@ import com.voximplant.demos.sdk.core.model.data.Node1
 import com.voximplant.demos.sdk.core.model.data.Node10
 import com.voximplant.demos.sdk.core.model.data.Node11
 import com.voximplant.demos.sdk.core.model.data.Node12
+import com.voximplant.demos.sdk.core.model.data.Node13
 import com.voximplant.demos.sdk.core.model.data.Node2
 import com.voximplant.demos.sdk.core.model.data.Node3
 import com.voximplant.demos.sdk.core.model.data.Node4
@@ -147,7 +148,7 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
-    val nodes = listOf(Node1, Node2, Node3, Node4, Node5, Node6, Node7, Node8, Node9, Node10, Node11, Node12)
+    val nodes = listOf(Node1, Node2, Node3, Node4, Node5, Node6, Node7, Node8, Node9, Node10, Node11, Node12, Node13)
     var nodesExpanded by remember { mutableStateOf(false) }
     var selectedNode: Node? by remember { mutableStateOf(null) }
 

@@ -44,7 +44,7 @@ class CallDataSource @Inject constructor(
 
     private val callListener = object : CallListener {
 
-        override fun onCallConnected(call: Call, headers: Map<String, String>?) {
+        override fun onCallConnected(call: Call, withVideo: Boolean, headers: Map<String, String>?) {
             coroutineScope.launch {
                 _callApiDataFlow.emit(call.asCallData())
             }
