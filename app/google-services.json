@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "ProjectNumber",
-    "project_id": "ProjectId",
-    "storage_bucket": "ProjectBucket"
+    "project_number": "1037622912258",
+    "project_id": "voximplant-android-sdk-demo",
+    "storage_bucket": "voximplant-android-sdk-demo.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "Your:App:Id",
+        "mobilesdk_app_id": "1:1037622912258:android:6e573a5906fdcd726a8e1b",
         "android_client_info": {
           "package_name": "com.voximplant.demos.sdk"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "APlaceholderAPIKeyWith-ThirtyNineCharsX"
+          "current_key": "AIzaSyDso04Gjs8-k-iaeYarKmuYBBKlPkAYHQE"
         }
       ],
       "services": {

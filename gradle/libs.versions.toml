@@ -14,14 +14,14 @@ androidxTestExt = "1.2.1"
 firebaseBom = "33.6.0"
 firebaseCrashlyticsPlugin = "3.0.2"
 gmsPlugin = "4.4.2"
-hilt = "2.50"
+hilt = "2.55"
 junit = "4.13.2"
 kotlin = "2.0.21"
 kotlinxCoroutines = "1.9.0"
 ksp = "2.0.21-1.0.25"
 protobuf = "3.25.1"
 protobufPlugin = "0.9.4"
-voximplantSdk = "3.1.1"
+voximplantSdk = "3.2.0"
 
 [libraries]
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
