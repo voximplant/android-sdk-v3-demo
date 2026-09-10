@@ -1,10 +1,9 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
  */
 
 plugins {
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
@@ -12,20 +11,20 @@ plugins {
 
 android {
     namespace = "com.voximplant.demos.sdk.core.datastore"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+kotlin {
+    jvmToolchain(17)
 }
 
 protobuf {
@@ -49,14 +48,13 @@ protobuf {
 androidComponents {
     onVariants(selector().all()) { variant ->
         afterEvaluate {
-            val protoTask =
-                project.tasks.getByName("generate" + variant.name.replaceFirstChar { it.uppercaseChar() } + "Proto") as com.google.protobuf.gradle.GenerateProtoTask
+            val variantName = variant.name.replaceFirstChar { it.uppercaseChar() }
 
-            project.tasks.getByName("ksp" + variant.name.replaceFirstChar { it.uppercaseChar() } + "Kotlin") {
-                dependsOn(protoTask)
-                (this as org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompileTool<*>).setSource(
-                    protoTask.outputBaseDir
-                )
+            val protoTask = project.tasks.findByName("generate${variantName}Proto")
+            val kspTask = project.tasks.findByName("ksp${variantName}Kotlin")
+
+            if (protoTask != null && kspTask != null) {
+                kspTask.dependsOn(protoTask)
             }
         }
     }
