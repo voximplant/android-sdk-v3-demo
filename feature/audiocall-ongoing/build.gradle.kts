@@ -1,10 +1,9 @@
 /*
- * Copyright (c) 2011 - 2023, Zingaya, Inc. All rights reserved.
+ * Copyright (c) 2011 - 2026, Voximplant, Inc. All rights reserved.
  */
 
 plugins {
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -12,9 +11,9 @@ plugins {
 
 android {
     namespace = "com.voximplant.demos.sdk.feature.audiocall.ongoing"
-    compileSdk = 35
+    compileSdk = 37
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {
@@ -22,13 +21,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
