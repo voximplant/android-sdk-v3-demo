@@ -43,4 +43,5 @@ jobs:
           gh release create "${GITHUB_REF_NAME}" \
             --title "${APP_VERSION}" \
             --generate-notes \
+            --draft \
             "${RELEASE_APK}"
